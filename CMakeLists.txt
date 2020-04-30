@@ -28,7 +28,8 @@ file(GLOB SOURCE_FILES
         *.h
         )
 
-add_executable(graphics ${SOURCE_FILES})
+add_executable(graphics Scene Camera Camera3D Camera4D Object Object3D Object4D
+        ${SOURCE_FILES})
 
 if (WIN32)
     target_link_libraries (graphics ${OPENGL_LIBRARIES} freeglut)

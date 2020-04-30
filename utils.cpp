@@ -5,8 +5,8 @@
 #include <utility>
 #include <vector>
 #include <cmath>
-#include <stdexcept>
 #include <iostream>
+#include <memory>
 
 
 /** ========== Functions ========== */
@@ -22,12 +22,16 @@ double square(double n){
  * Represents a vector with any number of dimensional components.
  */
 struct spatialVector {
+    /** Fields */
     std::vector<double> components;
 
+    /** Constructors */
     explicit spatialVector(std::vector<double> components){
         this->components = move(components);
     }
 
+    /** Other Methods */
+    /* Utility */
     /**
      * Return the magnitude of the vector.
      */
@@ -43,9 +47,10 @@ struct spatialVector {
 };
 
 /**
- * Represents a point. Abstract, derived by point3d and point4d.
+ * Represents a point. Abstract, derived by point2d, point3d, and point4d.
  */
 struct point {
+    /** Fields */
     std::vector<double*> coords;
 
     /** Setters */
@@ -56,7 +61,40 @@ struct point {
     /**
      * Return the Euclidean distance from this point to another.
      */
-    virtual double distanceTo(const point& other) = 0;
+    double distanceTo(const point& other) {
+        // Create two new vectors that are definitely of equal size().
+        // Whichever is shorter than the other will be filled with 0.0s until
+        // size()s are equal
+        std::vector<double> coordsVec;
+        std::vector<double> otherCoordsVec;
+
+        // Push back all values from this point
+        for (auto & coord : this->coords){
+            coordsVec.push_back(*coord);
+        }
+
+        // Push back all values from other point
+        for (auto & coord : other.coords){
+            otherCoordsVec.push_back(*coord);
+        }
+
+        // Try filling both with 0s until vectors are the same size()
+        while (coordsVec.size() < otherCoordsVec.size()){
+            coordsVec.push_back(0.0);
+        }
+        while (otherCoordsVec.size() < coordsVec.size()){
+            otherCoordsVec.push_back(0.0);
+        }
+
+        // Vectors are the same size now, add squares of each position and
+        // return square root
+        double sumOfSquares = 0;
+        for (int i = 0; i < coordsVec.size(); ++i){
+            sumOfSquares += square(coordsVec[i] - otherCoordsVec[i]);
+        }
+
+        return sqrt(sumOfSquares);
+    }
 
     /* Movement */
     virtual void move(const std::vector<double>& dPosition) = 0;
@@ -64,9 +102,94 @@ struct point {
 };
 
 /**
+ * Represents a point in 2 dimensions.
+ */
+struct point2d : public point {
+    /** Fields */
+    double x, y;
+
+    /** Constructors */
+    point2d() : point2d(0, 0){
+    }
+    point2d(double x, double y){
+        this->x = x;
+        this->y = y;
+        coords = {&x, &y};
+    }
+
+    /** Setters */
+    void setCoords(std::vector<double> coords) override {
+        if (coords.size() == 2){
+            setCoords(coords[0], coords[1]);
+        } else {
+            std::cout << "Warning: Invalid input to:\n\tvoid setCoords"
+                         "(std::vector<double> "
+                         "coords)\n\t(point2d, utils.cpp)" << std::endl;
+        }
+    }
+    void setCoords(double newX, double newY){
+        this->x = newX;
+        this->y = newY;
+    }
+
+    /** Other Methods */
+    /* Movement */
+    void moveX(double dX){
+        x += dX;
+    }
+    void moveY(double dY){
+        y += dY;
+    }
+    void move(double dX, double dY){
+        moveX(dX);
+        moveY(dY);
+    }
+    void move(const std::vector<double>& dPosition) override {
+        if (dPosition.size() <= 2){
+            // Can move in at most 2 directions
+            // Create a new vector of length 2 (fill remaining
+            // dimensions with 0s to make it possible to use a
+            // spacialVector of size() < 2)
+            std::vector<double> dPositionVec = dPosition;
+
+            while (dPositionVec.size() < 2){
+                dPositionVec.push_back(0.0);
+            }
+
+            move(dPositionVec[0], dPositionVec[1]);
+        } else {
+            std::cout << "Warning: Invalid input in:\n\tvoid move"
+                    "(std::vector<double>& dPosition)\n\t(point2d, utils.cpp)"
+                    << std::endl;
+        }
+    }
+    void move(const spatialVector& dPosition) override {
+        if (dPosition.components.size() <= 2){
+            // Can move in at most 2 directions
+            // Create a new vector of length 2 (fill remaining
+            // dimensions with 0s to make it possible to use a
+            // spacialVector of size() < 2)
+            std::vector<double> dPositionVec = dPosition.components;
+
+            while (dPositionVec.size() < 2){
+                dPositionVec.push_back(0.0);
+            }
+
+            move(dPositionVec);
+        } else {
+            // Bad input
+            std::cout << "Warning: Invalid input in:\n\tvoid move(const "
+                    "spatialVector& dPosition) override\n\t(point2d, utils.cpp)"
+                    << std::endl;
+        }
+    }
+};
+
+/**
  * Represents a point in 3 dimensions.
  */
 struct point3d : public point {
+    /** Fields */
     double x, y, z;
 
     /** Constructors */
@@ -84,8 +207,9 @@ struct point3d : public point {
         if (coords.size() == 3){
             setCoords(coords[0], coords[1], coords[2]);
         } else {
-            std::cout << "Invalid input to:\n\tvoid setCoords(std::vector<double> "
-                         "coords)\n\t(utils.cpp)" << std::endl;
+            std::cout << "Warning: Invalid input to:\n\tvoid setCoords"
+                         "(std::vector<double> "
+                         "coords)\n\t(point3d, utils.cpp)" << std::endl;
         }
     }
     void setCoords(double newX, double newY, double newZ){
@@ -112,33 +236,6 @@ struct point3d : public point {
     }
 
     /** Other Methods */
-    /* Utility */
-    /**
-     * Return the Euclidean distance from this point to another.
-     */
-    double distanceTo(const point& other) override {
-        if (other.coords.size() == 3){
-            // Regular 3d distance
-            return sqrt(square(x - *other.coords[0])
-                    + square(y - *other.coords[1])
-                    + square(z - *other.coords[2]));
-        } else if (other.coords.size() == 4){
-            // This 3d point has no distance into 4th dimension (a),
-            // so don't calculate difference in that direction,
-            // just use value from other coords
-            return sqrt(square(x - *other.coords[0])
-                    + square(y - *other.coords[1])
-                    + square(z - *other.coords[2])
-                    + square(*other.coords[3]));
-        } else {
-            // Bad input
-            std::cout << "Invalid input to:\n\tdouble distanceTo"
-                         "(std::vector<double> "
-                    "otherCoords) override\n\t(utils.cpp)" << std::endl;
-            return -1;
-        }
-    }
-
     /* Movement */
     void moveX(double dX){
         x += dX;
@@ -155,20 +252,30 @@ struct point3d : public point {
         moveZ(dZ);
     }
     void move(const std::vector<double>& dPosition) override {
-        if (dPosition.size() == 3){
-            move(dPosition[0], dPosition[1], dPosition[2]);
+        if (dPosition.size() <= 3){
+            // Can move in at most 3 directions
+            // Create a new vector of length 3 (fill remaining
+            // dimensions with 0s to make it possible to use a
+            // spacialVector of size() < 3)
+            std::vector<double> dPositionVec = dPosition;
+
+            while (dPositionVec.size() < 3){
+                dPositionVec.push_back(0.0);
+            }
+
+            move(dPositionVec[0], dPositionVec[1], dPositionVec[2]);
         } else {
-            std::cout << "Warning: Invalid input in:\n\tvoid move(std::vector<double> "
-                    "dPosition)"
-                    "\n\t(utils.cpp)" << std::endl;
+            std::cout << "Warning: Invalid input in:\n\tvoid move"
+                    "(std::vector<double>& dPosition)\n\t(point3d, utils.cpp)"
+                    << std::endl;
         }
     }
     void move(const spatialVector& dPosition) override {
         if (dPosition.components.size() <= 3){
-            // Can move in at most 4 directions
-            // Create a new vector of length 4 (fill remaining
+            // Can move in at most 3 directions
+            // Create a new vector of length 3 (fill remaining
             // dimensions with 0s to make it possible to use a
-            // spacialVector of size() < 4)
+            // spacialVector of size() < 3)
             std::vector<double> dPositionVec = dPosition.components;
 
             while (dPositionVec.size() < 3){
@@ -176,6 +283,11 @@ struct point3d : public point {
             }
 
             move(dPositionVec);
+        } else {
+            // Bad input
+            std::cout << "Warning: Invalid input in:\n\tvoid move(const "
+                    "spatialVector& dPosition) override\n\t(point3d, utils.cpp)"
+                    << std::endl;
         }
     }
 };
@@ -184,6 +296,7 @@ struct point3d : public point {
  * Represents a point in 4 dimensions.
  */
 struct point4d : public point {
+    /** Fields */
     double x, y, z, a;
 
     /** Constructors */
@@ -197,34 +310,24 @@ struct point4d : public point {
         this->coords = std::vector<double*>({&x, &y, &z, &a});
     }
 
-    /** Other Methods */
-    /* Utility */
-    /**
-     * Returns the Euclidean distance from this point to another.
-     */
-    double distanceTo(const point& other) override {
-        if (other.coords.size() == 3){
-            // A 3d point has no distance into 4th dimension (a),
-            // so don't calculate difference in a direction,
-            // just use value from other coords
-            return sqrt(square(x - *other.coords[0])
-                    + square(y - *other.coords[1])
-                    + square(z - *other.coords[2])
-                    + square(a));
-        } else if (other.coords.size() == 4){
-            // Regular 4d distance
-            return sqrt(square(x - *other.coords[0])
-                    + square(y - *other.coords[1])
-                    + square(z - *other.coords[2])
-                    + square(a - *other.coords[3]));
+    /** Setters */
+    void setCoords(std::vector<double> coords) override {
+        if (coords.size() == 4){
+            setCoords(coords[0], coords[1], coords[2], coords[3]);
         } else {
-            // Bad input
-            std::cout << "Invalid input in:\n\tdouble distanceTo(std::vector<double> "
-                    "otherCoords) override\n\t(utils.cpp)" << std::endl;
-            return -1;
+            std::cout << "Warning: Invalid input to:\n\tvoid setCoords"
+                         "(std::vector<double> "
+                         "coords)\n\t(point4d, utils.cpp)" << std::endl;
         }
     }
+    void setCoords(double newX, double newY, double newZ, double newA){
+        this->x = newX;
+        this->y = newY;
+        this->z = newZ;
+        this->a = newA;
+    }
 
+    /** Other Methods */
     /* Movement */
     void moveX(double dX){
         x += dX;
@@ -245,11 +348,23 @@ struct point4d : public point {
         moveA(dA);
     }
     void move(const std::vector<double>& dPosition) override {
-        if (dPosition.size() == 4){
-            move(dPosition[0], dPosition[1], dPosition[2], dPosition[3]);
+        if (dPosition.size() <= 4){
+            // Can move in at most 4 directions
+            // Create a new vector of length 4 (fill remaining
+            // dimensions with 0s to make it possible to use a
+            // spacialVector of size() < 4)
+            std::vector<double> dPositionVec = dPosition;
+
+            while (dPositionVec.size() < 4){
+                dPositionVec.push_back(0.0);
+            }
+
+            move(dPositionVec[0], dPositionVec[1], dPositionVec[2],
+                dPositionVec[3]);
         } else {
-            std::cout << "Invalid input in:\n\tvoid move(std::vector<double> "
-                    "dPosition)\n\t(utils.cpp)" << std::endl;
+            std::cout << "Warning: Invalid input in:\n\tvoid move"
+                    "(std::vector<double>& dPosition)\n\t(point4d, utils.cpp)"
+                    << std::endl;
         }
     }
     void move(const spatialVector& dPosition) override {
@@ -265,6 +380,11 @@ struct point4d : public point {
             }
 
             move(dPositionVec);
+        } else {
+            // Bad input
+            std::cout << "Warning: Invalid input in:\n\tvoid move(const "
+                    "spatialVector& dPosition) override\n\t(point4d, utils.cpp)"
+                    << std::endl;
         }
     }
 };
@@ -276,12 +396,23 @@ struct edge {
     point *p1, *p2;
     std::pair<point*, point*> endpoints;
 
-    edge(point *p1, point *p2){
-        this->p1 = (point *) p1;
-        this->p2 = (point *) p2;
+    /** Constructors */
+    edge(point* p1, point* p2){
+        this->p1 = p1;
+        this->p2 = p2;
         endpoints = std::make_pair(p1, p2);
     }
 
+    /** Destructor */
+    ~edge() {
+        p1 = nullptr;
+        p2 = nullptr;
+        // TODO possible memory leak if ~pair() not called
+        //      automatically for endpoints?
+    }
+
+    /** Other Methods */
+    /* Utility */
     /**
      * Return the Euclidean distance between the endpoints of this edge.
      */
