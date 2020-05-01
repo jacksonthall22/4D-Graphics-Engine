@@ -6,7 +6,6 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
-#include <memory>
 
 
 /** ========== Functions ========== */
@@ -26,6 +25,10 @@ struct spatialVector {
     std::vector<double> components;
 
     /** Constructors */
+    spatialVector() : spatialVector(std::vector<double>()){
+    }
+    spatialVector(const spatialVector& other) : spatialVector(other.components){
+    }
     explicit spatialVector(std::vector<double> components){
         this->components = move(components);
     }
@@ -35,7 +38,7 @@ struct spatialVector {
     /**
      * Return the magnitude of the vector.
      */
-    double magnitude(){
+    double magnitude() const {
         double sumOfSquares = 0;
 
         for (auto & component : components){
@@ -61,7 +64,7 @@ struct point {
     /**
      * Return the Euclidean distance from this point to another.
      */
-    double distanceTo(const point& other) {
+    double distanceTo(const point& other) const {
         // Create two new vectors that are definitely of equal size().
         // Whichever is shorter than the other will be filled with 0.0s until
         // size()s are equal
@@ -110,6 +113,8 @@ struct point2d : public point {
 
     /** Constructors */
     point2d() : point2d(0, 0){
+    }
+    point2d(const point2d& other) : point2d(other.x, other.y) {
     }
     point2d(double x, double y){
         this->x = x;
@@ -194,6 +199,8 @@ struct point3d : public point {
 
     /** Constructors */
     point3d() : point3d(0, 0, 0){
+    }
+    point3d(const point3d& other) : point3d(other.x, other.y, other.z) {
     }
     point3d(double x, double y, double z){
         this->x = x;
@@ -301,6 +308,8 @@ struct point4d : public point {
 
     /** Constructors */
     point4d() : point4d(0, 0, 0, 0){
+    }
+    point4d(const point4d& other) : point4d(other.x, other.y, other.z, other.a){
     }
     point4d(double x, double y, double z, double a){
         this->x = x;
@@ -435,7 +444,7 @@ struct sphericalAngle {
     /**
      * Return the unit vector in the direction defined by this object.
      */
-    virtual spatialVector getVectorDirection() = 0;
+    virtual spatialVector getUnitVector() = 0;
     virtual void rotate(std::vector<double> angles) = 0;
 };
 
@@ -445,6 +454,7 @@ struct sphericalAngle {
 struct sphericalAngle3d : public sphericalAngle {
     /// Note: All calculations done in degrees
 
+    /** Fields */
     // polarAngle ranges from [0, 360) degrees where 0 is "north"
     //      and increasing the angle rotates east (90 is east, etc.)
     // azimuthAngle ranges from [0, 180] degrees where 0 is
@@ -453,6 +463,9 @@ struct sphericalAngle3d : public sphericalAngle {
 
     /** Constructors */
     sphericalAngle3d() : sphericalAngle3d(0, 90){
+    }
+    sphericalAngle3d(sphericalAngle3d const &other) :
+            sphericalAngle3d(other.polarAngle, other.azimuthAngle){
     }
     sphericalAngle3d(double polarAngle, double azimuthAngle){
         this->polarAngle = polarAngle;
@@ -465,7 +478,7 @@ struct sphericalAngle3d : public sphericalAngle {
     /**
      * Return the unit vector pointing in the direction defined by this object.
      */
-    spatialVector getVectorDirection() override {
+    spatialVector getUnitVector() override {
         // By definition, when an angle is plotted on the unit circle, the
         // point where the angle's ray intersects the circle is (cos(x), sin
         // (x)). This method takes those coordinates and scales them down
@@ -568,6 +581,9 @@ struct sphericalAngle4d : public sphericalAngle {
     /** Constructors */
     sphericalAngle4d() : sphericalAngle4d(0, 90, 90){
     }
+    sphericalAngle4d(const sphericalAngle4d& other) : sphericalAngle4d(
+            other.polarAngle, other.azimuthAngle, other.phiAngle) {
+    }
     sphericalAngle4d(double polarAngle, double azimuthAngle, double phiAngle){
         this->polarAngle = polarAngle;
         this->azimuthAngle = azimuthAngle;
@@ -581,7 +597,7 @@ struct sphericalAngle4d : public sphericalAngle {
      * Return the coordinate of the point on the unit sphere
      * in the direction of the spherical angles.
      */
-    spatialVector getVectorDirection() override {
+    spatialVector getUnitVector() override {
         // It would seem at first that only the top hemisphere of the unit
         // 3-sphere can be reached with polarAngle and azimuthAngle both only
         // ranging from [0-180], but every point on this hemisphere can be
@@ -596,6 +612,17 @@ struct sphericalAngle4d : public sphericalAngle {
         //      y = cos(phiAngle)cos(azimuthAngle)sin(polarAngle) = 0
         //      z = cos(phiAngle)sin(azimuthAngle) = -1
         //      a = sin(phiAngle) = 0
+        // Intuitively this involves rotating a point starting at
+        // (1, 0, 0, 0) any direction around the z axis, rotating up into the
+        // z dimension by 90 deg = pi/2 rad, and rotating around the xy
+        // plane through the 4th dimension to the antipodal. Graphed in a 3d
+        // graphing calculator, the third rotation would appear to move the
+        // point straight through the sphere, but the distance of the
+        // point from the origin always remains constant. It is similar to how
+        // if the shadow of a 3d sphere were cast onto a 2d plane as a circle, a
+        // point rotating on its surface would appear to move "through"
+        // the circle's center to the antipodal of the circle when the point
+        // rotates into the third dimension.
         return spatialVector(std::vector<double>({
             cos(phiAngle) * cos(azimuthAngle) * cos(polarAngle),
             cos(phiAngle) * cos(azimuthAngle) * sin(polarAngle),
