@@ -58,77 +58,13 @@ void display() {
     // system set to first quadrant, limited by screen/window size
     glMatrixMode(GL_PROJECTION); // DO NOT CHANGE THIS LINE
     glLoadIdentity(); // DO NOT CHANGE THIS LINE
-    glOrtho(0.0, width, height, 0.0, -1.f, 1.f); // DO NOT CHANGE THIS LINE
+    glOrtho(-width/2, width/2, -height/2, height/2, 1.f, -1.f);
 
     // Clear the color buffer with current clearing color
-    glClear(GL_COLOR_BUFFER_BIT);   // DO NOT CHANGE THIS LINE
+    glClear(GL_COLOR_BUFFER_BIT); // DO NOT CHANGE THIS LINE
 
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // DO NOT CHANGE THIS LINE
 
-    /* Draw here */
-
-    // Square
-    drawSquare();
-
-    // Rhombus
-    glBegin(GL_QUADS);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(210, 90);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(160, 140);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(210, 140);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(260, 90);
-    glEnd();
-
-    // Two Triangles
-    glBegin(GL_TRIANGLES);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(110, 240);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(60, 190);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(160, 190);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(160, 290);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(60, 290);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(60, 240);
-    glEnd();
-
-    // Triangle Strip
-    glBegin(GL_TRIANGLE_STRIP);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(260, 240);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(210, 190);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(310, 190);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(310, 290);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(210, 290);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(210, 240);
-    glEnd();
-
-    // Triangle Fan
-    glBegin(GL_TRIANGLE_FAN);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(410, 240);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(360, 190);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(460, 190);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(460, 290);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(360, 290);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(360, 240);
-    glEnd();
 
     glFlush();  // Render now
 }

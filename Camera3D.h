@@ -12,39 +12,43 @@ class Camera3D : protected Camera {
 public:
     /** Constructors */
     Camera3D();
-    Camera3D(double polarAngle, double azimuthAngle);
-
-    /** Static Methods */
-    /// TODO Implement last or not at all
-    static double getFocalDistanceFromFOV(double fov);
+    Camera3D(const Camera3D& other); // Implicitly deleted copy constructor
+    Camera3D(const point3d& location,
+            const spatialVector& normal,
+            const sphericalAngle3d& sphericalDirection,
+            const point3d& focus,
+            const double& focalDistance);
 
     /** Getters */
-    /// TODO Returns coefficients of 2-hyperplane equation orthogonal to normal
-    std::vector<double> getHyperplane() const override;
+    spatialVector getUnitUpVector() const;
+    spatialVector getUnitRightVector() const;
+
+    spatialVector const& getNormal() const;
+    sphericalAngle3d const& getSphericalDirection() const;
+    point3d const& getFocus() const;
 
     /** Setters */
     /* Utility */
-    void setFocalDistance(double newFocalDistance) override;
+    void setFocus() override;
 
     /* Movement */
-    void setLocation(std::unique_ptr<point> newLocation) override;
     void setLocation(std::vector<double> newLocation) override;
 
+    void setLocation(const point3d& newLocation);
     void setLocation(double x, double y, double z);
 
     /* Rotation */
-    void setNormal(spatialVector newNormal) override;
-    void setSphericalDirection(std::unique_ptr<sphericalAngle> newAngles)
-            override;
+    void setNormal() override;
     void setSphericalDirection(std::vector<double> newAngles) override;
 
+    void setSphericalDirection(const sphericalAngle3d& newAngles);
     void setSphericalDirection(double polarAngle, double azimuthAngle);
     void setPolarAngle(double polarAngle);
     void setAzimuthAngle(double azimuthAngle);
 
     /** Other Methods */
     /* Utility */
-    point2d projectPoint(point3d);
+    optional<point2d> projectPoint(const point3d& p);
 
     /* Movement */
     void move(std::vector<double> dPosition) override;
@@ -63,15 +67,34 @@ public:
 
     /* Rotation */
     void rotate(std::vector<double> dAngles) override;
-    void rotate(std::unique_ptr<sphericalAngle> dAngles) override;
 
+    void rotate(const sphericalAngle3d& dAngles);
     void rotate(double dPolarAngle, double dAzimuthAngle);
-    void rotatePolarAngle(double dPolarAngle);
-    void rotateAzimuthAngle(double dAzimuthAngle);
+    void rotatePolar(double dPolarAngle);
+    void rotateAzimuth(double dAzimuthAngle);
     void rotateLeft();
     void rotateRight();
     void rotateUp();
     void rotateDown();
+
+protected:
+    /** Fields */
+    // Location of the camera
+    point3d location;
+
+    // Direction the camera is facing. Used to determine 2d plane/3d
+    // hyperplane of the camera onto which 3d/4d points get projected
+    spatialVector normal;
+
+    // A point P in the Scene is projected onto the plane of the
+    // Scene's camera by finding the intersection point of the line between
+    // P and the Camera's focus and the Camera's plane
+    // Note: this means the focus is "behind" the direction the Camera sees
+    point3d focus;
+
+    // Direction the camera is facing in spherical coordinates. Used to
+    // rotate the camera smoothly
+    sphericalAngle3d sphericalDirection;
 
 };
 

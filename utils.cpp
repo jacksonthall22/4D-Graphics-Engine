@@ -6,7 +6,25 @@
 #include <vector>
 #include <cmath>
 #include <iostream>
+#include <memory>
+#if __cplusplus < 201700
+    #include <experimental/optional>
+#include <GL/gl.h>
 
+using std::experimental::optional;
+    using std::experimental::nullopt;
+    using std::experimental::make_optional;
+#else
+    #include <optional>
+#endif
+
+
+
+/** ========== Constants ========== */
+const int DEFAULT_WINDOW_WIDTH = 960;
+const int DEFAULT_WINDOW_HEIGHT = 540;
+const double DEFAULT_RENDER_COLOR_RGB[3] = {0.0, 0.0, 0.0};
+const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {1.0, 1.0, 0.9};
 
 /** ========== Functions ========== */
 /**
@@ -14,6 +32,27 @@
  */
 double square(double n){
     return pow(n, 2);
+}
+
+/**
+ * Return the given degrees value converted to radians.
+ */
+double rad(double deg){
+    return deg * M_PI / 180;
+}
+
+/**
+ * Return a % n, which is not natively defined for doubles.
+ */
+double mod(double a, double n){
+    return a - floor(a / n) * n;
+}
+
+/**
+ * Set a to a % n, which is not natively defined for doubles.
+ */
+void modEquals(double *a, double n){
+    *a -= floor(*a / n) * n;
 }
 
 /** ========== Structs ========== */
@@ -29,12 +68,20 @@ struct spatialVector {
     }
     spatialVector(const spatialVector& other) : spatialVector(other.components){
     }
-    explicit spatialVector(std::vector<double> components){
-        this->components = move(components);
+    explicit spatialVector(const std::vector<double> components){
+        this->components = components;
     }
 
     /** Other Methods */
     /* Utility */
+    /**
+     * Multiply all components of a vector by the given scalar.
+     */
+    void scale(const double scalar){
+        for (auto & c : components){
+            c *= scalar;
+        }
+    }
     /**
      * Return the magnitude of the vector.
      */
@@ -47,6 +94,71 @@ struct spatialVector {
 
         return sqrt(sumOfSquares);
     }
+    /**
+     * Compute the dot product of this vector and another.
+     */
+    double dot(const spatialVector& other) const {
+        if (components.size() == other.components.size()){
+            // Sum products of components
+            double sum = 0;
+            for (int i = 0; i < components.size(); ++i){
+                sum += components[i] * other.components[i];
+            }
+            return sum;
+
+        } else {
+            // Bad input
+            std::cout << "Warning: Invalid input in:\n\tdouble dot(spatialVector "
+                         "v1, spatialVector v2)\n\t(utils.cpp)" << std::endl;
+            return -1;
+        }
+    }
+    /**
+     * Return the cosine of the angle between this vector and another in
+     * degrees.
+     */
+    double cosOfAngleBetween(const spatialVector& other) const {
+        return this->dot(other) / (other.magnitude() * other.magnitude());
+    }
+    /**
+     * Return the scalar projection of this vector onto another.
+     */
+    double scalarProjectOnto(const spatialVector& other) const{
+        if (components.size() == other.components.size()){
+            return magnitude() / cosOfAngleBetween(other);
+        } else {
+            // Bad input
+            std::cout << "Warning: Invalid input in:\n\tdouble vectorProjection"
+                         "(spatialVector v1, spatialVector v2)\n\t(utils.cpp)"
+                         << std::endl;
+            return -1;
+        }
+    }
+    /**
+     * Return the magnitude of the vector rejection of this from other.
+     */
+    double scalarRejectFrom(const spatialVector& other) const {
+        if (components.size() == other.components.size()){
+            std::vector<double> tempComponents;
+
+            double tempScalar = this->dot(other) / other.dot(other);
+
+            tempComponents.reserve(components.size());
+            for (int i = 0; i < components.size(); ++i){
+                tempComponents.push_back(
+                        components[i] - tempScalar * other.components[i]
+                );
+            }
+
+            return spatialVector(tempComponents).magnitude();
+        } else {
+            // Bad input
+            std::cout << "Warning: Invalid input in:\n\tdouble "
+                         "scalarRejectFrom(const spatialVector& other)\n\t"
+                         "(utils.cpp)" << std::endl;
+            return -1;
+        }
+    }
 };
 
 /**
@@ -54,13 +166,17 @@ struct spatialVector {
  */
 struct point {
     /** Fields */
-    std::vector<double*> coords;
+    std::vector<std::unique_ptr<double>> coords;
+
+    /** Constructors */
+    explicit point(std::vector<std::unique_ptr<double>> coords) :
+            coords(std::move(coords)){
+    }
 
     /** Setters */
     virtual void setCoords(std::vector<double> coords) = 0;
 
     /** Other Methods */
-    /* Utility */
     /**
      * Return the Euclidean distance from this point to another.
      */
@@ -103,7 +219,6 @@ struct point {
     virtual void move(const std::vector<double>& dPosition) = 0;
     virtual void move(const spatialVector& dPosition) = 0;
 };
-
 /**
  * Represents a point in 2 dimensions.
  */
@@ -114,12 +229,13 @@ struct point2d : public point {
     /** Constructors */
     point2d() : point2d(0, 0){
     }
-    point2d(const point2d& other) : point2d(other.x, other.y) {
+    point2d(const point2d& other) : point2d(other.x, other.y){
     }
-    point2d(double x, double y){
-        this->x = x;
-        this->y = y;
-        coords = {&x, &y};
+    point2d(double x, double y) :
+            point(std::vector<std::unique_ptr<double>>({
+                std::make_unique<double>(x),
+                std::make_unique<double>(y)
+            })), x(x), y(y) {
     }
 
     /** Setters */
@@ -170,17 +286,8 @@ struct point2d : public point {
     }
     void move(const spatialVector& dPosition) override {
         if (dPosition.components.size() <= 2){
-            // Can move in at most 2 directions
-            // Create a new vector of length 2 (fill remaining
-            // dimensions with 0s to make it possible to use a
-            // spacialVector of size() < 2)
-            std::vector<double> dPositionVec = dPosition.components;
+            move(dPosition.components);
 
-            while (dPositionVec.size() < 2){
-                dPositionVec.push_back(0.0);
-            }
-
-            move(dPositionVec);
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tvoid move(const "
@@ -189,7 +296,6 @@ struct point2d : public point {
         }
     }
 };
-
 /**
  * Represents a point in 3 dimensions.
  */
@@ -200,13 +306,14 @@ struct point3d : public point {
     /** Constructors */
     point3d() : point3d(0, 0, 0){
     }
-    point3d(const point3d& other) : point3d(other.x, other.y, other.z) {
+    point3d(const point3d& other) : point3d(other.x, other.y, other.z){
     }
-    point3d(double x, double y, double z){
-        this->x = x;
-        this->y = y;
-        this->z = z;
-        coords = {&x, &y, &z};
+    point3d(double x, double y, double z) :
+            point(std::vector<std::unique_ptr<double>>({
+                std::make_unique<double>(x),
+                std::make_unique<double>(y),
+                std::make_unique<double>(z)
+            })), x(x), y(y), z(z) {
     }
     
     /** Setters */
@@ -226,7 +333,7 @@ struct point3d : public point {
         std::cout << "Before updating coords, point3d.coords contains:"
                 << std::endl;
         for (auto & n : this->coords){
-            std::cout << n << " | ";
+            std::cout << *n << " | ";
         }
         std::cout << std::endl;
 
@@ -237,7 +344,7 @@ struct point3d : public point {
         std::cout << "After updating coords, point3d.coords contains:"
                 << std::endl;
         for (auto & n : this->coords){
-            std::cout << n << " | ";
+            std::cout << *n << " | ";
         }
         std::cout << std::endl;
     }
@@ -279,17 +386,7 @@ struct point3d : public point {
     }
     void move(const spatialVector& dPosition) override {
         if (dPosition.components.size() <= 3){
-            // Can move in at most 3 directions
-            // Create a new vector of length 3 (fill remaining
-            // dimensions with 0s to make it possible to use a
-            // spacialVector of size() < 3)
-            std::vector<double> dPositionVec = dPosition.components;
-
-            while (dPositionVec.size() < 3){
-                dPositionVec.push_back(0.0);
-            }
-
-            move(dPositionVec);
+            move(dPosition.components);
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tvoid move(const "
@@ -298,7 +395,6 @@ struct point3d : public point {
         }
     }
 };
-
 /**
  * Represents a point in 4 dimensions.
  */
@@ -311,12 +407,13 @@ struct point4d : public point {
     }
     point4d(const point4d& other) : point4d(other.x, other.y, other.z, other.a){
     }
-    point4d(double x, double y, double z, double a){
-        this->x = x;
-        this->y = y;
-        this->z = z;
-        this->a = a;
-        this->coords = std::vector<double*>({&x, &y, &z, &a});
+    point4d(double x, double y, double z, double a) :
+            point(std::vector<std::unique_ptr<double>>({
+                std::make_unique<double>(x),
+                std::make_unique<double>(y),
+                std::make_unique<double>(z),
+                std::make_unique<double>(a),
+            })), x(x), y(y), z(z), a(a) {
     }
 
     /** Setters */
@@ -334,6 +431,12 @@ struct point4d : public point {
         this->y = newY;
         this->z = newZ;
         this->a = newA;
+        this->coords = std::vector<std::unique_ptr<double>>({
+                std::make_unique<double>(x),
+                std::make_unique<double>(y),
+                std::make_unique<double>(z),
+                std::make_unique<double>(a)
+        });
     }
 
     /** Other Methods */
@@ -378,17 +481,8 @@ struct point4d : public point {
     }
     void move(const spatialVector& dPosition) override {
         if (dPosition.components.size() <= 4){
-            // Can move in at most 4 directions
-            // Create a new vector of length 4 (fill remaining
-            // dimensions with 0s to make it possible to use a
-            // spacialVector of size() < 4)
-            std::vector<double> dPositionVec = dPosition.components;
+            move(dPosition.components);
 
-            while (dPositionVec.size() < 4){
-                dPositionVec.push_back(0.0);
-            }
-
-            move(dPositionVec);
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tvoid move(const "
@@ -402,32 +496,179 @@ struct point4d : public point {
  * Stores pairs of pointers to point objects.
  */
 struct edge {
-    point *p1, *p2;
-    std::pair<point*, point*> endpoints;
-
-    /** Constructors */
-    edge(point* p1, point* p2){
-        this->p1 = p1;
-        this->p2 = p2;
-        endpoints = std::make_pair(p1, p2);
-    }
-
-    /** Destructor */
-    ~edge() {
-        p1 = nullptr;
-        p2 = nullptr;
-        // TODO possible memory leak if ~pair() not called
-        //      automatically for endpoints?
-    }
+    /** Virtual Destructor */
+    virtual ~edge() = 0;
 
     /** Other Methods */
-    /* Utility */
     /**
      * Return the Euclidean distance between the endpoints of this edge.
      */
-    double length(){
+    virtual double length() const = 0;
+};
+
+/**
+ * Stores a pair of pointers to point2d objects.
+ */
+struct edge2d : edge {
+    /** Fields */
+    std::unique_ptr<point2d> p1, p2;
+    std::pair<std::unique_ptr<point2d>, std::unique_ptr<point2d>> endpoints;
+
+    /** Constructors */
+    edge2d() : 
+            p1(nullptr), 
+            p2(nullptr), 
+            endpoints(std::pair<
+                std::unique_ptr<point2d>, 
+                std::unique_ptr<point2d>
+            >(nullptr, nullptr)){
+    }
+    edge2d(const edge2d& other){
+        p1 = std::make_unique<point2d>(*other.p1);
+        p2 = std::make_unique<point2d>(*other.p2);
+        endpoints = 
+                std::make_pair<
+                    std::unique_ptr<point2d>,
+                    std::unique_ptr<point2d>
+                >(
+                std::make_unique<point2d>(*p1),
+                std::make_unique<point2d>(*p2)
+        );
+    }
+    edge2d(const point2d& p1, const point2d& p2){
+        this->p1 = std::make_unique<point2d>(p1);
+        this->p2 = std::make_unique<point2d>(p2);
+        endpoints = std::make_pair<std::unique_ptr<point2d>, 
+            std::unique_ptr<point2d>>(
+            static_cast<std::unique_ptr<point2d> &&>(this->p1),
+            static_cast<std::unique_ptr<point2d> &&>(this->p2)
+        );
+    }
+
+    /** Other Methods */
+    /**
+     * Return the Euclidean distance between the endpoints of this edge.
+     */
+    double length() const override {
         return p1->distanceTo(*p2);
     }
+
+    /**
+     * Draws a line on the OpenGL screen between p1 and p2.
+     */
+    void draw() const {
+        glBegin(GL_LINES);
+        glLineWidth(1);
+        glColor3f(
+                DEFAULT_RENDER_COLOR_RGB[0],
+                DEFAULT_RENDER_COLOR_RGB[1],
+                DEFAULT_RENDER_COLOR_RGB[2]
+        );
+        glVertex2i(*endpoints.first->coords[0],
+                *endpoints.first->coords[1]);
+        glVertex2i(*endpoints.second->coords[0],
+                    *endpoints.first->coords[1]);
+        glEnd();
+    }
+};
+
+/**
+ * Stores a pair of pointers to point2d objects.
+ */
+struct edge3d : edge {
+    /** Fields */
+    std::unique_ptr<point3d> p1, p2;
+    std::pair<std::unique_ptr<point3d>, std::unique_ptr<point3d>> endpoints;
+
+
+    /** Constructors */
+    edge3d() : 
+            p1(nullptr), 
+            p2(nullptr), 
+            endpoints(std::pair<
+                std::unique_ptr<point3d>, 
+                std::unique_ptr<point3d>
+            >(nullptr, nullptr)){
+    }
+    edge3d(const edge3d& other){
+        p1 = std::make_unique<point3d>(*other.p1);
+        p2 = std::make_unique<point3d>(*other.p2);
+        endpoints = 
+                std::make_pair<
+                    std::unique_ptr<point3d>, 
+                    std::unique_ptr<point3d>
+                >(
+                std::make_unique<point3d>(*p1),
+                std::make_unique<point3d>(*p2)
+        );
+    }
+    edge3d(const point3d& p1, const point3d& p2){
+        this->p1 = std::make_unique<point3d>(p1);
+        this->p2 = std::make_unique<point3d>(p2);
+        endpoints = std::make_pair<std::unique_ptr<point3d>, 
+            std::unique_ptr<point3d>>(
+            static_cast<std::unique_ptr<point3d> &&>(this->p1),
+            static_cast<std::unique_ptr<point3d> &&>(this->p2)
+        );
+    }
+
+    /** Other Methods */
+    /**
+     * Return the Euclidean distance between the endpoints of this edge.
+     */
+    double length() const override {
+        return p1->distanceTo(*p2);
+    }
+};
+
+/**
+ * Stores a pair of pointers to point2d objects.
+ */
+struct edge4d : edge {
+    /** Fields */
+    std::unique_ptr<point4d> p1, p2;
+    std::pair<std::unique_ptr<point4d>, std::unique_ptr<point4d>> endpoints;
+
+
+    /** Constructors */
+    edge4d() :
+            p1(nullptr), 
+            p2(nullptr), 
+            endpoints(std::pair<
+                std::unique_ptr<point4d>, 
+                std::unique_ptr<point4d>
+            >(nullptr, nullptr)){
+    }
+    edge4d(const edge4d& other){
+        p1 = std::make_unique<point4d>(*other.p1);
+        p2 = std::make_unique<point4d>(*other.p2);
+        endpoints = 
+                std::make_pair<
+                    std::unique_ptr<point4d>, 
+                    std::unique_ptr<point4d>
+                >(
+                std::make_unique<point4d>(*p1),
+                std::make_unique<point4d>(*p2)
+        );
+    }
+    edge4d(const point4d& p1, const point4d& p2){
+        this->p1 = std::make_unique<point4d>(p1);
+        this->p2 = std::make_unique<point4d>(p2);
+        endpoints = std::make_pair<std::unique_ptr<point4d>, 
+            std::unique_ptr<point4d>>(
+            static_cast<std::unique_ptr<point4d> &&>(this->p1),
+            static_cast<std::unique_ptr<point4d> &&>(this->p2)
+        );
+    }
+
+    /** Other Methods */
+    /**
+     * Return the Euclidean distance between the endpoints of this edge.
+     */
+    double length() const override {
+        return p1->distanceTo(*p2);
+    }
+
 };
 
 /**
@@ -437,8 +678,15 @@ struct edge {
  */
 struct sphericalAngle {
     /// Note: All calculations done in degrees
+    /// Note: Left-handed coordinate system
 
-    std::vector<double*> angles;
+    /** Fields */
+    std::vector<std::unique_ptr<double>> angles;
+
+    /** Constructors */
+    explicit sphericalAngle(std::vector<std::unique_ptr<double>> angles) :
+            angles(std::move(angles)){
+    }
 
     /** Getters */
     /**
@@ -446,6 +694,7 @@ struct sphericalAngle {
      */
     virtual spatialVector getUnitVector() = 0;
     virtual void rotate(std::vector<double> angles) = 0;
+
 };
 
 /**
@@ -453,12 +702,14 @@ struct sphericalAngle {
  */
 struct sphericalAngle3d : public sphericalAngle {
     /// Note: All calculations done in degrees
+    /// Note: Left-handed coordinate system
 
     /** Fields */
-    // polarAngle ranges from [0, 360) degrees where 0 is "north"
-    //      and increasing the angle rotates east (90 is east, etc.)
-    // azimuthAngle ranges from [0, 180] degrees where 0 is
-    //      straight up and 180 is straight down (90 is forward)
+    // polarAngle rotates around the (vertical) z-axis, ranges from [0, 360)
+    //      degrees and where 0 is towards the positive y-axis, and increasing
+    //      rotates east (CCW rotation from top-down)
+    // azimuthAngle ranges from [0, 180] degrees where 0 is straight up and
+    //      180 is straight down (90 is forward)
     double polarAngle, azimuthAngle;
 
     /** Constructors */
@@ -467,10 +718,33 @@ struct sphericalAngle3d : public sphericalAngle {
     sphericalAngle3d(sphericalAngle3d const &other) :
             sphericalAngle3d(other.polarAngle, other.azimuthAngle){
     }
-    sphericalAngle3d(double polarAngle, double azimuthAngle){
+    sphericalAngle3d(double polarAngle, double azimuthAngle) :
+            sphericalAngle(std::vector<std::unique_ptr<double>>({
+                std::make_unique<double>(polarAngle),
+                std::make_unique<double>(azimuthAngle)
+            })) {
         this->polarAngle = polarAngle;
         this->azimuthAngle = azimuthAngle;
-        angles = {&polarAngle, &azimuthAngle};
+    }
+
+    /** Setters */
+    /**
+     * Set polar angle to given value, capping between [0, 360)
+     */
+    void setPolar(double polarAngle) {
+        this->polarAngle = mod(&polarAngle, 360);
+    }
+    /**
+     * Set azimuth angle to given value, capping between [0, 180]
+     */
+    void setAzimuth(double azimuthAngle) {
+        if (azimuthAngle < 0){
+            this->azimuthAngle = 0;
+        } else if (azimuthAngle > 180){
+            this->azimuthAngle = 180;
+        } else {
+            this->azimuthAngle = azimuthAngle;
+        }
     }
 
     /** Other Methods */
@@ -479,25 +753,25 @@ struct sphericalAngle3d : public sphericalAngle {
      * Return the unit vector pointing in the direction defined by this object.
      */
     spatialVector getUnitVector() override {
-        // By definition, when an angle is plotted on the unit circle, the
-        // point where the angle's ray intersects the circle is (cos(x), sin
-        // (x)). This method takes those coordinates and scales them down
-        // towards the circle's center by the sin of the azimuth (up/down)
-        // angle to emulate the same point rotating up/down along the unit
-        // sphere. Because the azimuthAngle is measured from the z-axis to
-        // the point, the sin of the angle represents the non-vertical
+        // By definition, when an angle a is plotted on the unit circle, the
+        // point where the angle's ray intersects the circle is
+        // (cos(a), sin(a)). This method takes those coordinates and scales
+        // them down towards the circle's center by the sin of the azimuth
+        // (up/down)  angle to emulate the same point rotating up/down along
+        // the unit sphere. Because the azimuthAngle is measured from the
+        // z-axis to the point, the sin of the angle represents the non-vertical
         // component of that angle, which is parallel to the xy plane. If you
         // put these equations in Desmos:
         //      a = 1 (range 0-2pi)
         //      b = 1 (range 0-pi)
-        //      (cos(a)sin(b), sin(a)sin(b))
+        //      (sin(b)sin(a), sin(b)cos(a)) // (and z would = cos(b))
         //      x^2+y^2=1
         // it will appear to be a top-down view of a point on the unit
-        // sphere with the sphere rotating up/down (b) and around (a).
+        // sphere rotating up/down (b) and around (a).
         return spatialVector(std::vector<double>({
-            cos(polarAngle) * sin(azimuthAngle),
-            sin(polarAngle) * sin(azimuthAngle),
-            cos(azimuthAngle)
+            sin(rad(azimuthAngle)) * sin(rad(polarAngle)),
+            sin(rad(azimuthAngle)) * cos(rad(polarAngle)),
+            cos(rad(azimuthAngle))
         }));
     }
     
@@ -507,41 +781,14 @@ struct sphericalAngle3d : public sphericalAngle {
      * [0, 360).
      */
     void rotatePolar(double dPolarAngle){
-        // TODO get rid of this if angles vector is updated automatically
-        std::cout << "test: utils.cpp: sphericalAngle3d: rotatePolar:"
-                << std::endl;
-        std::cout << "angles vector before increment of " << dPolarAngle
-                << " degrees:" << std::endl;
-        for (auto & angle : angles){
-            std::cout << angle << " | ";
-        }
-        std::cout << std::endl;
-        polarAngle += dPolarAngle;
-
-        // Cap between [0, 360)
-        // %= doesn't work with doubles, implement manually
-        polarAngle -= floor(polarAngle / 360.0) * 360;
-
-        std::cout << "angles vector after increment of " << dPolarAngle
-                << " degrees:" << std::endl;
-        for (auto & angle : angles){
-            std::cout << angle << " | ";
-        }
-        std::cout << std::endl;
+        setPolar(polarAngle + dPolarAngle);
     }
     /**
      * Increase rotation of azimuthAngle by dAzimuthAngle degrees, staying 
      * within [0, 180].
      */
     void rotateAzimuth(double dAzimuthAngle){
-        azimuthAngle += dAzimuthAngle;
-
-        // Cap between [0, 180]
-        if (azimuthAngle > 180){
-            azimuthAngle = 180;
-        } else if (azimuthAngle < 0){
-            azimuthAngle = 0;
-        }
+        setAzimuth(azimuthAngle + dAzimuthAngle);
     }
     /**
      * Increase rotation of polarAngle and azimuthAngle by values of the given
@@ -565,12 +812,14 @@ struct sphericalAngle3d : public sphericalAngle {
  */
 struct sphericalAngle4d : public sphericalAngle {
     /// Note: All calculations done in degrees
+    /// Note: Left-handed coordinate system
     /// Note: Read comments in sphericalAngle3d to make more sense of below
 
-    // polarAngle ranges from [0, 180] degrees where 0 is "north"
-    //      and increasing the angle rotates east (90 is east, etc.)
-    // azimuthAngle ranges from [0, 180] degrees where 0 is
-    //      straight up and 180 is straight down (90 is forward)
+    // polarAngle rotates around the (vertical) z-axis, ranges from [0, 180]
+    //      degrees and where 0 is towards the positive y-axis, and increasing
+    //      rotates east (CCW rotation from top-down)
+    // azimuthAngle ranges from [0, 180] degrees where 0 is straight up and
+    //      180 is straight down (90 is forward)
     // phiAngle ranges from [0, 360) degrees, where 0 lies as it would in our 3
     //      dimensions, 90 lies orthogonally "outward" to the 3d dimension,
     //      180 lies opposite to 0 would in our 3 dimensions, and 270 lies
@@ -584,50 +833,74 @@ struct sphericalAngle4d : public sphericalAngle {
     sphericalAngle4d(const sphericalAngle4d& other) : sphericalAngle4d(
             other.polarAngle, other.azimuthAngle, other.phiAngle) {
     }
-    sphericalAngle4d(double polarAngle, double azimuthAngle, double phiAngle){
+    sphericalAngle4d(double polarAngle, double azimuthAngle, double phiAngle) :
+            sphericalAngle(std::vector<std::unique_ptr<double>>({
+                std::make_unique<double>(polarAngle),
+                std::make_unique<double>(azimuthAngle),
+                std::make_unique<double>(phiAngle),
+            })) {
         this->polarAngle = polarAngle;
         this->azimuthAngle = azimuthAngle;
         this->phiAngle = phiAngle;
-        angles = {&polarAngle, &azimuthAngle, &phiAngle};
+    }
+
+    /** Setters */
+    /**
+     * Set polar angle to given value, capping between [0, 180]
+     */
+    void setPolar(const double polarAngle) {
+        if (polarAngle < 0){
+            this->polarAngle = 0;
+        } else if (polarAngle > 180){
+            this->polarAngle = 180;
+        } else {
+            this->polarAngle = polarAngle;
+        }
+    }
+    /**
+     * Set azimuth angle to given value, capping between [0, 180]
+     */
+    void setAzimuth(const double azimuthAngle) {
+        if (azimuthAngle < 0){
+            this->azimuthAngle = 0;
+        } else if (azimuthAngle > 180){
+            this->azimuthAngle = 180;
+        } else {
+            this->azimuthAngle = azimuthAngle;
+        }
+    }
+    /**
+     * Set phi angle to given value, capping between [0, 360)
+     */
+    void setPhi(const double phiAngle) {
+        this->phiAngle = mod(polarAngle, 360);
     }
     
     /** Other Methods */
     /* Utility */
     /**
-     * Return the coordinate of the point on the unit sphere
-     * in the direction of the spherical angles.
+     * Return the vector pointing in the direction defined by this object.
      */
     spatialVector getUnitVector() override {
-        // It would seem at first that only the top hemisphere of the unit
+        // It would seem at first that only the +x hemisphere of the unit
         // 3-sphere can be reached with polarAngle and azimuthAngle both only
         // ranging from [0-180], but every point on this hemisphere can be
         // mapped to the antipodal (opposite point) with a rotation through
-        // the 4th dimension by 180 degrees. For example, to reach (0, 0, -1,
+        // the 4th dimension by 180 degrees. For example, to reach (-1, 0, 0,
         // 0), these values work with the math that has been implemented below:
-        //      polarAngle = 0 deg = 0 rad (or any value)
-        //      azimuthAngle = 90 deg = pi/2 rad
-        //      phiAngle = 180 deg = pi rad
+        //      polarAngle = 90 deg = pi/2 rad
+        //      azimuthAngle = 90 deg
+        //      phiAngle = 270 deg = 3pi/2 rad
         // because
-        //      x = cos(phiAngle)cos(azimuthAngle)cos(polarAngle) = 0
-        //      y = cos(phiAngle)cos(azimuthAngle)sin(polarAngle) = 0
-        //      z = cos(phiAngle)sin(azimuthAngle) = -1
-        //      a = sin(phiAngle) = 0
-        // Intuitively this involves rotating a point starting at
-        // (1, 0, 0, 0) any direction around the z axis, rotating up into the
-        // z dimension by 90 deg = pi/2 rad, and rotating around the xy
-        // plane through the 4th dimension to the antipodal. Graphed in a 3d
-        // graphing calculator, the third rotation would appear to move the
-        // point straight through the sphere, but the distance of the
-        // point from the origin always remains constant. It is similar to how
-        // if the shadow of a 3d sphere were cast onto a 2d plane as a circle, a
-        // point rotating on its surface would appear to move "through"
-        // the circle's center to the antipodal of the circle when the point
-        // rotates into the third dimension.
+        //      x = sin(phiAngle)sin(azimuthAngle)sin(polarAngle) = -1
+        //      y = sin(phiAngle)sin(azimuthAngle)cos(polarAngle) = 0
+        //      z = sin(phiAngle)cos(azimuthAngle) = 0
+        //      a = cos(phiAngle) = 0
         return spatialVector(std::vector<double>({
-            cos(phiAngle) * cos(azimuthAngle) * cos(polarAngle),
-            cos(phiAngle) * cos(azimuthAngle) * sin(polarAngle),
-            cos(phiAngle) * sin(azimuthAngle),
-            sin(phiAngle)
+            sin(rad(phiAngle)) * sin(rad(azimuthAngle)) * sin(rad(polarAngle)),
+            sin(rad(phiAngle)) * sin(rad(azimuthAngle)) * cos(rad(polarAngle)),
+            sin(rad(phiAngle)) * cos(rad(azimuthAngle)),
+            cos(rad(phiAngle))
         }));
     }
     
@@ -637,39 +910,21 @@ struct sphericalAngle4d : public sphericalAngle {
      * [0, 180].
      */
     void rotatePolar(double dPolarAngle){
-        polarAngle += dPolarAngle;
-
-        // Cap between [0, 180]
-        if (polarAngle > 180){
-            polarAngle = 180;
-        } else if (polarAngle < 0){
-            polarAngle = 0;
-        }
+        setPolar(polarAngle + dPolarAngle);
     }
     /**
      * Increase rotation of azimuthAngle by dAzimuthAngle degrees, staying 
      * within [0, 180].
      */
     void rotateAzimuth(double dAzimuthAngle){
-        azimuthAngle += dAzimuthAngle;
-
-        // Cap between [0, 180]
-        if (azimuthAngle > 180){
-            azimuthAngle = 180;
-        } else if (azimuthAngle < 0){
-            azimuthAngle = 0;
-        }
+        setAzimuth(azimuthAngle + dAzimuthAngle);
     }
     /**
      * Increase rotation of phiAngle by dPhiAngle degrees, staying within 
      * [0, 180].
      */
     void rotatePhi(double dPhiAngle){
-        phiAngle += dPhiAngle;
-
-        // Cap between [0, 360)
-        // %= doesn't work with doubles, implement manually
-        phiAngle -= floor(phiAngle / 360.0) * 360;
+        setPhi(phiAngle + dPhiAngle);
     }
     /**
      * Increase rotation of polarAngle and azimuthAngle by values of the given
