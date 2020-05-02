@@ -15,19 +15,19 @@ Camera3D::Camera3D() : Camera3D(
 }
 Camera3D::Camera3D(const Camera3D &other) : Camera3D(
         point3d(
-            *other.location.coords[0],
-            *other.location.coords[1],
-            *other.location.coords[2]
+            other.location.x,
+            other.location.y,
+            other.location.z
         ),
         other.normal,
         sphericalAngle3d(
-            *other.sphericalDirection.angles[0],
-            *other.sphericalDirection.angles[1]
+            other.sphericalDirection.polarAngle,
+            other.sphericalDirection.azimuthAngle
         ),
         point3d(
-            *other.focus.coords[0],
-            *other.focus.coords[1],
-            *other.focus.coords[2]
+            other.focus.x,
+            other.focus.y,
+            other.focus.z
         ),
         other.focalDistance){
 }
@@ -51,8 +51,8 @@ Camera3D::Camera3D(
  */
 spatialVector Camera3D::getUnitUpVector() const {
     return sphericalAngle3d(
-            *sphericalDirection.angles[0],
-            *sphericalDirection.angles[1] - 90).getUnitVector();
+            sphericalDirection.polarAngle,
+            sphericalDirection.azimuthAngle - 90).getUnitVector();
 }
 /**
  * Return the unit vector that points rightward relative to the camera normal.
@@ -66,7 +66,7 @@ spatialVector Camera3D::getUnitRightVector() const {
 
     /// TODO Try replacing with below if this doesn't seem to work
 //    return sphericalAngle3d(
-//            mod(*sphericalDirection.angles[0] - 90, 360),
+//            mod(*sphericalDirection.polarAngle - 90, 360),
 //            90).getUnitVector();
 }
 
@@ -92,11 +92,11 @@ void Camera3D::setFocus() {
     // this.location
     double normalMagnitude = normal.magnitude();
 
-    double newX = *location.coords[0] - normal.components[0] * focalDistance
+    double newX = location.x - normal.components[0] * focalDistance
             / normalMagnitude;
-    double newY = *location.coords[1] - normal.components[1] * focalDistance
+    double newY = location.y - normal.components[1] * focalDistance
             / normalMagnitude;
-    double newZ = *location.coords[2] - normal.components[2] * focalDistance
+    double newZ = location.z - normal.components[2] * focalDistance
             / normalMagnitude;
 
     focus = point3d(newX, newY, newZ);
@@ -145,7 +145,7 @@ void Camera3D::setSphericalDirection(std::vector<double> newAngles) {
 }
 
 void Camera3D::setSphericalDirection(const sphericalAngle3d& newAngles) {
-    setSphericalDirection(*newAngles.angles[0],*newAngles.angles[1]);
+    setSphericalDirection(newAngles.polarAngle,newAngles.azimuthAngle);
 }
 void Camera3D::setSphericalDirection(double polarAngle, double azimuthAngle) {
     setPolar(polarAngle);
@@ -186,9 +186,9 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
     // First need to get v by calculating difference between coords of focus
     // and the point3d
     spatialVector v(std::vector<double>({
-        *p.coords[0] - *focus.coords[0],
-        *p.coords[1] - *focus.coords[1],
-        *p.coords[2] - *focus.coords[2]
+        p.x - focus.x,
+        p.y - focus.y,
+        p.z - focus.z
     }));
 
     // If this vector has a scalar projection of <= 0 onto the normal, it is
@@ -201,9 +201,9 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
 
     // Splitting up t calculation to keep it from getting huge
     double tNumerator, tDenominator, t;
-    tNumerator = normal.components[0] * (*p.coords[0] - *location.coords[0])
-            + normal.components[1] * (*p.coords[1] - *location.coords[1])
-            + normal.components[2] * (*p.coords[2] - *location.coords[2]);
+    tNumerator = normal.components[0] * (p.x - location.x)
+            + normal.components[1] * (p.y - location.y)
+            + normal.components[2] * (p.z - location.z);
     tDenominator = normal.components[0] * (v.components[0])
             + normal.components[1] * (v.components[1])
             + normal.components[2] * (v.components[2]);
@@ -216,9 +216,9 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
         // Now that t is known plug it back into parametric equations above to
         // get 3d intersection point
         point3d intersectionPoint(
-            *location.coords[0] + (*p.coords[0] - *focus.coords[0]),
-            *location.coords[1] + (*p.coords[1] - *focus.coords[1]),
-            *location.coords[2] + (*p.coords[2] - *focus.coords[2])
+            location.x + (p.x - focus.x),
+            location.y + (p.y - focus.y),
+            location.z + (p.z - focus.z)
         );
 
         // Must find coords (x', y') that represent a point on the rotated plane
@@ -229,9 +229,9 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
         // First create vector pointing from camera location to
         // intersectionPoint (which lies on the camera's plane)
         spatialVector cameraToIntersection(std::vector<double>({
-            *intersectionPoint.coords[0] - *location.coords[0],
-            *intersectionPoint.coords[1] - *location.coords[1],
-            *intersectionPoint.coords[2] - *location.coords[2]
+            intersectionPoint.x - location.x,
+            intersectionPoint.y - location.y,
+            intersectionPoint.z - location.z
         }));
 
         // Now x' and y' are just the scalar projections of cameraToIntersection
@@ -381,7 +381,7 @@ void Camera3D::rotate(const std::vector<double> dAngles) {
 }
 
 void Camera3D::rotate(const sphericalAngle3d& dAngles) {
-    rotate(*dAngles.angles[0], *dAngles.angles[1]);
+    rotate(dAngles.polarAngle, dAngles.azimuthAngle);
 }
 void Camera3D::rotate(const double dPolarAngle, const double dAzimuthAngle) {
     rotatePolar(dPolarAngle);

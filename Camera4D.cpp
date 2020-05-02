@@ -15,22 +15,22 @@ Camera4D::Camera4D() : Camera4D(
 }
 Camera4D::Camera4D(const Camera4D &other) : Camera4D(
         point4d(
-            *other.location.coords[0],
-            *other.location.coords[1],
-            *other.location.coords[2],
-            *other.location.coords[3]
+            other.location.x,
+            other.location.y,
+            other.location.z,
+            other.location.a
         ),
         other.normal,
         sphericalAngle4d(
-            *other.sphericalDirection.angles[0],
-            *other.sphericalDirection.angles[1],
-            *other.sphericalDirection.angles[2]
+            other.sphericalDirection.polarAngle,
+            other.sphericalDirection.azimuthAngle,
+            other.sphericalDirection.phiAngle
         ),
         point4d(
-            *other.focus.coords[0],
-            *other.focus.coords[1],
-            *other.focus.coords[2],
-            *other.focus.coords[3]
+            other.focus.x,
+            other.focus.y,
+            other.focus.z,
+            other.focus.a
         ),
         other.focalDistance){
 }
@@ -54,9 +54,9 @@ Camera4D::Camera4D(
  */
 spatialVector Camera4D::getUnitUpVector() const {
     return sphericalAngle4d(
-        *sphericalDirection.angles[0],
-        *sphericalDirection.angles[1] - 90,
-        *sphericalDirection.angles[2]
+        sphericalDirection.polarAngle,
+        sphericalDirection.azimuthAngle - 90,
+        sphericalDirection.phiAngle
     ).getUnitVector();
 }
 /**
@@ -104,13 +104,13 @@ void Camera4D::setFocus() {
     // this.location
     double normalMagnitude = normal.magnitude();
 
-    double newX = *location.coords[0] - normal.components[0] * focalDistance
+    double newX = location.x - normal.components[0] * focalDistance
         / normalMagnitude;
-    double newY = *location.coords[1] - normal.components[1] * focalDistance
+    double newY = location.y - normal.components[1] * focalDistance
         / normalMagnitude;
-    double newZ = *location.coords[2] - normal.components[2] * focalDistance
+    double newZ = location.z - normal.components[2] * focalDistance
         / normalMagnitude;
-    double newA = *location.coords[3] - normal.components[3] * focalDistance
+    double newA = location.a - normal.components[3] * focalDistance
         / normalMagnitude;
 
     focus = point4d(newX, newY, newZ, newA);
@@ -159,7 +159,10 @@ void Camera4D::setSphericalDirection(std::vector<double> newAngles) {
 }
 
 void Camera4D::setSphericalDirection(const sphericalAngle4d &newAngles) {
-    setSphericalDirection(*newAngles[0], *newAngles[1], *newAngles[2]);
+    setSphericalDirection(
+        newAngles.polarAngle,
+        newAngles.azimuthAngle,
+        newAngles.phiAngle);
 }
 void Camera4D::setSphericalDirection(
         const double polarAngle,
@@ -199,10 +202,10 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
 
     // Get v by calculating focus - p vector
     spatialVector v(std::vector<double>({
-        *p.coords[0] - *focus.coords[0],
-        *p.coords[1] - *focus.coords[1],
-        *p.coords[2] - *focus.coords[2],
-        *p.coords[3] - *focus.coords[3]
+        p.x - focus.x,
+        p.y - focus.y,
+        p.z - focus.z,
+        p.a - focus.a
     }));
 
     // If this vector has a scalar projection of <= 0 onto the normal, it is
@@ -215,10 +218,10 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
 
     // Splitting up t calculation to keep it from getting huge
     double tNumerator, tDenominator, t;
-    tNumerator = normal.components[0] * (*p.coords[0] - *location.coords[0])
-            + normal.components[1] * (*p.coords[1] - *location.coords[1])
-            + normal.components[2] * (*p.coords[2] - *location.coords[2])
-            + normal.components[3] * (*p.coords[3] - *location.coords[3]);
+    tNumerator = normal.components[0] * (p.x - location.x)
+            + normal.components[1] * (p.y - location.y)
+            + normal.components[2] * (p.z - location.z)
+            + normal.components[3] * (p.a - location.a);
     tDenominator = normal.components[0] * (v.components[0])
             + normal.components[1] * (v.components[1])
             + normal.components[2] * (v.components[2])
@@ -234,10 +237,10 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
         // Now that t is known plug it back into parametric equations above to
         // get 4d intersection point
         point4d intersectionPoint(
-            *location.coords[0] + (*p.coords[0] - *focus.coords[0]),
-            *location.coords[1] + (*p.coords[1] - *focus.coords[1]),
-            *location.coords[2] + (*p.coords[2] - *focus.coords[2]),
-            *location.coords[3] + (*p.coords[3] - *focus.coords[3])
+            location.x + (p.x - focus.x),
+            location.y + (p.y - focus.y),
+            location.z + (p.z - focus.z),
+            location.a + (p.a - focus.a)
         );
 
         // Now must find coords (x', y', z') that is a point on the rotated
@@ -247,10 +250,10 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
         // First create vector pointing from camera location to
         // intersectionPoint (which lies on the camera's hyperplane)
         spatialVector cameraToIntersection(std::vector<double>({
-            *intersectionPoint.coords[0] - *location.coords[0],
-            *intersectionPoint.coords[1] - *location.coords[1],
-            *intersectionPoint.coords[2] - *location.coords[2],
-            *intersectionPoint.coords[3] - *location.coords[3]
+            intersectionPoint.x - location.x,
+            intersectionPoint.y - location.y,
+            intersectionPoint.z - location.z,
+            intersectionPoint.a - location.a
         }));
 
         // Now x', y', and z' are just the scalar projections of

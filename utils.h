@@ -21,13 +21,29 @@ using std::experimental::optional;
     #include <optional>
 #endif
 
-namespace utils{
 
-
+/** ========== Functions ========== */
+/**
+ * Return the square of the given double value.
+ */
 double square(double n);
+/**
+ * Return the given degrees value converted to radians.
+ */
 double rad(double deg);
+/**
+ * Return a % n, which is not natively defined for doubles.
+ */
 double mod(double a, double n);
+/**
+ * Set a to a % n, which is not natively defined for doubles.
+ */
 void modEquals(double *a, double n);
+
+/** ========== Structs ========== */
+/**
+ * Represents a vector with any number of dimensional components.
+ */
 struct spatialVector {
     /** Fields */
     std::vector<double> components;
@@ -35,14 +51,14 @@ struct spatialVector {
     /** Constructors */
     spatialVector();
     spatialVector(const spatialVector& other);
-    explicit spatialVector(const std::vector<double> components);
+    explicit spatialVector(const std::vector<double>& components);
 
     /** Other Methods */
     /* Utility */
     /**
      * Multiply all components of a vector by the given scalar.
      */
-    void scale(const double scalar);
+    void scale(double scalar);
     /**
      * Return the magnitude of the vector.
      */
@@ -70,21 +86,7 @@ struct spatialVector {
  * Represents a point. Abstract, derived by point2d, point3d, and point4d.
  */
 struct point {
-    /** Fields */
-    std::vector<double> coords;
-
-    /** Constructors */
-    explicit point(std::vector<double> coords);
-
-    /** Setters */
-    virtual void setCoords(std::vector<double> coords) = 0;
-
     /** Other Methods */
-    /**
-     * Return the Euclidean distance from this point to another.
-     */
-    double distanceTo(const point& other) const;
-
     /* Movement */
     virtual void move(const std::vector<double>& dPosition) = 0;
     virtual void move(const spatialVector& dPosition) = 0;
@@ -101,11 +103,13 @@ struct point2d : public point {
     point2d(const point2d& other);
     point2d(double x, double y);
 
-    /** Setters */
-    void setCoords(std::vector<double> coords) override;
-    void setCoords(double newX, double newY);
-
     /** Other Methods */
+    /* Utility */
+    /**
+     * Return the Euclidean distance from this point to another.
+     */
+    double distanceTo(const point2d& other) const;
+
     /* Movement */
     void moveX(double dX);
     void moveY(double dY);
@@ -125,11 +129,13 @@ struct point3d : public point {
     point3d(const point3d& other);
     point3d(double x, double y, double z);
 
-    /** Setters */
-    void setCoords(std::vector<double> coords) override;
-    void setCoords(double newX, double newY, double newZ);
-
     /** Other Methods */
+    /* Utility */
+    /**
+     * Return the Euclidean distance from this point to another.
+     */
+    double distanceTo(const point3d& other) const;
+
     /* Movement */
     void moveX(double dX);
     void moveY(double dY);
@@ -150,11 +156,13 @@ struct point4d : public point {
     point4d(const point4d& other);
     point4d(double x, double y, double z, double a);
 
-    /** Setters */
-    void setCoords(std::vector<double> coords) override;
-    void setCoords(double newX, double newY, double newZ, double newA);
-
     /** Other Methods */
+    /* Utility */
+    /**
+     * Return the Euclidean distance from this point to another.
+     */
+    double distanceTo(const point4d& other) const;
+
     /* Movement */
     void moveX(double dX);
     void moveY(double dY);
@@ -185,7 +193,6 @@ struct edge {
 struct edge2d : edge {
     /** Fields */
     std::unique_ptr<point2d> p1, p2;
-    std::pair<std::unique_ptr<point2d>, std::unique_ptr<point2d>> endpoints;
 
     /** Constructors */
     edge2d();
@@ -210,8 +217,6 @@ struct edge2d : edge {
 struct edge3d : edge {
     /** Fields */
     std::unique_ptr<point3d> p1, p2;
-    std::pair<std::unique_ptr<point3d>, std::unique_ptr<point3d>> endpoints;
-
 
     /** Constructors */
     edge3d();
@@ -231,8 +236,6 @@ struct edge3d : edge {
 struct edge4d : edge {
     /** Fields */
     std::unique_ptr<point4d> p1, p2;
-    std::pair<std::unique_ptr<point4d>, std::unique_ptr<point4d>> endpoints;
-
 
     /** Constructors */
     edge4d();
@@ -256,19 +259,12 @@ struct sphericalAngle {
     /// Note: All calculations done in degrees
     /// Note: Left-handed coordinate system
 
-    /** Fields */
-    std::vector<double> angles;
-
-    /** Constructors */
-    explicit sphericalAngle(std::vector<double> angles);
-
     /** Getters */
     /**
      * Return the unit vector in the direction defined by this object.
      */
     virtual spatialVector getUnitVector() = 0;
     virtual void rotate(std::vector<double> angles) = 0;
-
 };
 
 /**
@@ -396,6 +392,6 @@ struct sphericalAngle4d : public sphericalAngle {
 
 };
 
-}
+
 
 #endif //PART_2___GRAPHICS_ALTERNATE_UTILS_H

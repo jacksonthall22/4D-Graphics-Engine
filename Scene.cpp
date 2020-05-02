@@ -4,6 +4,7 @@
 
 #include "Scene.h"
 #include "Object3D.h"
+#include "graphics.h"
 #include <utility>
 
 
@@ -55,4 +56,7 @@ void Scene::draw() const {
     for (auto & obj : object4ds){
         obj.draw(camera3d, camera4d);
     }
+
+    // Redraw screen
+    display();
 }

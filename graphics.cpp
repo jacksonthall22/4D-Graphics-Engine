@@ -34,39 +34,25 @@ void initGL() {
     glClearColor(0.9f, 0.9f, 0.8f, 1.0f); // Black and opaque
 }
 
-void drawSquare() {
-    glBegin(GL_QUADS);
-    // glVertex2i takes a 2-D (x, y) coordinate
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(60, 90);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(60, 140);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(110, 140);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(110, 90);
-    glEnd();
-}
-
 /* Handler for window-repaint event. Call back when the window first appears and
  whenever the window needs to be re-painted. */
 void display() {
     // Tell OpenGL to use the whole window for drawing
-    glViewport(0, 0, width, height); // DO NOT CHANGE THIS LINE
+    glViewport(0, 0, width, height);
 
     // Do an orthographic parallel projection with the coordinate
-    // system set to first quadrant, limited by screen/window size
-    glMatrixMode(GL_PROJECTION); // DO NOT CHANGE THIS LINE
-    glLoadIdentity(); // DO NOT CHANGE THIS LINE
+    // system set to center, limited by screen/window size
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
     glOrtho(-width/2, width/2, -height/2, height/2, 1.f, -1.f);
 
     // Clear the color buffer with current clearing color
-    glClear(GL_COLOR_BUFFER_BIT); // DO NOT CHANGE THIS LINE
+    glClear(GL_COLOR_BUFFER_BIT);
 
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // DO NOT CHANGE THIS LINE
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-
-    glFlush();  // Render now
+    // Render now
+    glFlush();
 }
 
 // http://www.theasciicode.com.ar/ascii-control-characters/escape-ascii-code-27.html
@@ -120,7 +106,6 @@ void timer(int dummy) {
 
 /* Main function: GLUT runs as a console application starting at main()  */
 int main(int argc, char** argv) {
-
     init();
 
     glutInit(&argc, argv);          // Initialize GLUT
@@ -158,21 +143,6 @@ int main(int argc, char** argv) {
 
     // Enter the event-processing loop
     glutMainLoop();
-
-    // Drawing in function other than display()
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(560, 240);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(510, 190);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(610, 190);
-    glColor3f(1.0, 1.0, 0.0); // Yellow
-    glVertex2i(610, 290);
-    glColor3f(1.0, 0.0, 1.0); // Magenta
-    glVertex2i(510, 290);
-    glColor3f(0.0, 1.0, 1.0); // Cyan
-    glVertex2i(510, 240);
-    glEnd();
 
     return 0;
 }
