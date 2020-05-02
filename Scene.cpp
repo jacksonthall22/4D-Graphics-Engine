@@ -3,45 +3,56 @@
 //
 
 #include "Scene.h"
-
+#include "Object3D.h"
 #include <utility>
+
+
+/** ========== Static Fields ========== */
+const int Scene::DEFAULT_WINDOW_WIDTH = 960;
+const int Scene::DEFAULT_WINDOW_HEIGHT = 540;
+const double Scene::DEFAULT_OBJECT_COLOR_RGB[3] = {0.0, 0.0, 0.0};
 
 /** ========== Constructors ========== */
 Scene::Scene() :
-        Scene(Camera3D()) {
+        Scene(std::vector<Object3D>(), std::vector<Object4D>()) {
 }
-
-Scene::Scene(const Camera3D &camera3d) :
-        Scene(camera3d, Camera4D()) {
+Scene::Scene(const std::vector<Object3D>& object3ds,
+        const std::vector<Object4D>& object4ds) :
+        camera3d(Camera3D()), camera4d(Camera4D()){
 }
-
-Scene::Scene(const Camera3D& camera3d, const Camera4D& camera4d,
-        std::vector<Object *> objects) {
+Scene::Scene(
+        const Camera3D& camera3d,
+        const Camera4D& camera4d,
+        const std::vector<Object3D>& object3ds,
+        const std::vector<Object4D>& object4ds) {
     this->camera3d = camera3d;
     this->camera4d = camera4d;
-    this->objects = std::move(objects);
-}
-
-Scene::Scene(const std::vector<Object *>& objects) :
-        Scene(Camera3D(), Camera4D(), objects) {
 }
 
 /** ========== Getters ========== */
 
-Camera3D* Scene::getCamera3D() const {
-    return *camera3d;
+Camera3D const& Scene::getCamera3D() const {
+    return camera3d;
 }
 
-Camera4D* Scene::getCamera4D() const {
-    return *camera4d;
+Camera4D const& Scene::getCamera4D() const {
+    return camera4d;
 }
 
-std::vector<Object *>& Scene::getObjects() {
-    return objects;
+std::vector<Object3D> const& Scene::get3dObjects() const {
+    return object3ds;
 }
 
-void Scene::draw() {
-    for (auto & object : objects) {
-        object->draw(getCamera3D(), getCamera4D());
+std::vector<Object4D> const& Scene::get4dObjects() const {
+    return object4ds;
+}
+
+void Scene::draw() const {
+    for (auto & obj : object3ds){
+        obj.draw(camera3d, camera4d);
+    }
+
+    for (auto & obj : object4ds){
+        obj.draw(camera3d, camera4d);
     }
 }

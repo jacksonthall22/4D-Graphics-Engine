@@ -128,6 +128,10 @@ void Camera3D::setLocation(double x, double y, double z) {
  */
 void Camera3D::setNormal() {
     this->normal = sphericalDirection.getUnitVector();
+
+
+    // Reset focus
+    setFocus();
 }
 void Camera3D::setSphericalDirection(std::vector<double> newAngles) {
     if (newAngles.size() == 2){
@@ -144,19 +148,25 @@ void Camera3D::setSphericalDirection(const sphericalAngle3d& newAngles) {
     setSphericalDirection(*newAngles.angles[0],*newAngles.angles[1]);
 }
 void Camera3D::setSphericalDirection(double polarAngle, double azimuthAngle) {
-    setPolarAngle(polarAngle);
-    setAzimuthAngle(azimuthAngle);
+    setPolar(polarAngle);
+    setAzimuth(azimuthAngle);
 }
-void Camera3D::setPolarAngle(double polarAngle) {
+void Camera3D::setPolar(double polarAngle) {
     sphericalDirection.setPolar(polarAngle);
-}
-void Camera3D::setAzimuthAngle(double azimuthAngle) {
 
+    // Reset focus
+    setFocus();
+}
+void Camera3D::setAzimuth(double azimuthAngle) {
+    sphericalDirection.setAzimuth(azimuthAngle);
+
+    // Reset focus
+    setFocus();
 }
 
 /** ========== Other Methods ========== */
 /* Utility */
-optional<point2d> Camera3D::projectPoint(const point3d& p) {
+optional<point2d> Camera3D::projectPoint(const point3d& p) const {
     // Plane of Camera orthogonal to normal vector n = (A, B, C):
     //      Ax + By + Cz = D
     //
@@ -378,13 +388,13 @@ void Camera3D::rotate(const double dPolarAngle, const double dAzimuthAngle) {
     rotateAzimuth(dAzimuthAngle);
 }
 void Camera3D::rotatePolar(const double dPolarAngle) {
-    rotatePolar(dPolarAngle);
+    sphericalDirection.rotatePolar(dPolarAngle);
 
     // Reset focus
     setFocus();
 }
 void Camera3D::rotateAzimuth(const double dAzimuthAngle) {
-    rotateAzimuth(dAzimuthAngle);
+    sphericalDirection.rotatePolar(dAzimuthAngle);
 
     // Reset focus
     setFocus();

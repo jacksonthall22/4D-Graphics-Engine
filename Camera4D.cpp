@@ -181,7 +181,7 @@ void Camera4D::setPhiAngle(double phiAngle) {
 
 /** ========== Other Methods ========== */
 /* Utility */
-optional<point3d> Camera4D::projectPoint(const point4d &p) {
+optional<point3d> Camera4D::projectPoint(const point4d &p) const {
     // To understand what's happening here, take a look at projectPoint() in
     // Camera3d.cpp and try to imagine a 4d line intersecting the hyperplane of
     // our reality. At least the math is the same.
@@ -227,8 +227,7 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) {
     // Make sure there's no division by 0 error
     if (tDenominator == 0){
         return nullopt;
-    } else if (
-    if (tDenominator != 0){
+    } if (tDenominator != 0){
         // Safe to do the calculation
         t = tNumerator / tDenominator;
 
@@ -260,7 +259,7 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) {
         // "out" from the perspective of the camera. These give 3d coordinates
         // in the Scene where the point should exist.
         return point3d(cameraToIntersection.scalarProjectOnto(getUnitUpVector()),
-                cameraToIntersection.scalarProjectOnto(getUnitRightVector())
+                cameraToIntersection.scalarProjectOnto(getUnitRightVector()),
                 cameraToIntersection.scalarProjectOnto(getUnitOutVector()));
 
     } else {
@@ -295,11 +294,11 @@ void Camera4D::move(spatialVector dPosition) {
     // Reset focus
     setFocus();
 }
-void Camera4D::move(double x, double y, double z, double a) {
-    location.move(std::vector<double>({x, y, z, a}));
-
-    // Reset focus
-    setFocus();
+void Camera4D::move(double dx, double dy, double dz, double da) {
+    moveX(dx);
+    moveY(dy);
+    moveZ(dz);
+    moveA(da);
 }
 void Camera4D::moveX(double dx) {
     location.moveX(dx);
@@ -460,56 +459,38 @@ void Camera4D::rotate(
     rotatePhi(phiAngle);
 }
 void Camera4D::rotatePolar(double dPolarAngle) {
-    rotatePolar(dPolarAngle);
+    sphericalDirection.rotatePolar(dPolarAngle);
 
     // Reset focus
     setFocus();
 }
 void Camera4D::rotateAzimuth(double dAzimuthAngle) {
-    rotateAzimuth(dAzimuthAngle);
+    sphericalDirection.rotateAzimuth(dAzimuthAngle);
 
     // Reset focus
     setFocus();
 }
 void Camera4D::rotatePhi(double dPhiAngle) {
-    rotatePhi(dPhiAngle);
+    sphericalDirection.rotatePhi(dPhiAngle);
 
     // Reset focus
     setFocus();
 }
 void Camera4D::rotateLeft() {
     rotatePolar(DEFAULT_ROTATION_ANGLE);
-
-    // Reset focus
-    setFocus();
 }
 void Camera4D::rotateRight() {
     rotatePolar(-DEFAULT_ROTATION_ANGLE);
-
-    // Reset focus
-    setFocus();
 }
 void Camera4D::rotateUp() {
     rotateAzimuth(-DEFAULT_ROTATION_ANGLE);
-
-    // Reset focus
-    setFocus();
 }
 void Camera4D::rotateDown() {
     rotateAzimuth(DEFAULT_ROTATION_ANGLE);
-
-    // Reset focus
-    setFocus();
 }
 void Camera4D::rotateIn() {
     rotatePhi(DEFAULT_ROTATION_ANGLE);
-
-    // Reset focus
-    setFocus();
 }
 void Camera4D::rotateOut() {
     rotatePhi(-DEFAULT_ROTATION_ANGLE);
-
-    // Reset focus
-    setFocus();
 }

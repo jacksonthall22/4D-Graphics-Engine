@@ -10,33 +10,41 @@
 #include "Object.h"
 #include "Camera3D.h"
 #include "Camera4D.h"
+#include "Object3D.h"
+#include "Object4D.h"
 
 
 class Scene {
 public:
+    static const int DEFAULT_WINDOW_WIDTH;
+    static const int DEFAULT_WINDOW_HEIGHT;
+    static const double DEFAULT_OBJECT_COLOR_RGB[3];
+
     /** Constructors */
     Scene();
-    explicit Scene(const Camera3D& camera3d);
-    Scene(const Camera3D& camera3d, const Camera4D& camera4d);
-    explicit Scene(const std::vector<Object *>& objects);
-    Scene(const Camera3D& camera3d, const Camera4D& camera4d, std::vector<Object *> objects);
+    Scene(const std::vector<Object3D>& object3ds,
+        const std::vector<Object4D>& object4ds);
+    Scene(const Camera3D& camera3d,
+        const Camera4D& camera4d,
+        const std::vector<Object3D>& object3ds,
+        const std::vector<Object4D>& object4ds);
 
     /** Getters */
     /* Utility */
     Camera3D const& getCamera3D() const;
     Camera4D const& getCamera4D() const;
-    Camera3D& getCamera3D();
-    Camera4D& getCamera4D();
-    std::vector<Object *>& getObjects();
+    std::vector<Object3D> const& get3dObjects() const;
+    std::vector<Object4D> const& get4dObjects() const;
 
     /** Other Methods */
-    void draw(); // TODO make this use polymorphism with Object3D and Object4d
+    void draw() const;
 
 protected:
     Camera3D camera3d;
     Camera4D camera4d;
-    std::vector<Object *> objects;
-
+    std::vector<Object3D> object3ds;
+    std::vector<Object4D> object4ds;
+//    std::vector<std::unique_ptr<Object>> objects;
 };
 
 

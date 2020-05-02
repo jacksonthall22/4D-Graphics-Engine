@@ -7,14 +7,30 @@
 
 #include "Object.h"
 
+
 class Object3D : protected Object {
 public:
     /** Constructors */
     Object3D();
-    Object3D(std::vector<point3d> vertices, std::vector<edge> sides);
+    Object3D(const std::vector<point3d>& vertices,
+            const std::vector<edge3d>& edges);
+    Object3D(std::vector<std::shared_ptr<point3d>> vertices,
+        std::vector<std::shared_ptr<edge3d>> edges);
 
     /** Getters */
+    const std::vector<std::shared_ptr<point3d>>& getVertices() const;
+    const std::vector<std::shared_ptr<edge3d>>& getEdges() const;
 
+    /** Other Methods */
+    void draw(const Camera3D& camera3d, const Camera4D& camera4d) const
+    override;
+
+protected:
+    /** Fields */
+    std::vector<std::shared_ptr<point3d>> vertices;
+
+    // Pairs between the points in the object
+    std::vector<std::shared_ptr<edge3d>> edges;
 
 };
 

@@ -51,7 +51,7 @@ public:
 
     /** Other Methods */
     /* Utility */
-    optional<point3d> projectPoint(const point4d& p);
+    optional<point3d> projectPoint(const point4d& p) const;
 
     /* Movement */
     void move(std::vector<double> dPosition) override;

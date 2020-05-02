@@ -731,19 +731,19 @@ struct sphericalAngle3d : public sphericalAngle {
     /**
      * Set polar angle to given value, capping between [0, 360)
      */
-    void setPolar(double polarAngle) {
-        this->polarAngle = mod(&polarAngle, 360);
+    void setPolar(double newPolarAngle) {
+        this->polarAngle = mod(newPolarAngle, 360);
     }
     /**
      * Set azimuth angle to given value, capping between [0, 180]
      */
-    void setAzimuth(double azimuthAngle) {
-        if (azimuthAngle < 0){
+    void setAzimuth(double newAzimuthAngle) {
+        if (newAzimuthAngle < 0){
             this->azimuthAngle = 0;
-        } else if (azimuthAngle > 180){
+        } else if (newAzimuthAngle > 180){
             this->azimuthAngle = 180;
         } else {
-            this->azimuthAngle = azimuthAngle;
+            this->azimuthAngle = newAzimuthAngle;
         }
     }
 
@@ -848,32 +848,32 @@ struct sphericalAngle4d : public sphericalAngle {
     /**
      * Set polar angle to given value, capping between [0, 180]
      */
-    void setPolar(const double polarAngle) {
-        if (polarAngle < 0){
+    void setPolar(const double newPolarAngle) {
+        if (newPolarAngle < 0){
             this->polarAngle = 0;
-        } else if (polarAngle > 180){
+        } else if (newPolarAngle > 180){
             this->polarAngle = 180;
         } else {
-            this->polarAngle = polarAngle;
+            this->polarAngle = newPolarAngle;
         }
     }
     /**
      * Set azimuth angle to given value, capping between [0, 180]
      */
-    void setAzimuth(const double azimuthAngle) {
-        if (azimuthAngle < 0){
+    void setAzimuth(const double newAzimuthAngle) {
+        if (newAzimuthAngle < 0){
             this->azimuthAngle = 0;
-        } else if (azimuthAngle > 180){
+        } else if (newAzimuthAngle > 180){
             this->azimuthAngle = 180;
         } else {
-            this->azimuthAngle = azimuthAngle;
+            this->azimuthAngle = newAzimuthAngle;
         }
     }
     /**
      * Set phi angle to given value, capping between [0, 360)
      */
-    void setPhi(const double phiAngle) {
-        this->phiAngle = mod(polarAngle, 360);
+    void setPhi(const double newPhiAngle) {
+        this->phiAngle = mod(newPhiAngle, 360);
     }
     
     /** Other Methods */

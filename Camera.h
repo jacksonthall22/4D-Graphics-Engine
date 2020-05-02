@@ -5,7 +5,7 @@
 #ifndef PART_2___GRAPHICS_ALTERNATE_CAMERA_H
 #define PART_2___GRAPHICS_ALTERNATE_CAMERA_H
 
-#include "utils.cpp"
+#include "utils.h"
 #include <memory>
 #include <vector>
 

@@ -4,14 +4,3 @@
 
 #include "Object.h"
 
-Object::Object() {
-
-}
-
-std::vector<point *> &Object::getVertices() {
-    return vertices;
-}
-
-std::vector<edge *> &Object::getEdges() {
-    return edges;
-}

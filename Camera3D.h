@@ -43,12 +43,12 @@ public:
 
     void setSphericalDirection(const sphericalAngle3d& newAngles);
     void setSphericalDirection(double polarAngle, double azimuthAngle);
-    void setPolarAngle(double polarAngle);
-    void setAzimuthAngle(double azimuthAngle);
+    void setPolar(double polarAngle);
+    void setAzimuth(double azimuthAngle);
 
     /** Other Methods */
     /* Utility */
-    optional<point2d> projectPoint(const point3d& p);
+    optional<point2d> projectPoint(const point3d& p) const;
 
     /* Movement */
     void move(std::vector<double> dPosition) override;

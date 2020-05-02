@@ -12,21 +12,25 @@ class Object4D : protected Object {
 public:
     /** Constructors */
     Object4D();
-    Object4D(std::vector<point4d> vertices, std::vector<edge> edges);
+    Object4D(const std::vector<point4d>& vertices,
+            const std::vector<edge4d>& edges);
+    Object4D(std::vector<std::shared_ptr<point4d>> vertices,
+            std::vector<std::shared_ptr<edge4d>> edges);
 
     /** Getters */
-    std::vector<point4d> getVertices() const;
-    std::vector<edge> getEdges() const;
-
-    /** Setters */
-    void setVertices(std::vector<point4d> vertices);
-    void setEdges(std::vector<edge> edges);
+    const std::vector<std::shared_ptr<point4d>>& getVertices() const;
+    const std::vector<std::shared_ptr<edge4d>>& getEdges() const;
 
     /** Other Methods */
+    void draw(const Camera3D& camera3d, const Camera4D& camera4d) const
+    override;
 
-private:
-    std::vector<point4d> vertices;
-    std::vector<edge> edges;
+protected:
+    /** Fields */
+    std::vector<std::shared_ptr<point4d>> vertices;
+
+    // Pairs between the points in the object
+    std::vector<std::shared_ptr<edge4d>> edges;
 };
 
 
