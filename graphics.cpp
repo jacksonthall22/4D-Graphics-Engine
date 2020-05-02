@@ -1,27 +1,12 @@
 #include "graphics.h"
+#include "Scene.h"
 #include <iostream>
 #include <vector>
 using namespace std;
 
+
 GLdouble width, height;
 int wd;
-
-/* Shape Variables */
-// Square
-const double SQUARE_START_LOC[] {60, 190};
-const double SQUARE_START_SCALE = 50;
-int squareCurrentLoc[] {};
-int squareCurrentScale;
-int squarePointLocationsRelative[5][2] {
-    {0, 0},
-    {0, 1},
-    {1, 1},
-    {1, 0}
-};
-
-// Rhombus
-const int RHOMBUS_START_LOC[] {};
-
 
 void init() {
     width = 600;
@@ -106,16 +91,26 @@ void timer(int dummy) {
 
 /* Main function: GLUT runs as a console application starting at main()  */
 int main(int argc, char** argv) {
+    /** Create and Initialize Scene */
+    Scene scene;
+    vector<point3d> cube3dPoints
+    Object3D();
+    scene.addObject();
+
+
+    /** GLUT Processes */
     init();
 
-    glutInit(&argc, argv);          // Initialize GLUT
+    // Initialize GLUT
+    glutInit(&argc, argv);
 
     glutInitDisplayMode(GLUT_RGBA);
 
     glutInitWindowSize((int)width, (int)height);
-    glutInitWindowPosition(-2500, 100); // Position the window's initial
-    // top-left
-    // corner
+
+    // Position the window's initial top-left corner
+    glutInitWindowPosition( 100, 100);
+
     /* create the window and store the handle to it */
     wd = glutCreateWindow(/* Fun with Drawing! */ "/* title */");
 
@@ -143,6 +138,7 @@ int main(int argc, char** argv) {
 
     // Enter the event-processing loop
     glutMainLoop();
+
 
     return 0;
 }

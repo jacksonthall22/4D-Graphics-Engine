@@ -48,6 +48,46 @@ const std::vector<std::shared_ptr<edge3d>> &Object3D::getEdges() const {
 
 /** ========== Other Methods ========== */
 /**
+ * Takes the current set of vertices and extrudes them into the given direction,
+ * creating edges between the appropriate points.
+ */
+void Object3D::extrude(const spatialVector &direction) {
+    if (direction.components.size() <= 3){
+        // Pad empty dimensions in given vector with 0s
+        std::vector<double> temp = direction.components;
+        while (temp.size() < 3){
+            temp.push_back(0.0);
+        }
+
+        // For every edge, extrude both points in the given direction
+        // and add 3 new edges to this object:
+        //      1. Between the 2 extruded points
+        //      2. Between the first point and the extruded first point
+        //      3. Between the second point and the extruded second point
+        for (auto & edge : edges){
+            point3d extrudedP1(*edge->p1);
+            extrudedP1.move(direction);
+            point3d extrudedP2(*edge->p2);
+            extrudedP2.move(direction);
+
+            // Add new points
+            vertices.push_back(std::make_unique<point3d>(extrudedP1));
+            vertices.push_back(std::make_unique<point3d>(extrudedP2));
+
+            // Add new edges
+            edges.push_back(std::make_unique<edge3d>(extrudedP1, extrudedP2));
+            edges.push_back(std::make_unique<edge3d>(*edge->p1, extrudedP1));
+            edges.push_back(std::make_unique<edge3d>(*edge->p2, extrudedP2));
+        }
+
+    } else {
+        std::cout << "Warning: Invalid input to:\n\tvoid extrude(const "
+                     "spatialVector& direction)\n\t(Object3D.cpp)"
+                     << std::endl;
+    }
+}
+
+/**
  * Draw this object on the screen by projecting them through the given
  * camera(s).
  */

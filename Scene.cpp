@@ -40,23 +40,20 @@ Camera4D const& Scene::getCamera4D() const {
     return camera4d;
 }
 
-std::vector<Object3D> const& Scene::get3dObjects() const {
-    return object3ds;
+std::vector<Object *> const& Scene::getObjects() const {
+    return objects;
 }
 
-std::vector<Object4D> const& Scene::get4dObjects() const {
-    return object4ds;
+void Scene::addObject(Object* obj) {
+    objects.push_back(obj);
 }
 
 void Scene::draw() const {
-    for (auto & obj : object3ds){
-        obj.draw(camera3d, camera4d);
-    }
-
-    for (auto & obj : object4ds){
-        obj.draw(camera3d, camera4d);
+    for (auto & obj : objects){
+        obj->draw(camera3d, camera4d);
     }
 
     // Redraw screen
     display();
 }
+

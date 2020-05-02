@@ -5,7 +5,6 @@
 #ifndef PART_2___GRAPHICS_ALTERNATE_SCENE_H
 #define PART_2___GRAPHICS_ALTERNATE_SCENE_H
 
-
 #include "Camera.h"
 #include "Object.h"
 #include "Camera3D.h"
@@ -33,18 +32,16 @@ public:
     /* Utility */
     Camera3D const& getCamera3D() const;
     Camera4D const& getCamera4D() const;
-    std::vector<Object3D> const& get3dObjects() const;
-    std::vector<Object4D> const& get4dObjects() const;
+    std::vector<Object *> const& getObjects() const;
 
     /** Other Methods */
+    void addObject(Object* obj);
     void draw() const;
 
 protected:
     Camera3D camera3d;
     Camera4D camera4d;
-    std::vector<Object3D> object3ds;
-    std::vector<Object4D> object4ds;
-//    std::vector<std::unique_ptr<Object>> objects;
+    std::vector<Object *> objects;
 };
 
 
