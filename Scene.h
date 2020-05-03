@@ -30,18 +30,25 @@ public:
 
     /** Getters */
     /* Utility */
-    Camera3D const& getCamera3D() const;
-    Camera4D const& getCamera4D() const;
-    std::vector<Object *> const& getObjects() const;
+    bool getActiveCamera() const;
+    Camera3D& getCamera3D();
+    Camera4D& getCamera4D();
+    std::vector<Object3D> const& getObjects3d() const;
+    std::vector<Object4D> const& getObjects4d() const;
 
     /** Other Methods */
-    void addObject(Object* obj);
+    void addObject(Object3D obj);
+    void addObject(Object4D obj);
+    void toggleActiveCamera();
     void draw() const;
 
 protected:
+    bool activeCamera; // True = 3d camera, false = 4d camera
     Camera3D camera3d;
     Camera4D camera4d;
-    std::vector<Object *> objects;
+    std::vector<Object3D> objects3d;
+    std::vector<Object4D> objects4d;
+//    std::vector<Object *> objects;
 };
 
 

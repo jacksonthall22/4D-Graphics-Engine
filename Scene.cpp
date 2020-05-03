@@ -19,41 +19,59 @@ Scene::Scene() :
 }
 Scene::Scene(const std::vector<Object3D>& object3ds,
         const std::vector<Object4D>& object4ds) :
-        camera3d(Camera3D()), camera4d(Camera4D()){
+        camera3d(Camera3D()), camera4d(Camera4D()), activeCamera(true){
 }
 Scene::Scene(
         const Camera3D& camera3d,
         const Camera4D& camera4d,
         const std::vector<Object3D>& object3ds,
-        const std::vector<Object4D>& object4ds) {
+        const std::vector<Object4D>& object4ds) : activeCamera(true) {
     this->camera3d = camera3d;
     this->camera4d = camera4d;
+    this->camera4d.setNormal();
+    this->camera3d.setNormal();
 }
 
 /** ========== Getters ========== */
 
-Camera3D const& Scene::getCamera3D() const {
+Camera3D& Scene::getCamera3D() {
     return camera3d;
 }
 
-Camera4D const& Scene::getCamera4D() const {
+Camera4D& Scene::getCamera4D() {
     return camera4d;
 }
 
-std::vector<Object *> const& Scene::getObjects() const {
-    return objects;
+bool Scene::getActiveCamera() const {
+    return activeCamera;
 }
 
-void Scene::addObject(Object* obj) {
-    objects.push_back(obj);
+std::vector<Object3D> const& Scene::getObjects3d() const {
+    return objects3d;
+}
+
+std::vector<Object4D> const& Scene::getObjects4d() const {
+    return objects4d;
+}
+
+void Scene::addObject(Object3D obj) {
+    objects3d.push_back(obj);
+}
+
+void Scene::addObject(Object4D obj) {
+    objects4d.push_back(obj);
+}
+
+void Scene::toggleActiveCamera() {
+    activeCamera = !activeCamera;
 }
 
 void Scene::draw() const {
-    for (auto & obj : objects){
-        obj->draw(camera3d, camera4d);
+    for (auto & obj : objects3d){
+        obj.draw(camera3d, camera4d);
     }
 
-    // Redraw screen
-    display();
+    for (auto & obj : objects4d){
+        obj.draw(camera3d, camera4d);
+    }
 }
-

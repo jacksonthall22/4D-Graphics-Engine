@@ -8,7 +8,7 @@
 /** ========== Constructors ========== */
 Camera4D::Camera4D() : Camera4D(
         point4d(),
-        spatialVector(),
+        spatialVector(std::vector<double>({0, 0, 1, 0})),
         sphericalAngle4d(0, 0, 90),
         point4d(),
         Camera::getFocalDistanceFromFOV(Camera::DEFAULT_FOV)){
@@ -44,6 +44,7 @@ Camera4D::Camera4D(
     this->normal = normal;
     this->sphericalDirection = sphericalDirection;
     this->focus = focus;
+    setFocus();
 }
 
 /** ========== Getters ========== */
@@ -201,12 +202,13 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
     //      a = a0 + ap * t
 
     // Get v by calculating focus - p vector
-    spatialVector v(std::vector<double>({
+    std::vector<double> test({
         p.x - focus.x,
         p.y - focus.y,
         p.z - focus.z,
         p.a - focus.a
-    }));
+    });
+    spatialVector v(test);
 
     // If this vector has a scalar projection of <= 0 onto the normal, it is
     // behind the camera. Make sure this is not the case trying to solve for

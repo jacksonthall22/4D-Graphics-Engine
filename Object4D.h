@@ -8,10 +8,11 @@
 #include "Object.h"
 
 
-class Object4D : protected Object {
+class Object4D : public Object {
 public:
     /** Constructors */
     Object4D();
+//    Object4D(const std::vector<edge4d>& edges);
     Object4D(const std::vector<point4d>& vertices,
             const std::vector<edge4d>& edges);
     Object4D(std::vector<std::shared_ptr<point4d>> vertices,

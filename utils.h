@@ -32,6 +32,10 @@ double square(double n);
  */
 double rad(double deg);
 /**
+ * Return the given radians value converted to degrees.
+ */
+double deg(double rad);
+/**
  * Return a % n, which is not natively defined for doubles.
  */
 double mod(double a, double n);

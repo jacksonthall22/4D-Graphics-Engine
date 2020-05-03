@@ -13,6 +13,14 @@ Object3D::Object3D() :
             std::vector<std::shared_ptr<edge3d>>()
         ) {
 }
+
+//Object3D::Object3D(const std::vector<edge3d>& edges){
+//    // Add all vertices from given edges to vertices vector
+//    for (auto & edge : edges){
+//
+//    }
+//}
+
 Object3D::Object3D(const std::vector<point3d>& vertices,
         const std::vector<edge3d>& edges) {
     // Put all items into new vector of smart pointers
@@ -30,6 +38,7 @@ Object3D::Object3D(const std::vector<point3d>& vertices,
     }
     this->edges = tempEdges;
 }
+
 Object3D::Object3D(std::vector<std::shared_ptr<point3d>> vertices,
         std::vector<std::shared_ptr<edge3d>> edges) {
     this->vertices = std::move(vertices);
@@ -64,6 +73,10 @@ void Object3D::extrude(const spatialVector &direction) {
         //      1. Between the 2 extruded points
         //      2. Between the first point and the extruded first point
         //      3. Between the second point and the extruded second point
+        //
+        // Make temp vector of the newly created edges so as not to change
+        // size of vector while looping
+        std::vector<std::shared_ptr<edge3d>> newEdges;
         for (auto & edge : edges){
             point3d extrudedP1(*edge->p1);
             extrudedP1.move(direction);
@@ -75,9 +88,14 @@ void Object3D::extrude(const spatialVector &direction) {
             vertices.push_back(std::make_unique<point3d>(extrudedP2));
 
             // Add new edges
-            edges.push_back(std::make_unique<edge3d>(extrudedP1, extrudedP2));
-            edges.push_back(std::make_unique<edge3d>(*edge->p1, extrudedP1));
-            edges.push_back(std::make_unique<edge3d>(*edge->p2, extrudedP2));
+            newEdges.push_back(std::make_shared<edge3d>(extrudedP1, extrudedP2));
+            newEdges.push_back(std::make_shared<edge3d>(*edge->p1, extrudedP1));
+            newEdges.push_back(std::make_shared<edge3d>(*edge->p2, extrudedP2));
+        }
+
+        // Add the new edges
+        for (auto & edge : newEdges){
+            edges.push_back(edge);
         }
 
     } else {

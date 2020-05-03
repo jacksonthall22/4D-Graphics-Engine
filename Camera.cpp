@@ -24,7 +24,7 @@ Camera::Camera(double focalDistance) : focalDistance(focalDistance) {
  */
 double Camera::getFocalDistanceFromFOV(const double fovDegrees) {
     // Focal distance is the cosine of half the field of view
-    return cos(fovDegrees / 2.0 * M_PI / 180);
+    return cos(rad(fovDegrees / 2.0 * M_PI / 180));
 }
 
 /** Getters */

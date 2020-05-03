@@ -26,6 +26,7 @@ const int DEFAULT_WINDOW_WIDTH = 960;
 const int DEFAULT_WINDOW_HEIGHT = 540;
 const double DEFAULT_RENDER_COLOR_RGB[3] = {0.0, 0.0, 0.0};
 const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {1.0, 1.0, 0.9};
+const double ORTHO_ZOOM = 700;
 
 /** ========== Functions ========== */
 /**
@@ -40,6 +41,10 @@ double square(double n){
  */
 double rad(double deg){
     return deg * M_PI / 180;
+}
+
+double deg(double rad){
+    return rad * 180 / M_PI;
 }
 
 /**
@@ -108,7 +113,7 @@ void modEquals(double *a, double n){
     }
 
     double spatialVector::cosOfAngleBetween(const spatialVector& other) const {
-        return this->dot(other) / (other.magnitude() * other.magnitude());
+        return deg(this->dot(other) / (other.magnitude() * other.magnitude()));
     }
 
     double spatialVector::scalarProjectOnto(const spatialVector& other) const{
@@ -119,6 +124,11 @@ void modEquals(double *a, double n){
             std::cout << "Warning: Invalid input in:\n\tdouble vectorProjection"
                          "(spatialVector v1, spatialVector v2)\n\t(utils.cpp)"
                          << std::endl;
+            std::cout << "other.components: ";
+            for (auto & e : other.components) {
+                std::cout << e << " | ";
+            }
+            std::cout << std::endl;
             return -1;
         }
     }
@@ -409,8 +419,8 @@ void modEquals(double *a, double n){
                 DEFAULT_RENDER_COLOR_RGB[1],
                 DEFAULT_RENDER_COLOR_RGB[2]
         );
-        glVertex2i(this->p1->x, this->p1->y);
-        glVertex2i(this->p2->x, this->p2->y);
+        glVertex2i(ORTHO_ZOOM * this->p1->x, ORTHO_ZOOM * this->p1->y);
+        glVertex2i(ORTHO_ZOOM * this->p2->x, ORTHO_ZOOM * this->p2->y);
         glEnd();
     }
 /** ===== End edge2d : edge Struct ===== */

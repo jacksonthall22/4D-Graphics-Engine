@@ -8,10 +8,11 @@
 #include "Object.h"
 
 
-class Object3D : protected Object {
+class Object3D : public Object {
 public:
     /** Constructors */
     Object3D();
+//    Object3D(const std::vector<edge3d>& edges);
     Object3D(const std::vector<point3d>& vertices,
             const std::vector<edge3d>& edges);
     Object3D(std::vector<std::shared_ptr<point3d>> vertices,
