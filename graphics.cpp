@@ -39,53 +39,97 @@ void init() {
     height = 400;
 
     /** Create and Initialize Scene */
-    double testScalar = 1;
-//    vector<point3d> cube3dPoints({
-//        point3d(1 * testScalar, 5 * testScalar, 1 * testScalar),
-//        point3d(1 * testScalar, 5 * testScalar, -1 * testScalar),
-//        point3d(1 * testScalar, 7 * testScalar, 1 * testScalar),
-//        point3d(1 * testScalar, 7 * testScalar, -1 * testScalar),
-//        point3d(-1 * testScalar, 5 * testScalar, 1 * testScalar),
-//        point3d(-1 * testScalar, 5 * testScalar, -1 * testScalar),
-//        point3d(-1 * testScalar, 7 * testScalar, 1 * testScalar),
-//        point3d(-1 * testScalar, 7 * testScalar, -1 * testScalar),
-//    });
-//    vector<edge3d> cube3dEdges({
-//        edge3d(cube3dPoints[0], cube3dPoints[1]),
-//        edge3d(cube3dPoints[0], cube3dPoints[2]),
-//        edge3d(cube3dPoints[0], cube3dPoints[4]),
-//        edge3d(cube3dPoints[1], cube3dPoints[3]),
-//        edge3d(cube3dPoints[1], cube3dPoints[5]),
-//        edge3d(cube3dPoints[2], cube3dPoints[3]),
-//        edge3d(cube3dPoints[2], cube3dPoints[6]),
-//        edge3d(cube3dPoints[3], cube3dPoints[7]),
-//        edge3d(cube3dPoints[4], cube3dPoints[5]),
-//        edge3d(cube3dPoints[4], cube3dPoints[6]),
-//        edge3d(cube3dPoints[5], cube3dPoints[7]),
-//        edge3d(cube3dPoints[6], cube3dPoints[7]),
-//
-//    });
+    double CUBE_SIZE = 1;
+
+    // Uncomment to create 3d Cube
     vector<point3d> cube3dPoints({
-       point3d(1 * testScalar, 5 * testScalar, 1 * testScalar),
-       point3d(1 * testScalar, 5 * testScalar, 0 * testScalar),
+        point3d(1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE),
+        point3d(1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE),
+        point3d(1 * CUBE_SIZE, 7 * CUBE_SIZE, 1 * CUBE_SIZE),
+        point3d(1 * CUBE_SIZE, 7 * CUBE_SIZE, -1 * CUBE_SIZE),
+        point3d(-1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE),
+        point3d(-1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE),
+        point3d(-1 * CUBE_SIZE, 7 * CUBE_SIZE, 1 * CUBE_SIZE),
+        point3d(-1 * CUBE_SIZE, 7 * CUBE_SIZE, -1 * CUBE_SIZE)
     });
     vector<edge3d> cube3dEdges({
-        edge3d(cube3dPoints[0], cube3dPoints[1])
+        edge3d(cube3dPoints[0], cube3dPoints[1]),
+        edge3d(cube3dPoints[0], cube3dPoints[2]),
+        edge3d(cube3dPoints[0], cube3dPoints[4]),
+        edge3d(cube3dPoints[1], cube3dPoints[3]),
+        edge3d(cube3dPoints[1], cube3dPoints[5]),
+        edge3d(cube3dPoints[2], cube3dPoints[3]),
+        edge3d(cube3dPoints[2], cube3dPoints[6]),
+        edge3d(cube3dPoints[3], cube3dPoints[7]),
+        edge3d(cube3dPoints[4], cube3dPoints[5]),
+        edge3d(cube3dPoints[4], cube3dPoints[6]),
+        edge3d(cube3dPoints[5], cube3dPoints[7]),
+        edge3d(cube3dPoints[6], cube3dPoints[7])
+
     });
 
-    Object3D testCube(cube3dPoints, cube3dEdges);
+    Object3D cube3d(cube3dPoints, cube3dEdges);
+    scene.addObject(cube3d);
 
-    // Extrude single edge twice into a cube
-    spatialVector extrusion1(std::vector<double>({
-        0, 2 * testScalar, 0
-    }));
-    spatialVector extrusion2(std::vector<double>({
-        2 * testScalar, 0, 0
-    }));
+    // Uncomment to create 4d Cube
+    vector<point4d> cube4dPoints({
+        point4d(1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE, 1),
+        point4d(1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE, 1),
+        point4d(1 * CUBE_SIZE, 7 * CUBE_SIZE, 1 * CUBE_SIZE, 1),
+        point4d(1 * CUBE_SIZE, 7 * CUBE_SIZE, -1 * CUBE_SIZE, 1),
+        point4d(-1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE, 1),
+        point4d(-1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE, 1),
+        point4d(-1 * CUBE_SIZE, 7 * CUBE_SIZE, 1 * CUBE_SIZE, 1),
+        point4d(-1 * CUBE_SIZE, 7 * CUBE_SIZE, -1 * CUBE_SIZE, 1),
+        point4d(1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE, -1),
+        point4d(1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE, -1),
+        point4d(1 * CUBE_SIZE, 7 * CUBE_SIZE, 1 * CUBE_SIZE, -1),
+        point4d(1 * CUBE_SIZE, 7 * CUBE_SIZE, -1 * CUBE_SIZE, -1),
+        point4d(-1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE, -1),
+        point4d(-1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE, -1),
+        point4d(-1 * CUBE_SIZE, 7 * CUBE_SIZE, 1 * CUBE_SIZE, -1),
+        point4d(-1 * CUBE_SIZE, 7 * CUBE_SIZE, -1 * CUBE_SIZE, -1),
+    });
+    vector<edge4d> cube4dEdges({
+        edge4d(cube4dPoints[0], cube4dPoints[1]),
+        edge4d(cube4dPoints[0], cube4dPoints[2]),
+        edge4d(cube4dPoints[0], cube4dPoints[4]),
+        edge4d(cube4dPoints[0], cube4dPoints[8]),
+        edge4d(cube4dPoints[1], cube4dPoints[3]),
+        edge4d(cube4dPoints[1], cube4dPoints[5]),
+        edge4d(cube4dPoints[1], cube4dPoints[9]),
+        edge4d(cube4dPoints[2], cube4dPoints[3]),
+        edge4d(cube4dPoints[2], cube4dPoints[10]),
+        edge4d(cube4dPoints[2], cube4dPoints[6]),
+        edge4d(cube4dPoints[3], cube4dPoints[7]),
+        edge4d(cube4dPoints[3], cube4dPoints[11]),
+        edge4d(cube4dPoints[4], cube4dPoints[5]),
+        edge4d(cube4dPoints[4], cube4dPoints[6]),
+        edge4d(cube4dPoints[4], cube4dPoints[12]),
+        edge4d(cube4dPoints[5], cube4dPoints[7]),
+        edge4d(cube4dPoints[5], cube4dPoints[13]),
+        edge4d(cube4dPoints[6], cube4dPoints[7]),
+        edge4d(cube4dPoints[6], cube4dPoints[14]),
+        edge4d(cube4dPoints[7], cube4dPoints[15]),
+        edge4d(cube4dPoints[8], cube4dPoints[9]),
+        edge4d(cube4dPoints[8], cube4dPoints[10]),
+        edge4d(cube4dPoints[8], cube4dPoints[12]),
+        edge4d(cube4dPoints[9], cube4dPoints[11]),
+        edge4d(cube4dPoints[9], cube4dPoints[13]),
+        edge4d(cube4dPoints[10], cube4dPoints[11]),
+        edge4d(cube4dPoints[10], cube4dPoints[14]),
+        edge4d(cube4dPoints[11], cube4dPoints[15]),
+        edge4d(cube4dPoints[12], cube4dPoints[13]),
+        edge4d(cube4dPoints[12], cube4dPoints[14]),
+        edge4d(cube4dPoints[13], cube4dPoints[15]),
+        edge4d(cube4dPoints[14], cube4dPoints[15]),
+    });
 
-    testCube.extrude(extrusion1);
-    testCube.extrude(extrusion2);
-    scene.addObject(testCube);
+    Object4D cube4d(cube4dPoints, cube4dEdges);
+    scene.addObject(cube4d);
+
+
+
 }
 
 /* Initialize OpenGL Graphics */
