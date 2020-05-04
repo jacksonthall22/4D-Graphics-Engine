@@ -9,8 +9,9 @@ GLdouble width, height;
 int wd;
 
 Scene scene;
-// Used in glOrtho below to map 2d coordinates to the screen.
-double ORTHO_ZOOM = 100;
+
+// Used to map 2d coordinates to the screen
+double ORTHO_ZOOM = -100;
 
 /* Movement Keybinds */
 const char UP_KEY = ' ';
@@ -65,7 +66,6 @@ void init() {
         edge3d(cube3dPoints[4], cube3dPoints[6]),
         edge3d(cube3dPoints[5], cube3dPoints[7]),
         edge3d(cube3dPoints[6], cube3dPoints[7])
-
     });
 
     Object3D cube3d(cube3dPoints, cube3dEdges);
@@ -127,9 +127,6 @@ void init() {
 
     Object4D cube4d(cube4dPoints, cube4dEdges);
     scene.addObject(cube4d);
-
-
-
 }
 
 /* Initialize OpenGL Graphics */

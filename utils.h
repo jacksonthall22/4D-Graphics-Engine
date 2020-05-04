@@ -60,6 +60,14 @@ struct spatialVector {
     /** Other Methods */
     /* Utility */
     /**
+     * Add all of other's components to this's components.
+     */
+    void plus(const spatialVector& other);
+    /**
+    * Subtract all of other's components from this's components.
+    */
+    void minus(const spatialVector& other);
+    /**
      * Multiply all components of a vector by the given scalar.
      */
     void scale(double scalar);
@@ -73,7 +81,7 @@ struct spatialVector {
     double dot(const spatialVector& other) const;
     /**
      * Return the cosine of the angle between this vector and another in
-     * degrees.
+     * radians.
      */
     double cosOfAngleBetween(const spatialVector& other) const;
     /**

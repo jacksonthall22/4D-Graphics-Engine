@@ -58,7 +58,7 @@ double mod(double a, double n){
  * Set a to a % n, which is not natively defined for doubles.
  */
 void modEquals(double *a, double n){
-    *a -= floor(*a / n) * n;
+    *a = mod(*a, n);
 }
 
 
@@ -77,6 +77,30 @@ void modEquals(double *a, double n){
 
     spatialVector::spatialVector(const std::vector<double>& components){
         this->components = components;
+    }
+
+    void spatialVector::plus(const spatialVector& other) {
+        if (other.components.size() <= components.size()){
+            for (int i = 0; i < other.components.size(); ++i){
+                components[i] += other.components[i];
+            }
+        } else {
+            std::cout << "Warning: Invalid input to:\n\tvoid "
+                         "spatialVector::plus(const spatialVector& other)\n\t"
+                         "(utils.cpp)" << std::endl;
+        }
+    }
+
+    void spatialVector::minus(const spatialVector& other) {
+        if (other.components.size() <= components.size()){
+            for (int i = 0; i < other.components.size(); ++i){
+                components[i] -= other.components[i];
+            }
+        } else {
+            std::cout << "Warning: Invalid input to:\n\tvoid "
+                         "spatialVector::minus(const spatialVector& other)\n\t"
+                         "(utils.cpp)" << std::endl;
+        }
     }
 
     void spatialVector::scale(const double scalar){
@@ -113,12 +137,14 @@ void modEquals(double *a, double n){
     }
 
     double spatialVector::cosOfAngleBetween(const spatialVector& other) const {
-        return deg(this->dot(other) / (other.magnitude() * other.magnitude()));
+        return this->dot(other) / (magnitude() * other.magnitude());
     }
 
     double spatialVector::scalarProjectOnto(const spatialVector& other) const{
         if (components.size() == other.components.size()){
-            return magnitude() / cosOfAngleBetween(other);
+            /// TODO Delete test var, using with debugger
+            double test = this->dot(other) / other.magnitude();
+            return test;
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tdouble vectorProjection"
@@ -369,7 +395,6 @@ void modEquals(double *a, double n){
     void point4d::move(const spatialVector& dPosition) {
         if (dPosition.components.size() <= 4){
             move(dPosition.components);
-
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tvoid move(const "

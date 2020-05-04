@@ -14,24 +14,10 @@ Camera4D::Camera4D() : Camera4D(
         Camera::getFocalDistanceFromFOV(Camera::DEFAULT_FOV)){
 }
 Camera4D::Camera4D(const Camera4D &other) : Camera4D(
-        point4d(
-            other.location.x,
-            other.location.y,
-            other.location.z,
-            other.location.a
-        ),
-        other.normal,
-        sphericalAngle4d(
-            other.sphericalDirection.polarAngle,
-            other.sphericalDirection.azimuthAngle,
-            other.sphericalDirection.phiAngle
-        ),
-        point4d(
-            other.focus.x,
-            other.focus.y,
-            other.focus.z,
-            other.focus.a
-        ),
+        point4d(other.location),
+        spatialVector(other.normal),
+        sphericalAngle4d(other.sphericalDirection),
+        point4d(other.focus),
         other.focalDistance){
 }
 Camera4D::Camera4D(
@@ -44,7 +30,7 @@ Camera4D::Camera4D(
     this->normal = normal;
     this->sphericalDirection = sphericalDirection;
     this->focus = focus;
-    setFocus();
+    setNormal();
 }
 
 /** ========== Getters ========== */
@@ -105,14 +91,14 @@ void Camera4D::setFocus() {
     // this.location
     double normalMagnitude = normal.magnitude();
 
-    double newX = location.x - normal.components[0] * focalDistance
-        / normalMagnitude;
-    double newY = location.y - normal.components[1] * focalDistance
-        / normalMagnitude;
-    double newZ = location.z - normal.components[2] * focalDistance
-        / normalMagnitude;
-    double newA = location.a - normal.components[3] * focalDistance
-        / normalMagnitude;
+    double newX = location.x - (focalDistance * normal.components[0]
+            / normalMagnitude);
+    double newY = location.y - (focalDistance * normal.components[1]
+            / normalMagnitude);
+    double newZ = location.z - (focalDistance * normal.components[2]
+            / normalMagnitude);
+    double newA = location.a - (focalDistance * normal.components[3]
+            / normalMagnitude);
 
     focus = point4d(newX, newY, newZ, newA);
 }
@@ -147,6 +133,9 @@ void Camera4D::setLocation(double x, double y, double z, double a) {
  */
 void Camera4D::setNormal() {
     this->normal = sphericalDirection.getUnitVector();
+
+    // Reset focus
+    setFocus();
 }
 void Camera4D::setSphericalDirection(std::vector<double> newAngles) {
     if (newAngles.size() == 3){
@@ -201,77 +190,77 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
     //      ...
     //      a = a0 + ap * t
 
-    // Get v by calculating focus - p vector
-    std::vector<double> test({
+    // First determine if point is in front of the camera. If the vector from
+    // the Camera's location to the point has a scalar projection < 0 onto
+    // the normal, it is behind the projection hyperplane - do not render,
+    // return nullopt.
+    spatialVector cameraToPoint(std::vector<double>({
+        p.x - location.x,
+        p.y - location.y,
+        p.z - location.z,
+        p.a - location.a
+    }));
+    if (cameraToPoint.scalarProjectOnto(normal) < 0){
+        return nullopt;
+    }
+
+    // Next need to get vector from focus to point (v)
+    spatialVector focusToPoint(std::vector<double>({
         p.x - focus.x,
         p.y - focus.y,
         p.z - focus.z,
         p.a - focus.a
-    });
-    spatialVector v(test);
+    }));
 
-    // If this vector has a scalar projection of <= 0 onto the normal, it is
-    // behind the camera. Make sure this is not the case trying to solve for
-    // an intersection point that doesn't exist (or one that would reflect
-    // backwards through the focus onto the plane)
-    if (v.scalarProjectOnto(normal) <= 0){
-        return nullopt;
-    }
-
-    // Splitting up t calculation to keep it from getting huge
-    double tNumerator, tDenominator, t;
-    tNumerator = normal.components[0] * (p.x - location.x)
-            + normal.components[1] * (p.y - location.y)
-            + normal.components[2] * (p.z - location.z)
-            + normal.components[3] * (p.a - location.a);
-    tDenominator = normal.components[0] * (v.components[0])
-            + normal.components[1] * (v.components[1])
-            + normal.components[2] * (v.components[2])
-            + normal.components[3] * (v.components[3]);
+    // Calculate t, split up num. and denom. to keep from getting huge
+    double tDenominator, tNumerator, t;
+    tDenominator = normal.components[0] * focusToPoint.components[0]
+            + normal.components[1] * focusToPoint.components[1]
+            + normal.components[2] * focusToPoint.components[2]
+            + normal.components[3] * focusToPoint.components[3];
 
     // Make sure there's no division by 0 error
     if (tDenominator == 0){
         return nullopt;
-    } if (tDenominator != 0){
-        // Safe to do the calculation
-        t = tNumerator / tDenominator;
-
-        // Now that t is known plug it back into parametric equations above to
-        // get 4d intersection point
-        point4d intersectionPoint(
-            location.x + (p.x - focus.x),
-            location.y + (p.y - focus.y),
-            location.z + (p.z - focus.z),
-            location.a + (p.a - focus.a)
-        );
-
-        // Now must find coords (x', y', z') that is a point on the rotated
-        // hyperplane relative to the camera's location (i.e. where the vertex
-        // should actually appear in 3d space)
-        //
-        // First create vector pointing from camera location to
-        // intersectionPoint (which lies on the camera's hyperplane)
-        spatialVector cameraToIntersection(std::vector<double>({
-            intersectionPoint.x - location.x,
-            intersectionPoint.y - location.y,
-            intersectionPoint.z - location.z,
-            intersectionPoint.a - location.a
-        }));
-
-        // Now x', y', and z' are just the scalar projections of
-        // cameraToIntersection onto the vector pointing straight "up", the
-        // vector pointing straight right, and the vector pointing straight
-        // "out" from the perspective of the camera. These give 3d coordinates
-        // in the Scene where the point should exist.
-        return point3d(cameraToIntersection.scalarProjectOnto(getUnitUpVector()),
-                cameraToIntersection.scalarProjectOnto(getUnitRightVector()),
-                cameraToIntersection.scalarProjectOnto(getUnitOutVector()));
-
-    } else {
-        // Would divide by 0
-        return nullopt;
     }
 
+    // Safe to do the calculation
+    tNumerator = normal.components[0] * cameraToPoint.components[0]
+            + normal.components[1] * cameraToPoint.components[1]
+            + normal.components[2] * cameraToPoint.components[2]
+            + normal.components[3] * cameraToPoint.components[3];
+    t = tNumerator / tDenominator;
+
+    // Now that t is known plug it back into parametric equations above to
+    // get 4d intersection point
+    point4d intersectionPoint(
+        location.x + focusToPoint.components[0] * t,
+        location.y + focusToPoint.components[1] * t,
+        location.z + focusToPoint.components[2] * t,
+        location.a + focusToPoint.components[3] * t
+    );
+
+    // Now must find coords (x', y', z') that is a point on the rotated
+    // hyperplane relative to the camera's location (i.e. where the vertex
+    // should actually appear in 3d space)
+    //
+    // First create vector pointing from camera location to
+    // intersectionPoint (which lies on the camera's hyperplane)
+    spatialVector cameraToIntersection(std::vector<double>({
+        intersectionPoint.x - location.x,
+        intersectionPoint.y - location.y,
+        intersectionPoint.z - location.z,
+        intersectionPoint.a - location.a
+    }));
+
+    // Now x', y', and z' are just the scalar projections of
+    // cameraToIntersection onto the vector pointing straight "up", the
+    // vector pointing straight right, and the vector pointing straight
+    // "out" from the perspective of the camera. These give 3d coordinates
+    // in the Scene where the point should exist.
+    return point3d(cameraToIntersection.scalarProjectOnto(getUnitRightVector()),
+            cameraToIntersection.scalarProjectOnto(getUnitUpVector()),
+            cameraToIntersection.scalarProjectOnto(getUnitOutVector()));
 }
 
 /* Movement */
@@ -466,20 +455,20 @@ void Camera4D::rotate(
 void Camera4D::rotatePolar(double dPolarAngle) {
     sphericalDirection.rotatePolar(dPolarAngle);
 
-    // Reset focus
-    setFocus();
+    // Reset normal and focus
+    setNormal();
 }
 void Camera4D::rotateAzimuth(double dAzimuthAngle) {
     sphericalDirection.rotateAzimuth(dAzimuthAngle);
 
-    // Reset focus
-    setFocus();
+    // Reset normal and focus
+    setNormal();
 }
 void Camera4D::rotatePhi(double dPhiAngle) {
     sphericalDirection.rotatePhi(dPhiAngle);
 
-    // Reset focus
-    setFocus();
+    // Reset normal and focus
+    setNormal();
 }
 void Camera4D::rotateLeft() {
     rotatePolar(DEFAULT_ROTATION_ANGLE);

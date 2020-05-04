@@ -111,8 +111,6 @@ void Object3D::extrude(const spatialVector &direction) {
  */
 void Object3D::draw(const Camera3D& camera3d, const Camera4D& camera4d) const {
     // Get drawable (x', y') coordinates for all vertices (x, y, z) in object
-    std::vector<edge2d> drawableEdges;
-
     for (auto & edge : edges){
         // Draw a line on the screen between the vertices of the projected edge
         edge2d(

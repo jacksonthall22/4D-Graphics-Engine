@@ -54,11 +54,11 @@ std::vector<Object4D> const& Scene::getObjects4d() const {
     return objects4d;
 }
 
-void Scene::addObject(Object3D obj) {
+void Scene::addObject(const Object3D& obj) {
     objects3d.push_back(obj);
 }
 
-void Scene::addObject(Object4D obj) {
+void Scene::addObject(const Object4D& obj) {
     objects4d.push_back(obj);
 }
 

@@ -37,8 +37,8 @@ public:
     std::vector<Object4D> const& getObjects4d() const;
 
     /** Other Methods */
-    void addObject(Object3D obj);
-    void addObject(Object4D obj);
+    void addObject(const Object3D& obj);
+    void addObject(const Object4D& obj);
     void toggleActiveCamera();
     void draw() const;
 
