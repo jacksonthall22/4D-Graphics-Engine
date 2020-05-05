@@ -50,7 +50,7 @@ spatialVector Camera3D::getUnitUpVector() const {
  * the normal.
  */
 spatialVector Camera3D::getUnitRightVector() const {
-    sphericalAngle3d temp(sphericalDirection);
+    sphericalAngle3d temp(sphericalDirection.polarAngle, 90);
     temp.rotatePolar(-90);
     return temp.getUnitVector();
 
@@ -323,7 +323,7 @@ void Camera3D::down() {
     move(std::vector<double>({
         0,
         0,
-        DEFAULT_MOVE_DISTANCE
+        -DEFAULT_MOVE_DISTANCE
     }));
 
     // Reset focus
