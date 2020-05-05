@@ -445,9 +445,9 @@ void Camera4D::rotate(const sphericalAngle4d &dAngles) {
     rotatePhi(dAngles.phiAngle);
 }
 void Camera4D::rotate(
-        double dPolarAngle,
-        double dAzimuthAngle,
-        double phiAngle) {
+        const double dPolarAngle,
+        const double dAzimuthAngle,
+        const double phiAngle) {
     rotatePolar(dPolarAngle);
     rotateAzimuth(dAzimuthAngle);
     rotatePhi(phiAngle);

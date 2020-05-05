@@ -11,7 +11,7 @@ int wd;
 Scene scene;
 
 // Used to map 2d coordinates to the screen
-double ORTHO_ZOOM = -100;
+//double ORTHO_ZOOM = -1;
 
 /* Movement Keybinds */
 const char UP_KEY = ' ';
@@ -35,23 +35,146 @@ const char ROT_IN_KEY = 'u';
 const char TOGGLE_ACTIVE_CAMERA_KEY = 't';
 
 
+/**
+ * Create and Initialize Scene
+ */
 void init() {
-    width = 600;
-    height = 400;
+    width = 800;
+    height = 500;
 
-    /** Create and Initialize Scene */
+    /** Create Axes */
+    /// X Axis
+    vector<point3d> xAxisPoints({
+        point3d(0, 0, 0),
+        point3d(10, 0, 0),
+        point3d(1, 0, 0),
+        point3d(1, 0.1, 0),
+        point3d(2, 0, 0),
+        point3d(2, 0.1, 0),
+        point3d(3, 0, 0),
+        point3d(3, 0.1, 0),
+        point3d(4, 0, 0),
+        point3d(4, 0.1, 0),
+        point3d(5, 0, 0),
+        point3d(5, 0.1, 0),
+        point3d(6, 0, 0),
+        point3d(6, 0.1, 0),
+        point3d(7, 0, 0),
+        point3d(7, 0.1, 0),
+        point3d(8, 0, 0),
+        point3d(8, 0.1, 0),
+        point3d(9, 0, 0),
+        point3d(9, 0.1, 0),
+        point3d(10, 0, 0),
+        point3d(10, 0.1, 0),
+    });
+    vector<edge3d> xAxisEdges({
+        edge3d(xAxisPoints[0], xAxisPoints[1]),
+        edge3d(xAxisPoints[2], xAxisPoints[3]),
+        edge3d(xAxisPoints[4], xAxisPoints[5]),
+        edge3d(xAxisPoints[6], xAxisPoints[7]),
+        edge3d(xAxisPoints[8], xAxisPoints[9]),
+        edge3d(xAxisPoints[10], xAxisPoints[11]),
+        edge3d(xAxisPoints[12], xAxisPoints[13]),
+        edge3d(xAxisPoints[14], xAxisPoints[15]),
+        edge3d(xAxisPoints[16], xAxisPoints[17]),
+        edge3d(xAxisPoints[18], xAxisPoints[19]),
+        edge3d(xAxisPoints[20], xAxisPoints[21]),
+    });
+    scene.addObject(Object3D(xAxisPoints, xAxisEdges));
+
+    /// Y Axis
+    vector<point3d> yAxisPoints({
+        point3d(0, 0, 0),
+        point3d(0, 10, 0),
+        point3d(0, 1, 0),
+        point3d(0.1, 1, 0),
+        point3d(0, 2, 0),
+        point3d(0.1, 2, 0),
+        point3d(0, 3, 0),
+        point3d(0.1, 3, 0),
+        point3d(0, 4, 0),
+        point3d(0.1, 4, 0),
+        point3d(0, 5, 0),
+        point3d(0.1, 5, 0),
+        point3d(0, 6, 0),
+        point3d(0.1, 6, 0),
+        point3d(0, 7, 0),
+        point3d(0.1, 7, 0),
+        point3d(0, 8, 0),
+        point3d(0.1, 8, 0),
+        point3d(0, 9, 0),
+        point3d(0.1, 9, 0),
+        point3d(0, 10, 0),
+        point3d(0.1, 10, 0),
+    });
+    vector<edge3d> yAxisEdges({
+        edge3d(yAxisPoints[0], yAxisPoints[1]),
+        edge3d(yAxisPoints[2], yAxisPoints[3]),
+        edge3d(yAxisPoints[4], yAxisPoints[5]),
+        edge3d(yAxisPoints[6], yAxisPoints[7]),
+        edge3d(yAxisPoints[8], yAxisPoints[9]),
+        edge3d(yAxisPoints[10], yAxisPoints[11]),
+        edge3d(yAxisPoints[12], yAxisPoints[13]),
+        edge3d(yAxisPoints[14], yAxisPoints[15]),
+        edge3d(yAxisPoints[16], yAxisPoints[17]),
+        edge3d(yAxisPoints[18], yAxisPoints[19]),
+        edge3d(yAxisPoints[20], yAxisPoints[21]),
+    });
+    scene.addObject(Object3D(yAxisPoints, yAxisEdges));
+
+    /// Z Axis
+    vector<point3d> zAxisPoints({
+        point3d(0, 0, 0),
+        point3d(0, 0, 10),
+        point3d(0, 0, 1),
+        point3d(0.1, 0, 1),
+        point3d(0, 0, 2),
+        point3d(0.1, 0, 2),
+        point3d(0, 0, 3),
+        point3d(0.1, 0, 3),
+        point3d(0, 0, 4),
+        point3d(0.1, 0, 4),
+        point3d(0, 0, 5),
+        point3d(0.1, 0, 5),
+        point3d(0, 0, 6),
+        point3d(0.1, 0, 6),
+        point3d(0, 0, 7),
+        point3d(0.1, 0, 7),
+        point3d(0, 0, 8),
+        point3d(0.1, 0, 8),
+        point3d(0, 0, 9),
+        point3d(0.1, 0, 9),
+        point3d(0, 0, 10),
+        point3d(0.1, 0, 10),
+    });
+    vector<edge3d> zAxisEdges({
+        edge3d(zAxisPoints[0], zAxisPoints[1]),
+        edge3d(zAxisPoints[2], zAxisPoints[3]),
+        edge3d(zAxisPoints[4], zAxisPoints[5]),
+        edge3d(zAxisPoints[6], zAxisPoints[7]),
+        edge3d(zAxisPoints[8], zAxisPoints[9]),
+        edge3d(zAxisPoints[10], zAxisPoints[11]),
+        edge3d(zAxisPoints[12], zAxisPoints[13]),
+        edge3d(zAxisPoints[14], zAxisPoints[15]),
+        edge3d(zAxisPoints[16], zAxisPoints[17]),
+        edge3d(zAxisPoints[18], zAxisPoints[19]),
+        edge3d(zAxisPoints[20], zAxisPoints[21]),
+    });
+    scene.addObject(Object3D(zAxisPoints, zAxisEdges));
+
+    /// Create 3d Cube
     double CUBE_SIZE = 1;
 
-    // Uncomment to create 3d Cube
     vector<point3d> cube3dPoints({
-        point3d(1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE),
-        point3d(1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE),
-        point3d(1 * CUBE_SIZE, 7 * CUBE_SIZE, 1 * CUBE_SIZE),
-        point3d(1 * CUBE_SIZE, 7 * CUBE_SIZE, -1 * CUBE_SIZE),
-        point3d(-1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE),
-        point3d(-1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE),
-        point3d(-1 * CUBE_SIZE, 7 * CUBE_SIZE, 1 * CUBE_SIZE),
-        point3d(-1 * CUBE_SIZE, 7 * CUBE_SIZE, -1 * CUBE_SIZE)
+        point3d(1 * CUBE_SIZE, 1 * CUBE_SIZE, 1 * CUBE_SIZE),
+        point3d(1 * CUBE_SIZE, 1 * CUBE_SIZE, -1 * CUBE_SIZE),
+        point3d(1 * CUBE_SIZE, -1 * CUBE_SIZE, 1 * CUBE_SIZE),
+        point3d(1 * CUBE_SIZE, -1 * CUBE_SIZE, -1 * CUBE_SIZE),
+        point3d(-1 * CUBE_SIZE, 1 * CUBE_SIZE, 1 * CUBE_SIZE),
+        point3d(-1 * CUBE_SIZE, 1 * CUBE_SIZE, -1 * CUBE_SIZE),
+        point3d(-1 * CUBE_SIZE, -1 * CUBE_SIZE, 1 * CUBE_SIZE),
+        point3d(-1 * CUBE_SIZE, -1 * CUBE_SIZE, -1 * CUBE_SIZE)
     });
     vector<edge3d> cube3dEdges({
         edge3d(cube3dPoints[0], cube3dPoints[1]),
@@ -67,11 +190,9 @@ void init() {
         edge3d(cube3dPoints[5], cube3dPoints[7]),
         edge3d(cube3dPoints[6], cube3dPoints[7])
     });
+    scene.addObject(Object3D(cube3dPoints, cube3dEdges));
 
-    Object3D cube3d(cube3dPoints, cube3dEdges);
-    scene.addObject(cube3d);
-
-    // Uncomment to create 4d Cube
+    /// Create 4d Cube
     vector<point4d> cube4dPoints({
         point4d(1 * CUBE_SIZE, 5 * CUBE_SIZE, 1 * CUBE_SIZE, 1),
         point4d(1 * CUBE_SIZE, 5 * CUBE_SIZE, -1 * CUBE_SIZE, 1),
@@ -124,9 +245,7 @@ void init() {
         edge4d(cube4dPoints[13], cube4dPoints[15]),
         edge4d(cube4dPoints[14], cube4dPoints[15]),
     });
-
-    Object4D cube4d(cube4dPoints, cube4dEdges);
-    scene.addObject(cube4d);
+    scene.addObject(Object4D(cube4dPoints, cube4dEdges));
 }
 
 /* Initialize OpenGL Graphics */
@@ -276,10 +395,13 @@ void kbd(unsigned char key, int x, int y)
 }
 
 void kbdS(int key, int x, int y) {
-
-    switch(key) {
-        case GLUT_ACTIVE_SHIFT:
-            cout << "TEST" << endl;
+    glutGetModifiers();
+    if (GLUT_ACTIVE_SHIFT) { // DOWN_KEY
+        if (scene.getActiveCamera()){
+            scene.getCamera3D().down();
+        } else {
+            scene.getCamera4D().down();
+        }
     }
 
     glutPostRedisplay();
