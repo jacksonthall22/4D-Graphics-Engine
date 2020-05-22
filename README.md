@@ -108,3 +108,5 @@ Four dimensional movement needs additional keys for moving and rotating into the
   - Out: `e`
   - Rotate in: `u`
   - Rotate out: `o`
+
+<sub><sup>Copyright © 2020 Jackson Hall. All rights reserved.</sup></sub>
