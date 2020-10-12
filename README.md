@@ -11,23 +11,31 @@ and proof of concept, rather than to create an efficient and optimized rendering
 In 4-dimensional space, a fourth coordinate axis exists that is orthogonal to the x, y, and z axes. As 3-dimensional beings, it's not
 really feasible to perceive what this would look and feel like, but since the applicable math works out so nicely when extrapolating up a
 dimension, a program like this one can give a glimpse into how geometries in higher dimensions would behave. Just about anything 
-regarding 4 dimensions can be understood, if not intuitively then logically, by creating an analogy that applies to 3 or fewer dimensions. If you couldn't, 
-it wouldn't really make much sense to spend time thinking about something so abstract and intangible. This thought process might be
-helpful in seeing how this program works, and how one (me) might have gone about creating it from the ground up.
+regarding 4 dimensions can be understood, if not intuitively then logically, by creating an analogy that applies to 3 or fewer dimensions. 
+Going through this thought process might be helpful in seeing how this program works.
 
 ### Thought Excercises
-Suppose you want to gain a better understanding of how rotation works in 4 dimensions. Start by creating an analogy, if one exists, in
-3D. Three dimensional objects can rotate—check. How? No matter how a 3D object rotates, it rotates about a (3 - 2)D = 1D pivot (a 
-line). Now extrapolate back up—a 4D object must rotate about a (4 - 2)D = 2D pivot (a plane). To give you more confidence in your
-assumption, notice that a 2D object also always rotates around a (2 - 2)D = 0D pivot (a point). The assumption must be correct.
+Suppose you want to gain a better understanding of how rotation works in 4 dimensions. Let's start by understanding rotation
+in relation to the number of dimensions. No matter how a 3D object rotates, it rotates about a 1D = (3 - 2)D pivot (a 
+line). In this case, we can confirm the analogy checks out by working out the same math in 2D, in which objects always rotate about a
+0D = (2 - 2)D pivot (a point). Now extrapolating up gives insight on 4D rotation—a 4D object must rotate about a (4 - 2)D = 2D pivot 
+(a plane).
 
 To take it a step further, imagine a 2D
-square lying in a 2D reality. If a 3D being could manipulate that square (think of it like a playing card on a table), it could flip it 
-into the 3rd dimension, keeping one of its edges in the 2D plane, and lay it down flat again. To a 2D being, this would look like pure
-magic. To them, it would look like a cube just dissappeared except for one face and reappeared on the other side of that face as its
-mirror image. You know where this is going. Similarly, a 4D being could rotate a 3D cube into the 4th dimension, keeping one of its six
-2D faces in the 3D hyperplane of our reality, and make it reappear on the other side of that face as its mirror image, without the face
+square lying in a 2D reality. If a 3D being could manipulate that square like a playing card on a table, it could flip it 
+into the 3rd dimension, keeping one of its edges in the 2D plane, and lay it down flat again, with the side originally facing "up" (a dimension and concept
+that doesn't exist to the 2D viewer) now facing the surface. From the 2d viewer's perspective, it would look like every part of that object 
+spontaneously disappeared except the 1 dimensional edge about which it was rotating, then all at once reappeared on the other side of that face
+as a mirror image of the original object. Similarly, a 4D being could rotate a 3D cube "out" (for lack of a four-dimensional rotational verb) into 
+the 4th dimension, keeping one of its six 2D faces in our 3D slice of reality, and make it reappear on the other side of that face as its mirror image, without the face
 ever moving.
+
+(An even weirder side note about this analogy is that, assuming the 2D object was originally bound to the 2d reality and not in fact a cross section
+of a higher-dimensional object, the one-dimensional "side" of the cube that is left in their plane of existence would necessarily be truly 1D with a thickness 
+of 0. If 2D laws of physics are analogous to those in 3D, a truly one-dimensional object could only exist in a 2D reality through manipulation by
+a higher-dimensional observer, the same way a two-dimensional object fundamentally cannot exist in 3D. However, a four-dimensional observer lifting a 3D
+cube off the 3D hyperplane of our reality would produce a truly 2D plane—if atoms are spheres, only the tangent points of those spheres would
+be touching our reality. Therefore, whether that would look like any physical object at all is questionable.)
 
 Another example is understanding how a 4D being might see. Whereas a 3D human's retina is 2D, and a 2D being could have no more
 than a 1D retina, a 4D being's retina would be 3D. It could perceive every 2D cross-section of our 3D reality at once, the same
