@@ -3,6 +3,7 @@
 //
 
 #include "Camera3D.h"
+#include "Scene.h"
 
 
 /** ========== Constructors ========== */
@@ -97,13 +98,11 @@ void Camera3D::setLocation(std::vector<double> newLocation) {
     if (newLocation.size() == 3){
         setLocation(newLocation[0], newLocation[1], newLocation[2]);
     } else {
-        // Bad input
         std::cout << "Warning: Invalid input in:\n\tvoid "
                      "Camera3D::setLocation(std::vector<double> newLocation)"
                      "\n\t(Camera3D.cpp)" << std::endl;
     }
 }
-
 void Camera3D::setLocation(const point3d& newLocation) {
     this->location = point3d(newLocation);
 }
@@ -114,25 +113,21 @@ void Camera3D::setLocation(double x, double y, double z) {
 /* Rotation */
 /**
  * Sets this.normal to the unit vector pointing in the direction of
- * this.sphericalDirection.
+ * this.sphericalDirection and calls setFocus().
  */
 void Camera3D::setNormal() {
     this->normal = sphericalDirection.getUnitVector();
-
-    // Reset focus
     setFocus();
 }
 void Camera3D::setSphericalDirection(std::vector<double> newAngles) {
     if (newAngles.size() == 2){
        setSphericalDirection(newAngles[0], newAngles[1]);
     } else {
-        // Bad input
         std::cout << "Warning: Invalid input in:\n\tvoid "
                      "Camera3D::setSphericalDirection(std::vector<double> "
                      "newAngles)\n\t(Camera3d.cpp)" << std::endl;
     }
 }
-
 void Camera3D::setSphericalDirection(const sphericalAngle3d& newAngles) {
     setSphericalDirection(newAngles.polarAngle,newAngles.azimuthAngle);
 }
@@ -148,15 +143,13 @@ void Camera3D::setPolar(double polarAngle) {
 }
 void Camera3D::setAzimuth(double azimuthAngle) {
     sphericalDirection.setAzimuth(azimuthAngle);
-
-    // Reset normal and focus
     setNormal();
 }
 
 /** ========== Other Methods ========== */
 /* Utility */
 optional<point2d> Camera3D::projectPoint(const point3d& p) const {
-    // Plane of Camera orthogonal to normal vector n = (A, B, C):
+    // Plane of Camera orthogonal to normal vector n = <A, B, C>:
     //      Ax + By + Cz = D
     //
     // Parametric equations of line r parallel to vector v = <xp, yp, zp>
@@ -176,16 +169,16 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
     // the Camera's location to the point has a scalar projection < 0 onto
     // the normal, it is behind the projection plane - do not render, return
     // nullopt.
+    /// TODO Return inf for x if
     spatialVector cameraToPoint(std::vector<double>({
         p.x - location.x,
         p.y - location.y,
         p.z - location.z
     }));
-    if (cameraToPoint.scalarProjectOnto(normal) < 0){
-        return nullopt;
-    }
+//    if (cameraToPoint.scalarProjectOnto(normal) < 0){
+//        return nullopt;
+//    }
 
-    // Next need to get vector from focus to point (v)
     spatialVector focusToPoint(std::vector<double>({
         p.x - focus.x,
         p.y - focus.y,
@@ -198,9 +191,8 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
             + normal.components[1] * focusToPoint.components[1]
             + normal.components[2] * focusToPoint.components[2];
 
-    // Make sure there's no division by 0 error, also make sure to cut off
-    // tiny values
-    if (tDenominator < 0.000001){
+    // Make sure there's no division by 0 error; also cut off tiny values
+    if (tDenominator == 0){
         return nullopt;
     }
 
@@ -221,7 +213,7 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
     // Must find coords (x', y') that represent a point on the rotated plane
     // relative to the camera's location (i.e. the pixel offset on the
     // screen where the vertex should actually appear relative to screen
-    // center (0,0))
+    // center, (0,0))
     //
     // First create vector pointing from camera location to
     // intersectionPoint (which lies on the camera's plane)
@@ -245,121 +237,332 @@ void Camera3D::move(std::vector<double> dPosition) {
     if (dPosition.size() == 3){
         location.move(dPosition);
     } else {
-        // Bad input
         std::cout << "Warning: Invalid input in:\n\tvoid Camera3D::move"
                      "(std::vector<double> dPosition)\n\t(Camera3D.cpp)"
                      << std::endl;
     }
-
-    // Reset focus
     setFocus();
 }
-void Camera3D::move(spatialVector dPosition) {
+void Camera3D::move(const spatialVector& dPosition) {
     if (dPosition.components.size() == 3){
         location.move(dPosition);
+        setFocus();
     } else {
         std::cout << "Warning: Invalid input in:\n\tvoid Camera3D::move"
-                     "(spatialVector dPosition)\n\t(Camera3D.cpp)" << std::endl;
+                     "(const spatialVector& dPosition)\n\t(Camera3D.cpp)" <<
+                     std::endl;
+    }
+}
+void Camera3D::move(double dX, double dY, double dZ) {
+    location.move(dX, dY, dZ);
+    setFocus();
+}
+void Camera3D::moveX(double dX) {
+    location.moveX(dX);
+    setFocus();
+}
+void Camera3D::moveY(double dY) {
+    location.moveY(dY);
+    setFocus();
+}
+void Camera3D::moveZ(double dZ) {
+    location.moveZ(dZ);
+    setFocus();
+}
+void Camera3D::moveLeftCustom(double dL) {
+    spatialVector dPositionVec = getUnitRightVector();
+    dPositionVec.scale(-dL);
+    move(dPositionVec);
+}
+void Camera3D::moveRightCustom(double dR){
+    spatialVector dPositionVec = getUnitRightVector();
+    dPositionVec.scale(dR);
+    move(dPositionVec);
+}
+void Camera3D::moveUpCustom(double dU){
+    moveZ(dU);
+}
+void Camera3D::moveDownCustom(double dD){
+    moveZ(-dD);
+}
+void Camera3D::moveForwardCustom(double dF){
+    // Get vector in direction of current polarAngle (locks movement
+    // to horizontal x/y plane only so moving forward while looking
+    // up/down cannot change z)
+    spatialVector dPositionVec = sphericalAngle3d(
+        sphericalDirection.polarAngle,
+        90
+    ).getUnitVector();
+    dPositionVec.scale(dF);
+    move(dPositionVec);
+}
+void Camera3D::moveBackCustom(double dB){
+    // Get vector in direction of current polarAngle (locks movement
+    // to horizontal x/y plane only so moving forward while looking
+    // up/down cannot change z)
+    spatialVector dPositionVec = sphericalAngle3d(
+        sphericalDirection.polarAngle,
+        90
+    ).getUnitVector();
+    dPositionVec.scale(-dB);
+    move(dPositionVec);
+}
+void Camera3D::moveLeftDefault() {
+    moveLeftCustom(DEFAULT_MOVE_DISTANCE);
+}
+void Camera3D::moveRightDefault(){
+    moveRightCustom(DEFAULT_MOVE_DISTANCE);
+}
+void Camera3D::moveUpDefault() {
+    moveUpCustom(DEFAULT_MOVE_DISTANCE);
+}
+void Camera3D::moveDownDefault(){
+    moveDownCustom(DEFAULT_MOVE_DISTANCE);
+}
+void Camera3D::moveForwardDefault(){
+    moveForwardCustom(DEFAULT_MOVE_DISTANCE);
+}
+void Camera3D::moveBackDefault(){
+    moveBackCustom(DEFAULT_MOVE_DISTANCE);
+}
+void Camera3D::moveVelocity(){
+    move(velocityVec);
+}
+void Camera3D::moveForwardVelocity(){
+    moveForwardCustom(velocityVec.components[0]);
+}
+void Camera3D::moveRightVelocity(){
+    moveRightCustom(velocityVec.components[1]);
+}
+void Camera3D::moveUpVelocity(){
+    moveUpCustom(velocityVec.components[2]);
+}
+void Camera3D::setMovementStatuses(const int movingForward_,
+                                   const int movingStrafe_,
+                                   const int movingUp_) {
+    if (movingForward_ >= -1 and movingForward_ <= 1){
+        movingForward = movingForward_;
+    } else {
+        std::cout << "Warning: Invalid input (movingForward_) in:"
+                     "\n\tvoid Camera3D::setMovementStatuses("
+                     "const int movingForward_,"
+                     "const int movingStrafe_, "
+                     "const int movingUp_)"
+                     "\n\t(Camera3D.cpp)" << std::endl;
     }
 
-    // Reset focus
-    setFocus();
+    if (movingStrafe_ >= -1 and movingStrafe_ <= 1){
+        movingStrafe = movingStrafe_;
+    } else {
+        std::cout << "Warning: Invalid input (movingStrafe_) in:"
+                     "\n\tvoid Camera3D::setMovementStatuses("
+                     "const int movingForward_,"
+                     "const int movingStrafe_, "
+                     "const int movingUp_)"
+                     "\n\t(Camera3D.cpp)" << std::endl;
+    }
+
+    if (movingUp_ >= -1 and movingUp_ <= 1){
+        movingUp = movingUp_;
+    } else {
+        std::cout << "Warning: Invalid input (movingUp_) in:"
+                     "\n\tvoid Camera3D::setMovementStatuses("
+                     "const int movingForward_,"
+                     "const int movingStrafe_, "
+                     "const int movingUp_)"
+                     "\n\t(Camera3D.cpp)" << std::endl;
+    }
 }
+void Camera3D::updateVelocities() {
+    // Update values in velocityVec by one game tick.
 
-void Camera3D::move(double x, double y, double z) {
-    location.move(std::vector<double>({x, y, z}));
+    /// TODO Does this method work?
 
-    // Reset focus
-    setFocus();
-}
-void Camera3D::moveX(double dx) {
-    location.moveX(dx);
+    /// First account for drag in any horizontal directions with current
+    /// nonzero velocity and cap at MAX_VELOCITY (vertical motion has very
+    /// little drag, should appear to move almost linearly)
 
-    // Reset focus
-    setFocus();
-}
-void Camera3D::moveY(double dy) {
-    location.moveY(dy);
+    // Forward drag
+    if (velocityVec.components[0] != 0) {
+        if (velocityVec.components[0] > 0){
+            // Drag down to 0
+            velocityVec.components[0] = std::max(
+                    velocityVec.components[0] - FORWARD_DRAG
+                        * Scene::SECONDS_PER_TICK,
+                    0.
+            );
+        } else {
+            // Drag up to 0
+            velocityVec.components[0] = std::min(
+                    velocityVec.components[0] + FORWARD_DRAG
+                        * Scene::SECONDS_PER_TICK,
+                    0.
+            );
+        }
+    }
 
-    // Reset focus
-    setFocus();
-}
-void Camera3D::moveZ(double dz) {
-    location.moveZ(dz);
+    // Strafe drag
+    if (velocityVec.components[1] != 0) {
+        if (velocityVec.components[1] > 0){
+            // Drag down to 0
+            velocityVec.components[1] = std::max(
+                    velocityVec.components[1] - STRAFE_DRAG
+                        * Scene::SECONDS_PER_TICK,
+                    0.
+            );
+        } else {
+            // Drag up to 0
+            velocityVec.components[1] = std::min(
+                    velocityVec.components[1] + STRAFE_DRAG
+                        * Scene::SECONDS_PER_TICK,
+                    0.
+            );
+        }
+    }
 
-    // Reset focus
-    setFocus();
-}
-/**
- * Move to the camera's left (orthogonal to normal), leaving z fixed.
- */
-void Camera3D::left() {
-    spatialVector dPositionVec = getUnitRightVector();
-    dPositionVec.scale(-DEFAULT_MOVE_DISTANCE);
-    move(dPositionVec);
+    // Up drag
+    if (velocityVec.components[2] != 0){
+        if (velocityVec.components[2] > 0){
+            // Drag down to 0
+            velocityVec.components[2] = std::max(
+                    velocityVec.components[2] - UP_DRAG
+                        * Scene::SECONDS_PER_TICK,
+                    0.
+            );
+        } else {
+            // Drag up to 0
+            velocityVec.components[2] = std::min(
+                    velocityVec.components[2] + UP_DRAG
+                        * Scene::SECONDS_PER_TICK,
+                    0.
+            );
+        }
+    }
 
-    // Reset focus
-    setFocus();
-}
-void Camera3D::right() {
-    spatialVector dPositionVec = getUnitRightVector();
-    dPositionVec.scale(DEFAULT_MOVE_DISTANCE);
-    move(dPositionVec);
+    /// Now account for current movement statuses
 
-    // Reset focus
-    setFocus();
-}
-void Camera3D::up() {
-    move(std::vector<double>({
-        0,
-        0,
-        DEFAULT_MOVE_DISTANCE
-    }));
+    // Forward movement
+    if (movingForward != 0){
+        if (movingForward > 0){
+            /// Positive acceleration
+            if (velocityVec.components[0] < 0){
+                // If velocity is negative, first break to 0
+                velocityVec.components[0] = std::min(
+                        velocityVec.components[0] + FORWARD_BRAKE
+                            * Scene::SECONDS_PER_TICK,
+                        0.
+                );
+            } else {
+                // If velocity is 0 or positive already,
+                // accelerate to MAX_VELOCITY
+                velocityVec.components[0] = std::max(
+                        velocityVec.components[0] + FORWARD_ACCELERATION
+                            * Scene::SECONDS_PER_TICK,
+                        MAX_FORWARD_VELOCITY
+                );
+            }
+        } else {
+            /// Negative acceleration
+            if (velocityVec.components[0] > 0){
+                // If velocity is positive, first break to 0
+                velocityVec.components[0] = std::max(
+                        velocityVec.components[0] - FORWARD_BRAKE
+                            * Scene::SECONDS_PER_TICK,
+                        0.
+                );
+            } else {
+                // If velocity is 0 or negative already,
+                // accelerate (negatively) to -MAX_VELOCITY
+                velocityVec.components[0] = std::min(
+                        velocityVec.components[0] - FORWARD_ACCELERATION
+                            * Scene::SECONDS_PER_TICK,
+                        -MAX_FORWARD_VELOCITY
+                );
+            }
+        }
+    }
 
-    // Reset focus
-    setFocus();
-}
-void Camera3D::down() {
-    move(std::vector<double>({
-        0,
-        0,
-        -DEFAULT_MOVE_DISTANCE
-    }));
+    // Strafe movement
+    if (movingStrafe != 0){
+        if (movingStrafe > 0){
+            /// Positive acceleration
+            if (velocityVec.components[1] < 0){
+                // If velocity is negative, first break to 0
+                velocityVec.components[1] = std::min(
+                        velocityVec.components[1] + STRAFE_BRAKE
+                            * Scene::SECONDS_PER_TICK,
+                        0.
+                );
+            } else {
+                // If velocity is 0 or positive already,
+                // accelerate to MAX_VELOCITY
+                velocityVec.components[1] = std::max(
+                        velocityVec.components[1] + STRAFE_ACCELERATION
+                            * Scene::SECONDS_PER_TICK,
+                        MAX_STRAFE_VELOCITY
+                );
+            }
+        } else {
+            /// Negative acceleration
+            if (velocityVec.components[1] > 0){
+                // If velocity is positive, first break to 0
+                velocityVec.components[1] = std::max(
+                        velocityVec.components[1] - STRAFE_BRAKE
+                            * Scene::SECONDS_PER_TICK,
+                        0.
+                );
+            } else {
+                // If velocity is 0 or negative already,
+                // accelerate (negatively) to -MAX_VELOCITY
+                velocityVec.components[1] = std::min(
+                        velocityVec.components[1] - STRAFE_ACCELERATION
+                            * Scene::SECONDS_PER_TICK,
+                        -MAX_STRAFE_VELOCITY
+                );
+            }
+        }
+    }
 
-    // Reset focus
-    setFocus();
-}
-/**
- * Move the camera forward (in direction of polarAngle) in x/z directions only
- * (locking y coordinate).
- */
-void Camera3D::forward() {
-    // Get vector in direction of current polarAngle
-    spatialVector dPositionVec = sphericalAngle3d(
-        sphericalDirection.polarAngle,
-        90
-    ).getUnitVector();
-    dPositionVec.scale(DEFAULT_MOVE_DISTANCE);
-    move(dPositionVec);
-
-    // Reset focus
-    setFocus();
-}
-/**
- * Move the camera backward (in direction of polarAngle) in x/z directions only
- * (locking z coordinate).
- */
-void Camera3D::back() {
-    // Get vector in direction of current polarAngle
-    spatialVector dPositionVec = sphericalAngle3d(
-        sphericalDirection.polarAngle,
-        90
-    ).getUnitVector();
-    dPositionVec.scale(-DEFAULT_MOVE_DISTANCE);
-    move(dPositionVec.components);
-
-    // Reset focus
-    setFocus();
+    // Up movement
+    if (movingUp != 0){
+        if (movingUp > 0){
+            /// Positive acceleration
+            if (velocityVec.components[2] < 0){
+                // If velocity is negative, first break to 0
+                velocityVec.components[2] = std::min(
+                        velocityVec.components[2] + UP_BREAK
+                            * Scene::SECONDS_PER_TICK,
+                        0.
+                );
+            } else {
+                // If velocity is 0 or positive already,
+                // accelerate to MAX_VELOCITY
+                velocityVec.components[2] = std::max(
+                        velocityVec.components[2] + UP_ACCELERATION
+                            * Scene::SECONDS_PER_TICK,
+                        MAX_UP_VELOCITY
+                );
+            }
+        } else {
+            /// Negative acceleration
+            if (velocityVec.components[2] > 0){
+                // If velocity is positive, first break to 0
+                velocityVec.components[2] = std::max(
+                        velocityVec.components[2] - UP_BREAK
+                            * Scene::SECONDS_PER_TICK,
+                        0.
+                );
+            } else {
+                // If velocity is 0 or negative already,
+                // accelerate (negatively) to -MAX_VELOCITY
+                velocityVec.components[2] = std::min(
+                        velocityVec.components[2] - UP_ACCELERATION
+                            * Scene::SECONDS_PER_TICK,
+                        -MAX_UP_VELOCITY
+                );
+            }
+        }
+    }
 }
 
 /* Rotation */
@@ -372,25 +575,30 @@ void Camera3D::rotate(const std::vector<double> dAngles) {
                      << std::endl;
     }
 }
-
 void Camera3D::rotate(const sphericalAngle3d& dAngles) {
     rotate(dAngles.polarAngle, dAngles.azimuthAngle);
 }
 void Camera3D::rotate(const double dPolarAngle, const double dAzimuthAngle) {
-    rotatePolar(dPolarAngle);
-    rotateAzimuth(dAzimuthAngle);
+    rotatePolar(dPolarAngle, false);
+    rotateAzimuth(dAzimuthAngle, false);
 }
 void Camera3D::rotatePolar(const double dPolarAngle) {
+    rotatePolar(dPolarAngle, true);
+}
+void Camera3D::rotatePolar(const double dPolarAngle, bool updateNormal) {
     sphericalDirection.rotatePolar(dPolarAngle);
-
-    // Reset normal and focus
-    setNormal();
+    if (updateNormal){
+        setNormal();
+    }
 }
 void Camera3D::rotateAzimuth(const double dAzimuthAngle) {
+    rotateAzimuth(dAzimuthAngle, true);
+}
+void Camera3D::rotateAzimuth(const double dAzimuthAngle, bool updateNormal) {
     sphericalDirection.rotateAzimuth(dAzimuthAngle);
-
-    // Reset normal and focus
-    setNormal();
+    if (updateNormal){
+        setNormal();
+    }
 }
 void Camera3D::rotateLeft() {
     rotatePolar(DEFAULT_ROTATION_ANGLE);

@@ -40,7 +40,6 @@ public:
     /* Rotation */
     void setNormal() override;
     void setSphericalDirection(std::vector<double> newAngles) override;
-
     void setSphericalDirection(const sphericalAngle3d& newAngles);
     void setSphericalDirection(double polarAngle, double azimuthAngle);
     void setPolar(double polarAngle);
@@ -51,27 +50,55 @@ public:
     optional<point2d> projectPoint(const point3d& p) const;
 
     /* Movement */
+    // Move by given values
     void move(std::vector<double> dPosition) override;
-    void move(spatialVector dPosition) override;
+    void move(const spatialVector& dPosition) override;
+    void move(double dX, double dY, double dZ);
+    void moveX(double dX);
+    void moveY(double dY);
+    void moveZ(double dZ);
 
-    void move(double x, double y, double z);
-    void moveX(double dx);
-    void moveY(double dy);
-    void moveZ(double dz);
-    void left();
-    void right();
-    void up();
-    void down();
-    void forward();
-    void back();
+    // Move by custom amounts
+    void moveLeftCustom(double dL);
+    void moveRightCustom(double dR);
+    void moveUpCustom(double dU);
+    void moveDownCustom(double dD);
+    void moveForwardCustom(double dF);
+    void moveBackCustom(double dB);
+
+    // Move by Camera.DEFAULT_MOVE_DISTANCE
+    void moveLeftDefault();
+    void moveRightDefault();
+    void moveUpDefault();
+    void moveDownDefault();
+    void moveForwardDefault();
+    void moveBackDefault();
+
+    // Move according to values in this.velocityVec
+    void moveVelocity();
+    void moveForwardVelocity();
+    void moveRightVelocity();
+    void moveUpVelocity();
+
+    /**
+     * Set movingForward, movingStrafe, and movingUp to given new values
+     * (each must be 1, 0, or -1)
+     */
+    void setMovementStatuses(int movingForward_,
+                             int movingStrafe_,
+                             int movingUp_);
+    // Update the velocity of the camera given current movement statuses
+    // (ie. movingForward, etc.)
+    void updateVelocities();
 
     /* Rotation */
     void rotate(std::vector<double> dAngles) override;
-
     void rotate(const sphericalAngle3d& dAngles);
     void rotate(double dPolarAngle, double dAzimuthAngle);
     void rotatePolar(double dPolarAngle);
+    void rotatePolar(double dPolarAngle, bool updateNormal);
     void rotateAzimuth(double dAzimuthAngle);
+    void rotateAzimuth(double dAzimuthAngle, bool updateNormal);
     void rotateLeft();
     void rotateRight();
     void rotateUp();
@@ -81,6 +108,18 @@ protected:
     /** Fields */
     // Location of the camera
     point3d location;
+
+    // Holds 1, -1, or 0 denoting positive, negative, or no movement
+    // (acceleration) along forward/backward, left/right, and up/down
+    // directions from perspective of the Camera (must then be translated
+    // to get absolute x/y/z movement velocities)
+    int movingForward;
+    int movingStrafe; // Moving towards Camera.getUnitRightVec()
+    int movingUp;
+
+    // Store the velocity of the camera movement from the perspective
+    // of the camera (not x/y/z velocities)
+    spatialVector velocityVec;
 
     // Direction the camera is facing. Used to determine 2d plane/3d
     // hyperplane of the camera onto which 3d/4d points get projected

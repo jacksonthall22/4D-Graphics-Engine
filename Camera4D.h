@@ -54,14 +54,23 @@ public:
     optional<point3d> projectPoint(const point4d& p) const;
 
     /* Movement */
+    // Move by given values
     void move(std::vector<double> dPosition) override;
-    void move(spatialVector dPosition) override;
-
-    void move(double x, double y, double z, double a);
+    void move(const spatialVector& dPosition) override;
+    void move(double dx, double dy, double dz, double da);
     void moveX(double dx);
     void moveY(double dy);
     void moveZ(double dz);
     void moveA(double da);
+
+    // Move according to this.velocityVec
+    void updateLocation();
+    void updateX();
+    void updateY();
+    void updateZ();
+    void updateA();
+
+    // Move by Camera.DEFAULT_MOVE_DISTANCE
     void left();
     void right();
     void up();
@@ -73,12 +82,14 @@ public:
 
     /* Rotation */
     void rotate(std::vector<double> dAngles) override;
-
     void rotate(const sphericalAngle4d& dAngles);
     void rotate(double dPolarAngle, double dAzimuthAngle, double phiAngle);
     void rotatePolar(double dPolarAngle);
+    void rotatePolar(double dPolarAngle, bool updateNormal);
     void rotateAzimuth(double dAzimuthAngle);
+    void rotateAzimuth(double dAzimuthAngle, bool updateNormal);
     void rotatePhi(double dPhiAngle);
+    void rotatePhi(double dPhiAngle, bool updateNormal);
     void rotateLeft();
     void rotateRight();
     void rotateUp();
@@ -90,6 +101,10 @@ protected:
     /** Fields */
     // Location of the camera
     point4d location;
+
+    // Acceleration and velocity of the camera's in-game movement
+    spatialVector accelVec;
+    spatialVector velocityVec;
 
     // Direction the camera is facing. Used to determine 2d plane/3d
     // hyperplane of the camera onto which 3d/4d points get projected

@@ -9,6 +9,8 @@
 
 
 /** ========== Static Fields ========== */
+const int Scene::TICKS_PER_SECOND = 20;
+const double Scene::SECONDS_PER_TICK = 1.0 / Scene::TICKS_PER_SECOND;
 const int Scene::DEFAULT_WINDOW_WIDTH = 960;
 const int Scene::DEFAULT_WINDOW_HEIGHT = 540;
 const double Scene::DEFAULT_OBJECT_COLOR_RGB[3] = {0.0, 0.0, 0.0};

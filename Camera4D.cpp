@@ -133,15 +133,12 @@ void Camera4D::setLocation(double x, double y, double z, double a) {
  */
 void Camera4D::setNormal() {
     this->normal = sphericalDirection.getUnitVector();
-
-    // Reset focus
     setFocus();
 }
 void Camera4D::setSphericalDirection(std::vector<double> newAngles) {
     if (newAngles.size() == 3){
         setSphericalDirection(newAngles[0], newAngles[1], newAngles[2]);
     } else {
-        // Bad input
         std::cout << "Warning: Invalid input in:\n\tvoid "
                      "Camera4D::setSphericalDirection(std::vector<double> "
                      "newAngles)\n\t(Camera4d.cpp)" << std::endl;
@@ -179,7 +176,7 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
     // Camera3d.cpp and try to imagine a 4d line intersecting the hyperplane of
     // our reality. At least the math is the same.
     //
-    // Hyperplane of Camera orthogonal to normal vector n = (A, B, C, D):
+    // Hyperplane of Camera orthogonal to normal vector n = <A, B, C, D>:
     //      Ax + By + Cz + Da = E
     // Parametric equations of line r parallel to vector v = <xp, yp, zp, ap>
     // and through point p = (x0, y0, z0, a0):
@@ -194,17 +191,19 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
     // the Camera's location to the point has a scalar projection < 0 onto
     // the normal, it is behind the projection hyperplane - do not render,
     // return nullopt.
+    /// TODO - if point is behind camera, don't skip, render from point to
+    /// new point3d that is the intersection of edge and focus (do this in
+    /// objects' draw())
     spatialVector cameraToPoint(std::vector<double>({
         p.x - location.x,
         p.y - location.y,
         p.z - location.z,
         p.a - location.a
     }));
-    if (cameraToPoint.scalarProjectOnto(normal) < 0){
-        return nullopt;
-    }
+//    if (cameraToPoint.scalarProjectOnto(normal) < 0){
+//        return nullopt;
+//    }
 
-    // Next need to get vector from focus to point (v)
     spatialVector focusToPoint(std::vector<double>({
         p.x - focus.x,
         p.y - focus.y,
@@ -267,112 +266,82 @@ optional<point3d> Camera4D::projectPoint(const point4d &p) const {
 void Camera4D::move(std::vector<double> dPosition) {
     if (dPosition.size() == 4){
         location.move(dPosition);
+        setFocus();
     } else {
-        // Bad input
         std::cout << "Warning: Invalid input in:\n\tvoid Camera4D::move"
                      "(std::vector<double> dPosition)\n\t(Camera4D.cpp)"
                      << std::endl;
     }
-
-    // Reset focus
     setFocus();
 }
-void Camera4D::move(spatialVector dPosition) {
+void Camera4D::move(const spatialVector& dPosition) {
     if (dPosition.components.size() == 4){
         location.move(dPosition);
+        setFocus();
     } else {
         std::cout << "Warning: Invalid input in:\n\tvoid Camera4D::move"
                      "(spatialVector dPosition)\n\t(Camera4D.cpp)" << std::endl;
     }
-
-    // Reset focus
-    setFocus();
 }
 void Camera4D::move(double dx, double dy, double dz, double da) {
-    moveX(dx);
-    moveY(dy);
-    moveZ(dz);
-    moveA(da);
+    location.move(dx, dy, dz, da);
+    setFocus();
 }
 void Camera4D::moveX(double dx) {
     location.moveX(dx);
-
-    // Reset focus
     setFocus();
 }
-
 void Camera4D::moveY(double dy) {
     location.moveY(dy);
-
-    // Reset focus
     setFocus();
 }
-
 void Camera4D::moveZ(double dz) {
     location.moveZ(dz);
-
-    // Reset focus
     setFocus();
 }
-
 void Camera4D::moveA(double da) {
     location.moveA(da);
-
-    // Reset focus
     setFocus();
 }
-
+void Camera4D::updateLocation() {
+    location.move(velocityVec);
+    setFocus();
+}
+void Camera4D::updateX() {
+    location.moveX(velocityVec.components[0]);
+}
+void Camera4D::updateY() {
+    location.moveX(velocityVec.components[1]);
+}
+void Camera4D::updateZ() {
+    location.moveX(velocityVec.components[2]);
+}
+void Camera4D::updateA() {
+    location.moveX(velocityVec.components[3]);
+}
 void Camera4D::left() {
     spatialVector dPositionVec = getUnitRightVector();
     dPositionVec.scale(-DEFAULT_MOVE_DISTANCE);
     move(dPositionVec);
-
-    // Reset focus
     setFocus();
 }
-
 void Camera4D::right() {
     spatialVector dPositionVec = getUnitRightVector();
     dPositionVec.scale(DEFAULT_MOVE_DISTANCE);
     move(dPositionVec);
-
-    // Reset focus
     setFocus();
 }
-/**
- * Move the camera upward (in direction of y-axis) in y dimension only
- * (locking all others).
- */
 void Camera4D::up() {
-    move(std::vector<double>({
-        0,
-        0,
-        DEFAULT_MOVE_DISTANCE,
-        0
-    }));
-
-    // Reset focus
+    moveZ(DEFAULT_MOVE_DISTANCE);
     setFocus();
 }
-
 void Camera4D::down() {
-    move(std::vector<double>({
-        0,
-        0,
-        -DEFAULT_MOVE_DISTANCE,
-        0
-    }));
-
-    // Reset focus
+    moveZ(-DEFAULT_MOVE_DISTANCE);
     setFocus();
 }
-
-/**
- * Move the camera forward (in direction of polarAngle and azimuthAngle) in
- * x/z/a directions only (locking a).
- */
 void Camera4D::forward() {
-    // Get vector in direction of current polarAngle and phiAngle
+    // Get vector in direction of current polarAngle and phiAngle only
+    // (Locks movement to x/y/a dimensions)
     spatialVector dPositionVec = sphericalAngle4d(
         sphericalDirection.polarAngle,
         sphericalDirection.azimuthAngle,
@@ -380,15 +349,10 @@ void Camera4D::forward() {
     ).getUnitVector();
     dPositionVec.scale(DEFAULT_MOVE_DISTANCE);
     move(dPositionVec);
-
-    // Reset focus
-    setFocus();
 }
-/**
- * Move the camera backward (in the direction of polarAngle and azimuthAngle) in
- * x/y/z directions only (locking a).
- */
 void Camera4D::back() {
+    // Get vector in direction of current polarAngle and phiAngle only
+    // (Locks movement to x/y/a dimensions)
     spatialVector dPositionVec = sphericalAngle4d(
         sphericalDirection.polarAngle,
         sphericalDirection.azimuthAngle,
@@ -396,40 +360,15 @@ void Camera4D::back() {
     ).getUnitVector();
     dPositionVec.scale(-DEFAULT_MOVE_DISTANCE);
     move(dPositionVec);
-
-    // Reset focus
-    setFocus();
 }
-
-/**
- * Move the camera straight "inward" in the a direction.
- */
 void Camera4D::in() {
-    move(std::vector<double>({
-        0,
-        0,
-        0,
-        -DEFAULT_MOVE_DISTANCE
-    }));
-
-    // Reset focus
-    setFocus();
+    moveA(-DEFAULT_MOVE_DISTANCE);
 }
-
-/**
- * Move the camera straight "outward" in the a direction.
- */
 void Camera4D::out() {
-    move(std::vector<double>({
-        0,
-        0,
-        0,
-        DEFAULT_MOVE_DISTANCE
-    }));
-
-    // Reset focus
-    setFocus();
+    moveA(DEFAULT_MOVE_DISTANCE);
 }
+
+/* Rotation */
 void Camera4D::rotate(std::vector<double> dAngles) {
     if (dAngles.size() == 3){
         rotate(dAngles[0], dAngles[1], dAngles[2]);
@@ -440,35 +379,43 @@ void Camera4D::rotate(std::vector<double> dAngles) {
     }
 }
 void Camera4D::rotate(const sphericalAngle4d &dAngles) {
-    rotatePolar(dAngles.polarAngle);
-    rotateAzimuth(dAngles.azimuthAngle);
-    rotatePhi(dAngles.phiAngle);
+    rotate(dAngles.polarAngle, dAngles.azimuthAngle, dAngles.phiAngle);
 }
 void Camera4D::rotate(
-        const double dPolarAngle,
-        const double dAzimuthAngle,
-        const double phiAngle) {
-    rotatePolar(dPolarAngle);
-    rotateAzimuth(dAzimuthAngle);
-    rotatePhi(phiAngle);
+            const double dPolarAngle,
+            const double dAzimuthAngle,
+            const double phiAngle){
+    rotatePolar(dPolarAngle, false);
+    rotateAzimuth(dAzimuthAngle, false);
+    rotatePhi(phiAngle, false);
+    setNormal();
 }
-void Camera4D::rotatePolar(double dPolarAngle) {
+void Camera4D::rotatePolar(const double dPolarAngle) {
+    rotatePolar(dPolarAngle, true);
+}
+void Camera4D::rotatePolar(const double dPolarAngle, bool updateNormal) {
     sphericalDirection.rotatePolar(dPolarAngle);
-
-    // Reset normal and focus
-    setNormal();
+    if (updateNormal){
+        setNormal();
+    }
 }
-void Camera4D::rotateAzimuth(double dAzimuthAngle) {
+void Camera4D::rotateAzimuth(const double dAzimuthAngle) {
+    rotateAzimuth(dAzimuthAngle, true);
+}
+void Camera4D::rotateAzimuth(const double dAzimuthAngle, bool updateNormal) {
     sphericalDirection.rotateAzimuth(dAzimuthAngle);
-
-    // Reset normal and focus
-    setNormal();
+    if (updateNormal){
+        setNormal();
+    }
 }
-void Camera4D::rotatePhi(double dPhiAngle) {
+void Camera4D::rotatePhi(const double dPhiAngle) {
+    rotatePhi(dPhiAngle, true);
+}
+void Camera4D::rotatePhi(const double dPhiAngle, bool updateNormal) {
     sphericalDirection.rotatePhi(dPhiAngle);
-
-    // Reset normal and focus
-    setNormal();
+    if (updateNormal){
+        setNormal();
+    }
 }
 void Camera4D::rotateLeft() {
     rotatePolar(DEFAULT_ROTATION_ANGLE);

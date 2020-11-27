@@ -142,7 +142,7 @@ void modEquals(double *a, double n){
 
     double spatialVector::scalarProjectOnto(const spatialVector& other) const{
         if (components.size() == other.components.size()){
-            /// TODO Delete test var, using with debugger
+            /// TODO Delete test var (using with debugger)
             double test = this->dot(other) / other.magnitude();
             return test;
         } else {
@@ -516,19 +516,15 @@ void modEquals(double *a, double n){
      */
     sphericalAngle3d::sphericalAngle3d() : sphericalAngle3d(0, 90){
     }
-
     sphericalAngle3d::sphericalAngle3d(sphericalAngle3d const &other) :
             sphericalAngle3d(other.polarAngle, other.azimuthAngle){
     }
-
     sphericalAngle3d::sphericalAngle3d(double polarAngle, double azimuthAngle) :
             polarAngle(polarAngle), azimuthAngle(azimuthAngle){
     }
-
     void sphericalAngle3d::setPolar(double newPolarAngle) {
         this->polarAngle = mod(newPolarAngle, 360);
     }
-
     void sphericalAngle3d::setAzimuth(double newAzimuthAngle) {
         if (newAzimuthAngle < 0){
             this->azimuthAngle = 0;
@@ -538,13 +534,16 @@ void modEquals(double *a, double n){
             this->azimuthAngle = newAzimuthAngle;
         }
     }
-
+    /**
+     * Return a spatialVector of length 1 facing in the direction of this
+     * spherical angle.
+     */
     spatialVector sphericalAngle3d::getUnitVector() {
         // By definition, when an angle a is plotted on the unit circle, the
         // point where the angle's ray intersects the circle is
         // (cos(a), sin(a)). This method takes those coordinates and scales
         // them down towards the circle's center by the sin of the azimuth
-        // (up/down)  angle to emulate the same point rotating up/down along
+        // (up/down) angle to emulate the same point rotating up/down along
         // the unit sphere. Because the azimuthAngle is measured from the
         // z-axis to the point, the sin of the angle represents the non-vertical
         // component of that angle, which is parallel to the xy plane. If you
@@ -561,24 +560,22 @@ void modEquals(double *a, double n){
             cos(rad(azimuthAngle))
         }));
     }
-
     void sphericalAngle3d::rotatePolar(double dPolarAngle){
         setPolar(polarAngle + dPolarAngle);
     }
-
     void sphericalAngle3d::rotateAzimuth(double dAzimuthAngle){
         setAzimuth(azimuthAngle + dAzimuthAngle);
     }
-
-    void sphericalAngle3d::rotate(std::vector<double> dAngles) {
+    void sphericalAngle3d::rotate(const std::vector<double>& dAngles) {
         if (dAngles.size() == 2){
             rotatePolar(dAngles[0]);
             rotateAzimuth(dAngles[1]);
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tvoid "
-                         "rotate(std::vector<double> angles) override\n\t"
-                         "(sphericalAngle3d, utils.cpp)" << std::endl;
+                         "rotate(const std::vector<double>& angles) "
+                         "override\n\t(sphericalAngle3d, utils.cpp)"
+                         << std::endl;
         }
     }
 
@@ -593,18 +590,15 @@ void modEquals(double *a, double n){
  */
     sphericalAngle4d::sphericalAngle4d() : sphericalAngle4d(0, 90, 90){
     }
-
-    sphericalAngle4d::sphericalAngle4d(const sphericalAngle4d& other) : sphericalAngle4d(
-            other.polarAngle, other.azimuthAngle, other.phiAngle) {
+    sphericalAngle4d::sphericalAngle4d(const sphericalAngle4d& other) :
+        sphericalAngle4d(other.polarAngle, other.azimuthAngle, other.phiAngle) {
     }
-
     sphericalAngle4d::sphericalAngle4d(
             double polarAngle, double azimuthAngle, double phiAngle) :
             polarAngle(polarAngle),
             azimuthAngle(azimuthAngle),
             phiAngle(phiAngle){
     }
-
     void sphericalAngle4d::setPolar(const double newPolarAngle) {
         if (newPolarAngle < 0){
             this->polarAngle = 0;
@@ -614,7 +608,6 @@ void modEquals(double *a, double n){
             this->polarAngle = newPolarAngle;
         }
     }
-
     void sphericalAngle4d::setAzimuth(const double newAzimuthAngle) {
         if (newAzimuthAngle < 0){
             this->azimuthAngle = 0;
@@ -624,11 +617,9 @@ void modEquals(double *a, double n){
             this->azimuthAngle = newAzimuthAngle;
         }
     }
-
     void sphericalAngle4d::setPhi(const double newPhiAngle) {
         this->phiAngle = mod(newPhiAngle, 360);
     }
-
     spatialVector sphericalAngle4d::getUnitVector() {
         // It would seem at first that only the +x hemisphere of the unit
         // 3-sphere can be reached with polarAngle and azimuthAngle both only
@@ -637,13 +628,13 @@ void modEquals(double *a, double n){
         // the 4th dimension by 180 degrees. For example, to reach (-1, 0, 0,
         // 0), these values work with the math that has been implemented below:
         //      polarAngle = 90 deg = pi/2 rad
-        //      azimuthAngle = 90 deg
+        //      azimuthAngle = 90 deg = pi/2 rad
         //      phiAngle = 270 deg = 3pi/2 rad
         // because
-        //      x = sin(phiAngle)sin(azimuthAngle)sin(polarAngle) = -1
-        //      y = sin(phiAngle)sin(azimuthAngle)cos(polarAngle) = 0
-        //      z = sin(phiAngle)cos(azimuthAngle) = 0
-        //      a = cos(phiAngle) = 0
+        //      x = sin(3pi/2)sin(pi/2)sin(pi/2) = -1
+        //      y = sin(3pi/2)sin(pi/2)cos(pi/2) = 0
+        //      z = sin(3pi/2)cos(pi/2) = 0
+        //      a = cos(3pi/2) = 0
         return spatialVector(std::vector<double>({
             sin(rad(phiAngle)) * sin(rad(azimuthAngle)) * sin(rad(polarAngle)),
             sin(rad(phiAngle)) * sin(rad(azimuthAngle)) * cos(rad(polarAngle)),
@@ -651,20 +642,16 @@ void modEquals(double *a, double n){
             cos(rad(phiAngle))
         }));
     }
-
     void sphericalAngle4d::rotatePolar(double dPolarAngle){
         setPolar(polarAngle + dPolarAngle);
     }
-
     void sphericalAngle4d::rotateAzimuth(double dAzimuthAngle){
         setAzimuth(azimuthAngle + dAzimuthAngle);
     }
-
     void sphericalAngle4d::rotatePhi(double dPhiAngle){
         setPhi(phiAngle + dPhiAngle);
     }
-
-    void sphericalAngle4d::rotate(std::vector<double> dAngles) {
+    void sphericalAngle4d::rotate(const std::vector<double>& dAngles) {
         if (dAngles.size() == 3){
             rotatePolar(dAngles[0]);
             rotateAzimuth(dAngles[1]);
@@ -672,8 +659,9 @@ void modEquals(double *a, double n){
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tvoid "
-                         "rotate(std::vector<double> angles) override\n\t"
-                         "(sphericalAngle4d, utils.cpp)" << std::endl;
+                         "rotate(const std::vector<double>& angles) "
+                         "override\n\t(sphericalAngle4d, utils.cpp)"
+                         << std::endl;
         }
     }
 /** ===== End sphericalAngle4d : sphericalAngle Struct ===== */

@@ -15,6 +15,8 @@
 
 class Scene {
 public:
+    static const int TICKS_PER_SECOND;
+    static const double SECONDS_PER_TICK;
     static const int DEFAULT_WINDOW_WIDTH;
     static const int DEFAULT_WINDOW_HEIGHT;
     static const double DEFAULT_OBJECT_COLOR_RGB[3];

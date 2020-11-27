@@ -15,8 +15,8 @@
 #endif
 
 /** Default Final Variables */
-const int DEFAULT_WINDOW_WIDTH = 960;
-const int DEFAULT_WINDOW_HEIGHT = 540;
+const int DEFAULT_WINDOW_WIDTH = 1200;
+const int DEFAULT_WINDOW_HEIGHT = 800;
 const double DEFAULT_RENDER_COLOR_RGB[3] = {0.0, 0.0, 0.0};
 const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {0.0, 0.0, 0.0};
 
@@ -26,7 +26,7 @@ const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {0.0, 0.0, 0.0};
 void init();
 
 // Initialize OpenGL Graphics
-void InitGL();
+void initGL();
 
 // Callback functions for GLUT
 

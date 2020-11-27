@@ -276,7 +276,7 @@ struct sphericalAngle {
      * Return the unit vector in the direction defined by this object.
      */
     virtual spatialVector getUnitVector() = 0;
-    virtual void rotate(std::vector<double> angles) = 0;
+    virtual void rotate(const std::vector<double>& angles) = 0;
 };
 
 /**
@@ -331,7 +331,7 @@ struct sphericalAngle3d : public sphericalAngle {
      * Increase rotation of polarAngle and azimuthAngle by values of the given
      * vector (must be of size() 2).
      */
-    void rotate(std::vector<double> dAngles) override;
+    void rotate(const std::vector<double>& dAngles) override;
 };
 
 /**
@@ -400,7 +400,7 @@ struct sphericalAngle4d : public sphericalAngle {
      * Increase rotation of polarAngle and azimuthAngle by values of the given
      * vector (must be of size() 3).
      */
-    void rotate(std::vector<double> dAngles) override;
+    void rotate(const std::vector<double>& dAngles) override;
 
 };
 

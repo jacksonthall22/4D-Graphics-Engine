@@ -11,26 +11,40 @@
 
 class Camera {
 public:
-    /** Static Fields */
-    // Distance the camera moves when moved using up(), down(), etc.
+    /** ---------- Static Fields ---------- */
+    // Distance in blocks the camera moves
     static const double DEFAULT_MOVE_DISTANCE;
 
-    // Angle the camera moves when rotated using rotateUp(), rotateDown(), etc.
+    // Angle in degrees the camera rotates by default
     static const double DEFAULT_ROTATION_ANGLE;
 
     // Default field of view in degrees
     static const double DEFAULT_FOV;
 
-    /** Constructors */
+    // Values used to update camera velocity
+    static const double FORWARD_ACCELERATION; // blocks/second^2
+    static const double STRAFE_ACCELERATION;
+    static const double UP_ACCELERATION;
+    static const double FORWARD_DRAG; // blocks/second^2
+    static const double STRAFE_DRAG;
+    static const double UP_DRAG;
+    static const double FORWARD_BRAKE; // blocks/second^2
+    static const double STRAFE_BRAKE;
+    static const double UP_BREAK;
+    static const double MAX_FORWARD_VELOCITY; // blocks/second
+    static const double MAX_STRAFE_VELOCITY;
+    static const double MAX_UP_VELOCITY;
+
+    /** ---------- Constructors ---------- */
     explicit Camera(double focalDistance);
 
-    /** Static Methods */
+    /** ---------- Static Methods ---------- */
     static double getFocalDistanceFromFOV(double fovDegrees);
 
-    /** Getters */
+    /** ---------- Getters ---------- */
     double getFocalDistance() const;
 
-    /** Setters */
+    /** ---------- Setters ---------- */
     /* Utility */
     void setFocalDistance(double newFocalDistance);
 
@@ -43,10 +57,10 @@ public:
     virtual void setNormal() = 0;
     virtual void setSphericalDirection(std::vector<double> newAngles) = 0;
 
-    /** Other Methods */
+    /** ---------- Other Methods ---------- */
     /* Movement */
     virtual void move(std::vector<double> dPosition) = 0;
-    virtual void move(spatialVector dPosition) = 0;
+    virtual void move(const spatialVector& dPosition) = 0;
 
     /* Rotation */
     virtual void rotate(std::vector<double> dAngles) = 0;
@@ -55,7 +69,6 @@ protected:
     // Distance in the direction opposite the Camera's normal from its
     // coordinate location to the focus. Used to set the focus point
     double focalDistance{};
-
 };
 
 

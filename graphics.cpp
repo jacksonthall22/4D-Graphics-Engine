@@ -2,11 +2,16 @@
 #include "Scene.h"
 #include <iostream>
 #include <vector>
+//#include <map>
+
 using namespace std;
 
 
-GLdouble width, height;
-int wd;
+GLdouble windowWidth, windowHeight;
+int window;
+
+//std::map<char, bool> keyStates;
+
 
 Scene scene;
 
@@ -15,7 +20,7 @@ Scene scene;
 
 /* Movement Keybinds */
 const char UP_KEY = ' ';
-const char DOWN_KEY = GLUT_ACTIVE_SHIFT;
+const char DOWN_KEY = 'c';
 const char RIGHT_KEY = 'd';
 const char LEFT_KEY = 'a';
 const char FORWARD_KEY = 'w';
@@ -39,9 +44,8 @@ const char TOGGLE_ACTIVE_CAMERA_KEY = 't';
  * Create and Initialize Scene
  */
 void init() {
-    width = 800;
-    height = 500;
-
+    windowWidth = DEFAULT_WINDOW_WIDTH;
+    windowHeight = DEFAULT_WINDOW_HEIGHT;
     /** Create Axes */
     /// X Axis
     vector<point3d> xAxisPoints({
@@ -258,8 +262,7 @@ void initGL() {
  whenever the window needs to be re-painted. */
 void display() {
     // Tell OpenGL to use the whole window for drawing
-    glViewport(0, 0, width, height);
-//    glViewport(0, 0, width, height);
+    glViewport(0, 0, windowWidth, windowHeight);
 
     // Do an orthographic parallel projection with the coordinate
     // system set to center, limited by screen/window size
@@ -267,7 +270,9 @@ void display() {
     glLoadIdentity();
 //    glOrtho(-ORTHO_ZOOM/width/2, ORTHO_ZOOM/width/2, -ORTHO_ZOOM/height/2,
 //        ORTHO_ZOOM/height/2, 1.f, -1.f);
-    glOrtho(-width/2, width/2, -height/2, height/2, 1.f, -1.f);
+    glOrtho(-windowWidth/2.0, windowWidth/2.0,
+        -windowHeight/2.0, windowHeight/2.0,
+        1.f, -1.f);
 
     // Clear the color buffer with current clearing color
     glClear(GL_COLOR_BUFFER_BIT);
@@ -280,18 +285,25 @@ void display() {
     glFlush();
 }
 
+
+//void kbd(unsigned char key, int x, int y){
+//    glutGetModifiers();
+//
+//    keyStates[key] = key;
+//
+//}
+
 // http://www.theasciicode.com.ar/ascii-control-characters/escape-ascii-code-27.html
 void kbd(unsigned char key, int x, int y)
 {
     // Get state of shift/ctrl/alt etc.
     glutGetModifiers();
 
-    switch(key) {
+    switch(tolower(key)) {
         case 27:
             // escape
-            glutDestroyWindow(wd);
+            glutDestroyWindow(window);
             exit(0);
-            break;
         case ROT_UP_KEY:
             if (scene.getActiveCamera()){
                 scene.getCamera3D().rotateUp();
@@ -334,42 +346,42 @@ void kbd(unsigned char key, int x, int y)
             break;
         case UP_KEY:
             if (scene.getActiveCamera()){
-                scene.getCamera3D().up();
+                scene.getCamera3D().moveUpDefault();
             } else {
                 scene.getCamera4D().up();
             }
             break;
         case DOWN_KEY:
             if (scene.getActiveCamera()){
-                scene.getCamera3D().down();
+                scene.getCamera3D().moveDownDefault();
             } else {
                 scene.getCamera4D().down();
             }
             break;
         case RIGHT_KEY:
             if (scene.getActiveCamera()){
-                scene.getCamera3D().right();
+                scene.getCamera3D().moveRightDefault();
             } else {
                 scene.getCamera4D().right();
             }
             break;
         case LEFT_KEY:
             if (scene.getActiveCamera()){
-                scene.getCamera3D().left();
+                scene.getCamera3D().moveLeftDefault();
             } else {
                 scene.getCamera4D().left();
             }
             break;
         case FORWARD_KEY:
             if (scene.getActiveCamera()){
-                scene.getCamera3D().forward();
+                scene.getCamera3D().moveForwardDefault();
             } else {
                 scene.getCamera4D().forward();
             }
             break;
         case BACKWARD_KEY:
             if (scene.getActiveCamera()){
-                scene.getCamera3D().back();
+                scene.getCamera3D().moveBackDefault();
             } else {
                 scene.getCamera4D().back();
             }
@@ -396,13 +408,28 @@ void kbd(unsigned char key, int x, int y)
 
 void kbdS(int key, int x, int y) {
     glutGetModifiers();
-    if (GLUT_ACTIVE_SHIFT) { // DOWN_KEY
-        if (scene.getActiveCamera()){
-            scene.getCamera3D().down();
-        } else {
-            scene.getCamera4D().down();
-        }
+
+    switch(key){
+        case GLUT_ACTIVE_SHIFT:
+            if (scene.getActiveCamera()){
+                scene.getCamera3D().moveDownDefault();
+            } else {
+                scene.getCamera4D().down();
+            }
+            break;
+        case 27:
+            // escape
+            glutDestroyWindow(window);
+            exit(0);
+            break;
     }
+//    if (GLUT_ACTIVE_SHIFT) { // DOWN_KEY
+//        if (scene.getActiveCamera()){
+//            scene.getCamera3D().moveDownDefault();
+//        } else {
+//            scene.getCamera4D().moveDownDefault();
+//        }
+//    }
 
     glutPostRedisplay();
 }
@@ -474,13 +501,13 @@ int main(int argc, char** argv) {
 
     glutInitDisplayMode(GLUT_RGBA);
 
-    glutInitWindowSize((int)width, (int)height);
+    glutInitWindowSize((int)windowWidth, (int)windowHeight);
 
     // Position the window's initial top-left corner
     glutInitWindowPosition( 100, 100);
 
     /* create the window and store the handle to it */
-    wd = glutCreateWindow(/* Fun with Drawing! */ "/* title */");
+    window = glutCreateWindow(/* Fun with Drawing! */ "/* title */");
 
     // Register callback handler for window re-paint event
     glutDisplayFunc(display);
