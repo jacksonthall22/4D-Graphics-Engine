@@ -12,10 +12,10 @@ Object4D::Object4D() :
         Object4D(
             std::vector<std::shared_ptr<point4d>>(),
             std::vector<std::shared_ptr<edge4d>>()
-        ) {
+        ){
 }
 Object4D::Object4D(const std::vector<point4d>& vertices,
-                   const std::vector<edge4d>& edges) {
+                   const std::vector<edge4d>& edges){
     // Put all items into new vector of smart pointers
     std::vector<std::shared_ptr<point4d>> tempVertices;
     tempVertices.reserve(vertices.size());
@@ -32,7 +32,7 @@ Object4D::Object4D(const std::vector<point4d>& vertices,
     this->edges = tempEdges;
 }
 Object4D::Object4D(std::vector<std::shared_ptr<point4d>> vertices,
-                   std::vector<std::shared_ptr<edge4d>> edges) {
+                   std::vector<std::shared_ptr<edge4d>> edges){
     this->vertices = std::move(vertices);
     this->edges = std::move(edges);
 }
@@ -51,7 +51,7 @@ const std::vector<std::shared_ptr<edge4d>> &Object4D::getEdges() const {
  * Takes the current set of vertices and extrudes them into the given direction,
  * creating edges between the appropriate points.
  */
-void Object4D::extrude(const spatialVector &direction) {
+void Object4D::extrude(const spatialVector &direction){
     if (direction.components.size() <= 4){
         // Pad empty dimensions in given vector with 0s
         std::vector<double> temp = direction.components;

@@ -8,8 +8,12 @@
 #include "Camera.h"
 
 
-class Camera4D : protected Camera {
+class Camera4D : public Camera {
 public:
+    /** Static Const Vars */
+    static const double DEFAULT_FOV_DEGREES;
+    static const double DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS;
+
     /** Constructors */
     Camera4D();
     Camera4D(const Camera4D& other); // Implicitly deleted copy constructor
@@ -17,7 +21,8 @@ public:
             const spatialVector& normal,
             const sphericalAngle4d& sphericalDirection,
             const point4d& focus,
-            const double& focalDistance);
+            const double& focalDistance,
+            Camera::MovementMode movementMode);
 
     /** Getters */
     spatialVector getUnitUpVector() const;
@@ -55,8 +60,8 @@ public:
 
     /* Movement */
     // Move by given values
-    void move(std::vector<double> dPosition) override;
-    void move(const spatialVector& dPosition) override;
+    void moveAbsolute(std::vector<double> dPosition) override;
+    void moveAbsolute(const spatialVector& dPosition) override;
     void move(double dx, double dy, double dz, double da);
     void moveX(double dx);
     void moveY(double dy);

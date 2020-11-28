@@ -11,7 +11,7 @@ Object3D::Object3D() :
         Object3D(
             std::vector<std::shared_ptr<point3d>>(),
             std::vector<std::shared_ptr<edge3d>>()
-        ) {
+        ){
 }
 
 //Object3D::Object3D(const std::vector<edge3d>& edges){
@@ -22,7 +22,7 @@ Object3D::Object3D() :
 //}
 
 Object3D::Object3D(const std::vector<point3d>& vertices,
-        const std::vector<edge3d>& edges) {
+        const std::vector<edge3d>& edges){
     // Put all items into new vector of smart pointers
     std::vector<std::shared_ptr<point3d>> tempVertices;
     tempVertices.reserve(vertices.size());
@@ -40,7 +40,7 @@ Object3D::Object3D(const std::vector<point3d>& vertices,
 }
 
 Object3D::Object3D(std::vector<std::shared_ptr<point3d>> vertices,
-        std::vector<std::shared_ptr<edge3d>> edges) {
+        std::vector<std::shared_ptr<edge3d>> edges){
     this->vertices = std::move(vertices);
     this->edges = std::move(edges);
 }
@@ -60,7 +60,7 @@ const std::vector<std::shared_ptr<edge3d>> &Object3D::getEdges() const {
  * Takes the current set of vertices and extrudes them into the given direction,
  * creating edges between the appropriate points.
  */
-void Object3D::extrude(const spatialVector &direction) {
+void Object3D::extrude(const spatialVector &direction){
     if (direction.components.size() <= 3){
         // Pad empty dimensions in given vector with 0s
         std::vector<double> temp = direction.components;

@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include <iostream>
 #include <vector>
+#include <sstream>
 //#include <map>
 
 using namespace std;
@@ -10,40 +11,14 @@ using namespace std;
 GLdouble windowWidth, windowHeight;
 int window;
 
-//std::map<char, bool> keyStates;
-
 
 Scene scene;
-
-// Used to map 2d coordinates to the screen
-//double ORTHO_ZOOM = -1;
-
-/* Movement Keybinds */
-const char UP_KEY = ' ';
-const char DOWN_KEY = 'c';
-const char RIGHT_KEY = 'd';
-const char LEFT_KEY = 'a';
-const char FORWARD_KEY = 'w';
-const char BACKWARD_KEY = 's';
-const char OUT_KEY = 'q';
-const char IN_KEY = 'e';
-
-/* Rotation Keybinds */
-const char ROT_RIGHT_KEY = 'l';
-const char ROT_LEFT_KEY = 'j';
-const char ROT_UP_KEY = 'i';
-const char ROT_DOWN_KEY = 'k';
-const char ROT_OUT_KEY = 'o';
-const char ROT_IN_KEY = 'u';
-
-/* Other Keybinds */
-const char TOGGLE_ACTIVE_CAMERA_KEY = 't';
 
 
 /**
  * Create and Initialize Scene
  */
-void init() {
+void init(){
     windowWidth = DEFAULT_WINDOW_WIDTH;
     windowHeight = DEFAULT_WINDOW_HEIGHT;
     /** Create Axes */
@@ -253,14 +228,14 @@ void init() {
 }
 
 /* Initialize OpenGL Graphics */
-void initGL() {
+void initGL(){
     // Set "clearing" or background color 0, 113, 85, 1
     glClearColor(0.9f, 0.9f, 0.86f, 1.0f); // Black and opaque
 }
 
 /* Handler for window-repaint event. Call back when the window first appears and
  whenever the window needs to be re-painted. */
-void display() {
+void display(){
     // Tell OpenGL to use the whole window for drawing
     glViewport(0, 0, windowWidth, windowHeight);
 
@@ -294,39 +269,41 @@ void display() {
 //}
 
 // http://www.theasciicode.com.ar/ascii-control-characters/escape-ascii-code-27.html
-void kbd(unsigned char key, int x, int y)
-{
+void kbd(unsigned char key, int x, int y){
     // Get state of shift/ctrl/alt etc.
-    glutGetModifiers();
+//    int modifiers = glutGetModifiers();
+//    if (modifiers == GLUT_ACTIVE_SHIFT){
+//        std::cout << "Shift pressed!" << std::endl;
+//    }
 
-    switch(tolower(key)) {
+    switch(tolower(key)){
         case 27:
             // escape
             glutDestroyWindow(window);
             exit(0);
         case ROT_UP_KEY:
-            if (scene.getActiveCamera()){
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
                 scene.getCamera3D().rotateUp();
             } else {
                 scene.getCamera4D().rotateUp();
             }
             break;
         case ROT_DOWN_KEY:
-            if (scene.getActiveCamera()){
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
                 scene.getCamera3D().rotateDown();
             } else {
                 scene.getCamera4D().rotateDown();
             }
             break;
         case ROT_RIGHT_KEY:
-            if (scene.getActiveCamera()){
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
                 scene.getCamera3D().rotateRight();
             } else {
                 scene.getCamera4D().rotateRight();
             }
             break;
         case ROT_LEFT_KEY:
-            if (scene.getActiveCamera()){
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
                 scene.getCamera3D().rotateLeft();
             } else {
                 scene.getCamera4D().rotateLeft();
@@ -334,67 +311,67 @@ void kbd(unsigned char key, int x, int y)
             break;
         case ROT_OUT_KEY:
             // Only can rotate out if 4d camera is selected
-            if (!scene.getActiveCamera()){
+            if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
                 scene.getCamera4D().rotateOut();
             }
             break;
         case ROT_IN_KEY:
             // Only can rotate in if 4d camera is selected
-            if (!scene.getActiveCamera()){
+            if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
                 scene.getCamera4D().rotateIn();
             }
             break;
         case UP_KEY:
-            if (scene.getActiveCamera()){
-                scene.getCamera3D().moveUpDefault();
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
+                scene.getCamera3D().moveU();
             } else {
                 scene.getCamera4D().up();
             }
             break;
         case DOWN_KEY:
-            if (scene.getActiveCamera()){
-                scene.getCamera3D().moveDownDefault();
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
+                scene.getCamera3D().moveD();
             } else {
                 scene.getCamera4D().down();
             }
             break;
         case RIGHT_KEY:
-            if (scene.getActiveCamera()){
-                scene.getCamera3D().moveRightDefault();
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
+                scene.getCamera3D().moveR();
             } else {
                 scene.getCamera4D().right();
             }
             break;
         case LEFT_KEY:
-            if (scene.getActiveCamera()){
-                scene.getCamera3D().moveLeftDefault();
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
+                scene.getCamera3D().moveL();
             } else {
                 scene.getCamera4D().left();
             }
             break;
         case FORWARD_KEY:
-            if (scene.getActiveCamera()){
-                scene.getCamera3D().moveForwardDefault();
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
+                scene.getCamera3D().moveF();
             } else {
                 scene.getCamera4D().forward();
             }
             break;
-        case BACKWARD_KEY:
-            if (scene.getActiveCamera()){
-                scene.getCamera3D().moveBackDefault();
+        case BACK_KEY:
+            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
+                scene.getCamera3D().moveB();
             } else {
                 scene.getCamera4D().back();
             }
             break;
         case OUT_KEY:
             // Only can move outward if 4d camera is selected
-            if (!scene.getActiveCamera()){
+            if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
                 scene.getCamera4D().out();
             }
             break;
         case IN_KEY:
             // Only can move outward if 4d camera is selected
-            if (!scene.getActiveCamera()){
+            if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
                 scene.getCamera4D().in();
             }
             break;
@@ -406,54 +383,193 @@ void kbd(unsigned char key, int x, int y)
     glutPostRedisplay();
 }
 
-void kbdS(int key, int x, int y) {
-    glutGetModifiers();
-
+void kbdS(int key, int x, int y){
     switch(key){
-        case GLUT_ACTIVE_SHIFT:
-            if (scene.getActiveCamera()){
-                scene.getCamera3D().moveDownDefault();
-            } else {
-                scene.getCamera4D().down();
-            }
-            break;
         case 27:
             // escape
             glutDestroyWindow(window);
             exit(0);
-            break;
     }
-//    if (GLUT_ACTIVE_SHIFT) { // DOWN_KEY
-//        if (scene.getActiveCamera()){
-//            scene.getCamera3D().moveDownDefault();
-//        } else {
-//            scene.getCamera4D().moveDownDefault();
-//        }
-//    }
 
     glutPostRedisplay();
 }
 
-void cursor(int x, int y) {
-
+void cursor(int x, int y){
     glutPostRedisplay();
 }
 
 // button will be GLUT_LEFT_BUTTON or GLUT_RIGHT_BUTTON
 // state will be GLUT_UP or GLUT_DOWN
-void mouse(int button, int state, int x, int y) {
-
+void mouse(int button, int state, int x, int y){
     glutPostRedisplay();
 }
 
-void timer(int dummy) {
+bool debug = false;
+void timer(int dummy){
+    /// Get states of all keybinds
+    int upPressed,
+                 downPressed,
+                 rightPressed,
+                 leftPressed,
+                 forwardPressed,
+                 backPressed,
+                 outPressed,
+                 inPressed,
+                 rotRightPressed,
+                 rotLeftPressed,
+                 rotUpPressed,
+                 rotDownPressed,
+                 rotOutPressed,
+                 rotInPressed,
+                 toggleActiveCameraPressed,
+                 toggleMovementModePressed;
+    // TODO Make variables store whether there was a change in keystate
+    // TODO Change variables to bools indicating whether SHORT return val has
+    //  most significant bit set - see:
+    //  https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate
+    /* Movement */
+    upPressed = GetAsyncKeyState(UP_KEY);
+    downPressed = GetAsyncKeyState(DOWN_KEY);
+    rightPressed = GetAsyncKeyState(RIGHT_KEY);
+    leftPressed = GetAsyncKeyState(LEFT_KEY);
+    forwardPressed = GetAsyncKeyState(FORWARD_KEY);
+    backPressed = GetAsyncKeyState(BACK_KEY);
+    outPressed = GetAsyncKeyState(OUT_KEY);
+    inPressed = GetAsyncKeyState(IN_KEY);
+
+    /* Rotation */
+    rotRightPressed = GetAsyncKeyState(ROT_RIGHT_KEY);
+    rotLeftPressed = GetAsyncKeyState(ROT_LEFT_KEY);
+    rotUpPressed = GetAsyncKeyState(ROT_UP_KEY);
+    rotDownPressed = GetAsyncKeyState(ROT_DOWN_KEY);
+    rotOutPressed = GetAsyncKeyState(ROT_OUT_KEY);
+    rotInPressed = GetAsyncKeyState(ROT_IN_KEY);
+
+    /* Other */
+    toggleActiveCameraPressed = GetAsyncKeyState(TOGGLE_ACTIVE_CAMERA_KEY);
+    toggleMovementModePressed = GetAsyncKeyState(TOGGLE_MOVEMENT_MODE);
+
+    /** Handle key presses */
+
+    /// Movement
+    if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
+        // Move scene.camera3d
+        if (scene.getCamera3D().getMovementMode()
+                == Camera::MovementMode::Fixed){
+            /// Move 3d in fixed mode
+
+            // Right/left
+            if (rightPressed and leftPressed){
+                ;
+            } else if (rightPressed){
+                scene.getCamera3D().moveRelativeFixedR();
+            } else if (leftPressed){
+                scene.getCamera3D().moveRelativeFixedL();
+            }
+
+            // Up/down
+            if (upPressed and downPressed){
+                ;
+            } else if (upPressed){
+                scene.getCamera3D().moveRelativeFixedU();
+            } else if (downPressed){
+                scene.getCamera3D().moveRelativeFixedD();
+            }
+
+            // Forward/back
+            if (forwardPressed and backPressed){
+                ;
+            } else if (forwardPressed){
+                scene.getCamera3D().moveRelativeFixedF();
+            } else if (backPressed){
+                scene.getCamera3D().moveRelativeFixedB();
+            }
+
+        } else if (scene.getCamera3D().getMovementMode()
+                == Camera::MovementMode::Fly){
+            /// Move 3d in fly mode
+
+            // Forward/back
+            if (forwardPressed and backPressed){
+                // Slow movement in f/b direction
+                if (debug)
+                    std::cout << "test: forwardPressed and backPressed"
+                            << std::endl;
+                scene.getCamera3D().brakeFB();
+            } else if (forwardPressed){
+                if (debug)
+                    std::cout << "test: forwardPressed" << std::endl;
+
+                if (scene.getCamera3D().getAcceleratingFB() == 0){
+                    scene.getCamera3D().setAcceleratingF();
+                }
+            } else if (backPressed){
+                if (debug)
+                    std::cout << "test: backPressed" << std::endl;
+
+                scene.getCamera3D().setAcceleratingB();
+            } else {
+                scene.getCamera3D().setAcceleratingFB(0);
+            }
+
+            // Right/left
+            if (rightPressed and leftPressed){
+                if (debug)
+                    std::cout << "test: rightPressed and leftPressed"
+                            << std::endl;
+
+                scene.getCamera3D().brakeRL();
+            } else if (rightPressed){
+                if (debug)
+                    std::cout << "test: rightPressed" << std::endl;
+
+                scene.getCamera3D().setAcceleratingR();
+            } else if (leftPressed){
+                if (debug)
+                    std::cout << "test: leftPressed" << std::endl;
+
+                scene.getCamera3D().setAcceleratingL();
+            } else {
+                scene.getCamera3D().setAcceleratingRL(0);
+            }
+
+            // Up/down
+            if (upPressed and downPressed){
+                if (debug)
+                    std::cout << "test: upPressed and downPressed" << std::endl;
+
+                scene.getCamera3D().brakeUD();
+            } else if (upPressed){
+                if (debug)
+                    std::cout << "test: upPressed" << std::endl;
+
+                scene.getCamera3D().setAcceleratingU();
+            } else if (downPressed){
+                if (debug)
+                    std::cout << "test: downPressed" << std::endl;
+
+                scene.getCamera3D().setAcceleratingD();
+            } else {
+                scene.getCamera3D().setAcceleratingUD(0);
+            }
+
+            scene.getCamera3D().moveFly();
+        }
+
+    } else if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
+        // Move scene.camera4d
+        std::cout << "TODO" << std::endl;
+    }
+
+    /// TODO Add rotation control here or in kbd()?
+    /// Rotation
 
     glutPostRedisplay();
-    glutTimerFunc(30, timer, dummy);
+    glutTimerFunc((int)(Scene::SECONDS_PER_TICK * 1000), timer, dummy);
 }
 
 /* Main function: GLUT runs as a console application starting at main()  */
-int main(int argc, char** argv) {
+int main(int argc, char** argv){
 //    /** Create and Initialize Scene */
 //    vector<point3d> cube3dPoints({
 //        point3d(1, 5, 1),

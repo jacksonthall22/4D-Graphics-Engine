@@ -54,6 +54,7 @@ struct spatialVector {
 
     /** Constructors */
     spatialVector();
+    explicit spatialVector(int numDimensions);
     spatialVector(const spatialVector& other);
     explicit spatialVector(const std::vector<double>& components);
 

@@ -11,6 +11,7 @@
 #include "Camera4D.h"
 #include "Object3D.h"
 #include "Object4D.h"
+#include <memory>
 
 
 class Scene {
@@ -32,7 +33,7 @@ public:
 
     /** Getters */
     /* Utility */
-    bool getActiveCamera() const;
+    Camera::CameraType getActiveCamera() const;
     Camera3D& getCamera3D();
     Camera4D& getCamera4D();
     std::vector<Object3D> const& getObjects3d() const;
@@ -45,12 +46,14 @@ public:
     void draw() const;
 
 protected:
-    bool activeCamera; // True = 3d camera, false = 4d camera
+    Camera::CameraType activeCamera;
     Camera3D camera3d;
     Camera4D camera4d;
-    std::vector<Object3D> objects3d;
+    // TODO Make vector of all objects polymorphic?
+    //  ie. std::vector<Object *> objects;
+    //  or std::vector<std::shared_ptr<Object>> objects;
     std::vector<Object4D> objects4d;
-//    std::vector<Object *> objects;
+    std::vector<Object3D> objects3d;
 };
 
 

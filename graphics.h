@@ -1,7 +1,9 @@
 #ifndef graphics_h
 #define graphics_h
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <winuser.h>
+#include "winuser.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -14,11 +16,43 @@
 #include <GL/glut.h>
 #endif
 
-/** Default Final Variables */
+
+/** Const Variables */
 const int DEFAULT_WINDOW_WIDTH = 1200;
-const int DEFAULT_WINDOW_HEIGHT = 800;
+
+const int DEFAULT_WINDOW_HEIGHT = 675;
 const double DEFAULT_RENDER_COLOR_RGB[3] = {0.0, 0.0, 0.0};
 const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {0.0, 0.0, 0.0};
+
+/// Keybinds
+/* Movement */
+const char UP_KEY = VK_SPACE;       // Space
+const char DOWN_KEY = VK_SHIFT;     // Shift
+const char RIGHT_KEY = 0x44;        // D
+const char LEFT_KEY = 0x41;         // A
+const char FORWARD_KEY = 0x57;      // W
+const char BACK_KEY = 0x53;         // S
+const char OUT_KEY = 0x51;          // Q
+const char IN_KEY = 0x45;           // E
+
+/* Rotation */
+const char ROT_RIGHT_KEY = 'l';     // L
+const char ROT_LEFT_KEY = 'j';      // J
+const char ROT_UP_KEY = 'i';        // I
+const char ROT_DOWN_KEY = 'k';      // K
+const char ROT_OUT_KEY = 'o';       // O
+const char ROT_IN_KEY = 'u';        // U
+
+//const char ROT_RIGHT_KEY = 0x4C;  // L
+//const char ROT_LEFT_KEY = 0x4A;   // J
+//const char ROT_UP_KEY = 0x49;     // I
+//const char ROT_DOWN_KEY = 0x4B;   // K
+//const char ROT_OUT_KEY = 0x4F;    // O
+//const char ROT_IN_KEY = 0x55;     // U
+
+/* Other */
+const char TOGGLE_ACTIVE_CAMERA_KEY = 0x54;     // T
+const char TOGGLE_MOVEMENT_MODE = VK_CONTROL;   // Control
 
 
 // Program initialization NOT OpenGL/GLUT dependent,
