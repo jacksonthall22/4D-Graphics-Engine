@@ -30,20 +30,6 @@ public:
     // Angle in degrees the camera rotates by default
     static const double DEFAULT_ROTATION_ANGLE;
 
-    // Values used to maintain camera velocity
-    static const double FB_ACCEL;     // blocks/second^2
-    static const double RL_ACCEL;
-    static const double UD_ACCEL;
-    static const double FB_DRAG;      // blocks/second^2
-    static const double RL_DRAG;
-    static const double UD_DRAG;
-    static const double FB_BRAKE;     // blocks/second^2
-    static const double RL_BRAKE;
-    static const double UD_BREAK;
-    static const double FB_MAX_SPEED; // blocks/second
-    static const double RL_MAX_SPEED;
-    static const double UD_MAX_SPEED;
-
     /** ---------- Constructors ---------- */
     explicit Camera(double focalDistance, MovementMode movementMode);
 

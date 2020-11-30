@@ -14,6 +14,20 @@ public:
     static const double DEFAULT_FOV_DEGREES;
     static const double DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS;
 
+    // Values used to maintain camera velocity
+    static const double FB_ACCEL;     // blocks/second^2
+    static const double RL_ACCEL;
+    static const double UD_ACCEL;
+    static const double FB_DRAG;      // blocks/second^2
+    static const double RL_DRAG;
+    static const double UD_DRAG;
+    static const double FB_BRAKE;     // blocks/second^2
+    static const double RL_BRAKE;
+    static const double UD_BRAKE;
+    static const double FB_MAX_SPEED; // blocks/second
+    static const double RL_MAX_SPEED;
+    static const double UD_MAX_SPEED;
+
     /** Constructors */
     Camera3D();
     Camera3D(const Camera3D& other); // Implicitly deleted copy constructor

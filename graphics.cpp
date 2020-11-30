@@ -495,6 +495,7 @@ void timer(int dummy){
                 if (debug)
                     std::cout << "test: forwardPressed and backPressed"
                             << std::endl;
+
                 scene.getCamera3D().brakeFB();
             } else if (forwardPressed){
                 if (debug)

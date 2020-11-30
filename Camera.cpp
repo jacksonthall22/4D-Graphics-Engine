@@ -10,24 +10,6 @@
 const double Camera::DEFAULT_MOVE_DISTANCE = 0.25;
 const double Camera::DEFAULT_ROTATION_ANGLE = 2;
 
-// Credit to:
-// https://gaming.stackexchange.com/questions/327830/what-is-the-player-
-// acceleration-in-minecraft-when-flying
-// and
-// https://github.com/ddevault/TrueCraft/wiki/Entity-Movement-And-Physics
-const double Camera::FB_ACCEL = 5; // blocks/second^2
-const double Camera::RL_ACCEL = 4;
-const double Camera::UD_ACCEL = 10;
-const double Camera::FB_DRAG = 3; // blocks/second^2
-const double Camera::RL_DRAG = 3;
-const double Camera::UD_DRAG = 5;
-const double Camera::FB_BRAKE = 10; // blocks/second^2
-const double Camera::RL_BRAKE = 10;
-const double Camera::UD_BREAK = 10;
-const double Camera::FB_MAX_SPEED = 3; // blocks/second
-const double Camera::RL_MAX_SPEED = 3;
-const double Camera::UD_MAX_SPEED = 1;
-
 /** ---------- Constructors ---------- */
 Camera::Camera(double focalDistance, MovementMode movementMode) :
         focalDistance(focalDistance), movementMode(movementMode){

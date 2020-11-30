@@ -10,6 +10,24 @@
 const double Camera3D::DEFAULT_FOV_DEGREES = 160;
 const double Camera3D::DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS = 10;
 
+// Credit to:
+// https://gaming.stackexchange.com/questions/327830/what-is-the-player-
+// acceleration-in-minecraft-when-flying
+// and
+// https://github.com/ddevault/TrueCraft/wiki/Entity-Movement-And-Physics
+const double Camera3D::FB_ACCEL = 7; // blocks/second^2
+const double Camera3D::RL_ACCEL = 6;
+const double Camera3D::UD_ACCEL = 10;
+const double Camera3D::FB_DRAG = 3; // blocks/second^2
+const double Camera3D::RL_DRAG = 3;
+const double Camera3D::UD_DRAG = 5;
+const double Camera3D::FB_BRAKE = 5; // blocks/second^2
+const double Camera3D::RL_BRAKE = 5;
+const double Camera3D::UD_BRAKE = 10;
+const double Camera3D::FB_MAX_SPEED = 3; // blocks/second
+const double Camera3D::RL_MAX_SPEED = 3;
+const double Camera3D::UD_MAX_SPEED = 1;
+
 /** ---------- Constructors ---------- */
 Camera3D::Camera3D() : Camera3D(
         point3d(),
@@ -593,6 +611,11 @@ void Camera3D::brakeFB(){
                                         * Scene::SECONDS_PER_TICK,
                 0.
         );
+
+        if (velocityVec.components[0] == 0){
+            // Reset acceleration when velocity gets to 0
+            setAcceleratingFB(0);
+        }
     } else if (velocityVec.components[0] < 0){
         // Break up to 0
         velocityVec.components[0] = std::min(
@@ -600,6 +623,11 @@ void Camera3D::brakeFB(){
                                         * Scene::SECONDS_PER_TICK,
                 0.
         );
+
+        if (velocityVec.components[0] == 0){
+            // Reset acceleration when velocity gets to 0
+            setAcceleratingFB(0);
+        }
     } else {
         std::cout << "Warning: Breaking called when velocityVec.components[0]"
                      " == 0 in:"
@@ -611,17 +639,27 @@ void Camera3D::brakeRL(){
     if (velocityVec.components[1] > 0){
         // Break down to 0
         velocityVec.components[1] = std::max(
-            velocityVec.components[1] - FB_BRAKE
+            velocityVec.components[1] - RL_BRAKE
                                         * Scene::SECONDS_PER_TICK,
                 0.
         );
+
+        if (velocityVec.components[1] == 0){
+            // Reset acceleration when velocity gets to 0
+            setAcceleratingRL(0);
+        }
     } else if (velocityVec.components[1] < 0){
         // Break up to 0
         velocityVec.components[1] = std::min(
-            velocityVec.components[1] + FB_BRAKE
+            velocityVec.components[1] + RL_BRAKE
                                         * Scene::SECONDS_PER_TICK,
                 0.
         );
+
+        if (velocityVec.components[1] == 0){
+            // Reset acceleration when velocity gets to 0
+            setAcceleratingRL(0);
+        }
     } else {
         std::cout << "Warning: Breaking called when velocityVec.components[1]"
                      " == 0 in:"
@@ -633,17 +671,27 @@ void Camera3D::brakeUD(){
     if (velocityVec.components[2] > 0){
         // Break down to 0
         velocityVec.components[2] = std::max(
-            velocityVec.components[2] - FB_BRAKE
+            velocityVec.components[2] - UD_BRAKE
                                         * Scene::SECONDS_PER_TICK,
                 0.
         );
+
+        if (velocityVec.components[2] == 0){
+            // Reset acceleration when velocity gets to 0
+            setAcceleratingUD(0);
+        }
     } else if (velocityVec.components[2] < 0){
         // Break up to 0
         velocityVec.components[2] = std::min(
-            velocityVec.components[2] + FB_BRAKE
+            velocityVec.components[2] + UD_BRAKE
                                         * Scene::SECONDS_PER_TICK,
                 0.
         );
+
+        if (velocityVec.components[2] == 0){
+            // Reset acceleration when velocity gets to 0
+            setAcceleratingUD(0);
+        }
     } else {
         std::cout << "Warning: Breaking called when velocityVec.components[2]"
                      " == 0 in:"
