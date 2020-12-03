@@ -49,11 +49,11 @@ Camera::CameraType Scene::getActiveCamera() const {
     return activeCamera;
 }
 
-std::vector<Object3D> const& Scene::getObjects3d() const {
+const std::vector<Object3D>& Scene::getObjects3d() const {
     return objects3d;
 }
 
-std::vector<Object4D> const& Scene::getObjects4d() const {
+const std::vector<Object4D>& Scene::getObjects4d() const {
     return objects4d;
 }
 

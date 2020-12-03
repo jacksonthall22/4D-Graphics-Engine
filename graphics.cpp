@@ -462,27 +462,27 @@ void timer(int dummy){
             if (rightPressed and leftPressed){
                 ;
             } else if (rightPressed){
-                scene.getCamera3D().moveRelativeFixedR();
+                scene.getCamera3D().moveRelativeDefaultR();
             } else if (leftPressed){
-                scene.getCamera3D().moveRelativeFixedL();
+                scene.getCamera3D().moveRelativeDefaultL();
             }
 
             // Up/down
             if (upPressed and downPressed){
                 ;
             } else if (upPressed){
-                scene.getCamera3D().moveRelativeFixedU();
+                scene.getCamera3D().moveRelativeDefaultU();
             } else if (downPressed){
-                scene.getCamera3D().moveRelativeFixedD();
+                scene.getCamera3D().moveRelativeDefaultD();
             }
 
             // Forward/back
             if (forwardPressed and backPressed){
                 ;
             } else if (forwardPressed){
-                scene.getCamera3D().moveRelativeFixedF();
+                scene.getCamera3D().moveRelativeDefaultF();
             } else if (backPressed){
-                scene.getCamera3D().moveRelativeFixedB();
+                scene.getCamera3D().moveRelativeDefaultB();
             }
 
         } else if (scene.getCamera3D().getMovementMode()
@@ -496,21 +496,21 @@ void timer(int dummy){
                     std::cout << "test: forwardPressed and backPressed"
                             << std::endl;
 
-                scene.getCamera3D().brakeFB();
+                scene.getCamera3D().applyBrakeFB();
             } else if (forwardPressed){
                 if (debug)
                     std::cout << "test: forwardPressed" << std::endl;
 
                 if (scene.getCamera3D().getAcceleratingFB() == 0){
-                    scene.getCamera3D().setAcceleratingF();
+                    scene.getCamera3D().setAccelerationDefaultF();
                 }
             } else if (backPressed){
                 if (debug)
                     std::cout << "test: backPressed" << std::endl;
 
-                scene.getCamera3D().setAcceleratingB();
+                scene.getCamera3D().setAccelerationDefaultB();
             } else {
-                scene.getCamera3D().setAcceleratingFB(0);
+                scene.getCamera3D().setAccelerationFB(0);
             }
 
             // Right/left
@@ -519,19 +519,19 @@ void timer(int dummy){
                     std::cout << "test: rightPressed and leftPressed"
                             << std::endl;
 
-                scene.getCamera3D().brakeRL();
+                scene.getCamera3D().applyBrakeRL();
             } else if (rightPressed){
                 if (debug)
                     std::cout << "test: rightPressed" << std::endl;
 
-                scene.getCamera3D().setAcceleratingR();
+                scene.getCamera3D().setAccelerationDefaultR();
             } else if (leftPressed){
                 if (debug)
                     std::cout << "test: leftPressed" << std::endl;
 
-                scene.getCamera3D().setAcceleratingL();
+                scene.getCamera3D().setAccelerationDefaultL();
             } else {
-                scene.getCamera3D().setAcceleratingRL(0);
+                scene.getCamera3D().setAccelerationRL(0);
             }
 
             // Up/down
@@ -539,19 +539,19 @@ void timer(int dummy){
                 if (debug)
                     std::cout << "test: upPressed and downPressed" << std::endl;
 
-                scene.getCamera3D().brakeUD();
+                scene.getCamera3D().applyBrakeUD();
             } else if (upPressed){
                 if (debug)
                     std::cout << "test: upPressed" << std::endl;
 
-                scene.getCamera3D().setAcceleratingU();
+                scene.getCamera3D().setAccelerationDefaultU();
             } else if (downPressed){
                 if (debug)
                     std::cout << "test: downPressed" << std::endl;
 
-                scene.getCamera3D().setAcceleratingD();
+                scene.getCamera3D().setAccelerationDefaultD();
             } else {
-                scene.getCamera3D().setAcceleratingUD(0);
+                scene.getCamera3D().setAccelerationUD(0);
             }
 
             scene.getCamera3D().moveFly();

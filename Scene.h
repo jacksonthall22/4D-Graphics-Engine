@@ -36,8 +36,8 @@ public:
     Camera::CameraType getActiveCamera() const;
     Camera3D& getCamera3D();
     Camera4D& getCamera4D();
-    std::vector<Object3D> const& getObjects3d() const;
-    std::vector<Object4D> const& getObjects4d() const;
+    const std::vector<Object3D>& getObjects3d() const;
+    const std::vector<Object4D>& getObjects4d() const;
 
     /** Other Methods */
     void addObject(const Object3D& obj);
