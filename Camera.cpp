@@ -8,7 +8,7 @@
 
 /** ---------- Static Const Vars ---------- */
 const double Camera::DEFAULT_MOVE_DISTANCE = 0.25;
-const double Camera::DEFAULT_ROTATION_ANGLE = 2;
+const double Camera::DEFAULT_ROTATION_ANGLE = 2.5;
 
 /** ---------- Constructors ---------- */
 Camera::Camera(double focalDistance, MovementMode movementMode) :

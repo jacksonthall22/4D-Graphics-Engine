@@ -303,9 +303,7 @@ void timer(int dummy){
             rotUpPressed,
             rotDownPressed,
             rotOutPressed,
-            rotInPressed,
-            toggleActiveCameraPressed,
-            toggleMovementModePressed;
+            rotInPressed;
 
     /* Movement */
     upPressed = GetAsyncKeyState(UP_KEY);
@@ -324,10 +322,6 @@ void timer(int dummy){
     rotDownPressed = GetAsyncKeyState(ROT_DOWN_KEY);
     rotOutPressed = GetAsyncKeyState(ROT_OUT_KEY);
     rotInPressed = GetAsyncKeyState(ROT_IN_KEY);
-
-    /* Other */
-    toggleActiveCameraPressed = GetAsyncKeyState(TOGGLE_ACTIVE_CAMERA_KEY);
-    toggleMovementModePressed = GetAsyncKeyState(TOGGLE_MOVEMENT_MODE);
 
     /** Movement & Rotation **/
     if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
@@ -488,7 +482,7 @@ void timer(int dummy){
             } else if (leftPressed){
                 scene.getCamera4D().setAccelerationDefaultL();
             } else {
-                scene.getCamera3D().setAccelerationRL(0);
+                scene.getCamera4D().setAccelerationRL(0);
             }
 
             // Up/down
@@ -500,6 +494,17 @@ void timer(int dummy){
                 scene.getCamera4D().setAccelerationDefaultD();
             } else {
                 scene.getCamera4D().setAccelerationUD(0);
+            }
+
+            // Up/down
+            if (outPressed and inPressed){
+                scene.getCamera4D().applyBrakeOI();
+            } else if (outPressed){
+                scene.getCamera4D().setAccelerationDefaultO();
+            } else if (inPressed){
+                scene.getCamera4D().setAccelerationDefaultI();
+            } else {
+                scene.getCamera4D().setAccelerationOI(0);
             }
 
             scene.getCamera4D().moveFly();

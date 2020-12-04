@@ -15,17 +15,17 @@ const double Camera3D::DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS = 10;
 // acceleration-in-minecraft-when-flying
 // and
 // https://github.com/ddevault/TrueCraft/wiki/Entity-Movement-And-Physics
-const double Camera3D::FB_ACCEL = 7;     // blocks/second^2
-const double Camera3D::RL_ACCEL = 6;
+const double Camera3D::FB_ACCEL = 8;     // blocks/second^2
+const double Camera3D::RL_ACCEL = 3;
 const double Camera3D::UD_ACCEL = 10;
-const double Camera3D::FB_DRAG = 3;      // blocks/second^2
-const double Camera3D::RL_DRAG = 3;
-const double Camera3D::UD_DRAG = 5;
-const double Camera3D::FB_BRAKE = 5;     // blocks/second^2
-const double Camera3D::RL_BRAKE = 5;
+const double Camera3D::FB_DRAG = 6;      // blocks/second^2
+const double Camera3D::RL_DRAG = 4;
+const double Camera3D::UD_DRAG = 6;
+const double Camera3D::FB_BRAKE = 8;     // blocks/second^2
+const double Camera3D::RL_BRAKE = 6;
 const double Camera3D::UD_BRAKE = 10;
 const double Camera3D::FB_MAX_SPEED = 3; // blocks/second
-const double Camera3D::RL_MAX_SPEED = 3;
+const double Camera3D::RL_MAX_SPEED = 2;
 const double Camera3D::UD_MAX_SPEED = 1;
 
 /** ---------- Constructors ---------- **/
@@ -570,9 +570,6 @@ void Camera3D::updateVelocities(){
     updateVelUD();
 }
 void Camera3D::updateVelFB() {
-    // Always apply drag regardless of whether camera is accelerating
-    applyDragFB();
-
     if (acceleratingFB != 0){
         if (getVelocityFB()/acceleratingFB >= 0){
             // Current velocity is 0, or trying to accelerate in same
@@ -596,12 +593,12 @@ void Camera3D::updateVelFB() {
             // Accelerating against current velocity - apply brake instead
             applyBrakeFB();
         }
+    } else {
+        // Apply drag only if camera is not accelerating
+        applyDragFB();
     }
 }
 void Camera3D::updateVelRL() {
-    // Always apply drag regardless of whether camera is accelerating
-    applyDragRL();
-
     if (acceleratingRL != 0){
         if (getVelocityRL()/acceleratingRL >= 0){
             // Current velocity is 0, or trying to accelerate in same
@@ -625,12 +622,12 @@ void Camera3D::updateVelRL() {
             // Accelerating against current velocity - apply brake instead
             applyBrakeRL();
         }
+    } else {
+        // Apply drag only if camera is not accelerating
+        applyDragRL();
     }
 }
 void Camera3D::updateVelUD() {
-    // Always apply drag regardless of whether camera is accelerating
-    applyDragUD();
-
     if (acceleratingUD != 0){
         if (getVelocityUD()/acceleratingUD >= 0){
             // Current velocity is 0, or trying to accelerate in same
@@ -654,6 +651,9 @@ void Camera3D::updateVelUD() {
             // Accelerating against current velocity - apply brake instead
             applyBrakeUD();
         }
+    } else {
+        // Apply drag only if camera is not accelerating
+        applyDragUD();
     }
 }
 

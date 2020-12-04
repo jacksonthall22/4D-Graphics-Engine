@@ -18,9 +18,9 @@
 
 
 /** Const Variables */
-const int DEFAULT_WINDOW_WIDTH = 1200;
+const int DEFAULT_WINDOW_WIDTH = 1400;
 
-const int DEFAULT_WINDOW_HEIGHT = 675;
+const int DEFAULT_WINDOW_HEIGHT = 700;
 const double DEFAULT_RENDER_COLOR_RGB[3] = {0.0, 0.0, 0.0};
 const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {0.0, 0.0, 0.0};
 

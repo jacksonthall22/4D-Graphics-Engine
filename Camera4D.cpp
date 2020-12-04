@@ -693,9 +693,6 @@ void Camera4D::updateVelocities(){
     updateVelOI();
 }
 void Camera4D::updateVelFB() {
-    // Always apply drag regardless of whether camera is accelerating
-    applyDragFB();
-
     if (acceleratingFB != 0){
         if (getVelocityFB()/acceleratingFB >= 0){
             // Current velocity is 0, or trying to accelerate in same
@@ -719,12 +716,12 @@ void Camera4D::updateVelFB() {
             // Accelerating against current velocity - apply brake instead
             applyBrakeFB();
         }
+    } else {
+        // Apply drag only if camera is not accelerating
+        applyDragFB();
     }
 }
 void Camera4D::updateVelRL() {
-    // Always apply drag regardless of whether camera is accelerating
-    applyDragRL();
-
     if (acceleratingRL != 0){
         if (getVelocityRL()/acceleratingRL >= 0){
             // Current velocity is 0, or trying to accelerate in same
@@ -748,12 +745,12 @@ void Camera4D::updateVelRL() {
             // Accelerating against current velocity - apply brake instead
             applyBrakeRL();
         }
+    } else {
+        // Apply drag only if camera is not accelerating
+        applyDragRL();
     }
 }
 void Camera4D::updateVelUD() {
-    // Always apply drag regardless of whether camera is accelerating
-    applyDragUD();
-
     if (acceleratingUD != 0){
         if (getVelocityUD()/acceleratingUD >= 0){
             // Current velocity is 0, or trying to accelerate in same
@@ -777,12 +774,12 @@ void Camera4D::updateVelUD() {
             // Accelerating against current velocity - apply brake instead
             applyBrakeUD();
         }
+    } else {
+        // Apply drag only if camera is not accelerating
+        applyDragUD();
     }
 }
 void Camera4D::updateVelOI() {
-    // Always apply drag regardless of whether camera is accelerating
-    applyDragOI();
-
     if (acceleratingOI != 0){
         if (getVelocityOI()/acceleratingOI >= 0){
             // Current velocity is 0, or trying to accelerate in same
@@ -806,6 +803,9 @@ void Camera4D::updateVelOI() {
             // Accelerating against current velocity - apply brake instead
             applyBrakeOI();
         }
+    } else {
+        // Apply drag only if camera is not accelerating
+        applyDragOI();
     }
 }
 
