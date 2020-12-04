@@ -10,7 +10,7 @@
 
 class Camera3D : public Camera {
 public:
-    /** Static Const Vars **/
+    /** ---------- Static Const Vars ---------- **/
     static const double DEFAULT_FOV_DEGREES;
     static const double DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS;
 
@@ -86,20 +86,19 @@ public:
     void setAzimuth(double azimuthAngle);
     void setFocus() override;
 
-    /** ---------- Utility ---------- **/
+    /** ---------- Utility / Other ---------- **/
     optional<point2d> projectPoint(const point3d& p) const;
 
     /** ---------- Movement ---------- **/
-
     /** Main API Calls **/
     // Use appropriate movement methods (moveFly or moveFixed) to move
     // `location`, depending on movementMode
+    void moveF();
+    void moveB();
     void moveR();
     void moveL();
     void moveU();
     void moveD();
-    void moveF();
-    void moveB();
 
     /** Utility **/
     bool isMoving() const;
@@ -115,8 +114,8 @@ public:
 
     /** Relative Movement **/
     // Move by amounts relative to orientation of camera
-    void moveRelative(const std::vector<double>& dPosition)/* override*/;
-    void moveRelative(const spatialVector& dPosition)/* override*/;
+    void moveRelative(const std::vector<double>& dPosition) override;
+    void moveRelative(const spatialVector& dPosition) override;
     void moveRelative(double dF, double dR, double dU);
     void moveRelativeFB(double dF); // dF > 0 = forward, dF < 0 = backward
     void moveRelativeRL(double dR); // etc.
@@ -125,8 +124,8 @@ public:
     void moveRelativeB(double dB);  // Move opposite polar angel (x/y plane only)
     void moveRelativeR(double dR);  // Move toward getUnitRightVector()
     void moveRelativeL(double dL);  // Move opposite getUnitRightVector()
-    void moveRelativeU(double dU);  // Equivalent to moveAbsolute(dU)
-    void moveRelativeD(double dD);  // Equivalent to moveAbsolute(dU)
+    void moveRelativeU(double dU);  // Equivalent to moveAbsoluteY(dU)
+    void moveRelativeD(double dD);  // Equivalent to moveAbsoluteY(-dD)
 
     // Move by Camera.DEFAULT_MOVE_DISTANCE relative to orientation of camera
     void moveRelativeDefaultF(); // Same as moveRelativeF(DEFAULT_MOVE_DISTANCE)
@@ -194,8 +193,8 @@ protected:
     // Used to calculate focal distance given an FOV angle.
     double projectionPlaneWidthBlocks;
 
-    // Location of the camera, the point on which the projection plane
-    // always remains centered
+    // Location of the camera, the point around which the projection plane is
+    // always centered
     point3d location;
 
     // Holds 1, -1, or 0 denoting positive, negative, or no movement
@@ -211,13 +210,13 @@ protected:
     // a negative `right` value = moving left by that velocity.
     spatialVector velocityFRU;
 
-    // Direction the camera is facing. Used to determine 2d plane/3d
-    // hyperplane of the camera onto which 3d/4d points get projected
+    // Direction the camera is facing. Used to determine 2d plane of the
+    // camera onto which 3d points get projected
     spatialVector normal;
 
     // A point P in the Scene is projected onto the plane of the
-    // Scene's camera by finding the intersection point of the line between
-    // P and the Camera's focus and the Camera's plane
+    // Scene's camera by finding the intersection point of [the line between
+    // P and the Camera's focus] and the Camera's plane
     // Note: this means the focus is "behind" the direction the Camera sees
     point3d focus;
 

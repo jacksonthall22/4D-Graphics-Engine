@@ -64,14 +64,14 @@ public:
      * directions relative to camera orientation. Ex. if 'forward'
      * value negative, move backward, etc.
      */
-//    virtual void moveRelative(std::vector<double>& dPosition) = 0;
+    virtual void moveRelative(const std::vector<double>& dPosition) = 0;
     /**
      * Take a spatialVector <forward, right, up> and move in given directions
      * relative to camera orientation. Ex. if 'forward' value negative, move
      * backward, etc.
      * @param dPosition
      */
-//    virtual void moveRelative(const spatialVector& dPosition) = 0;
+    virtual void moveRelative(const spatialVector& dPosition) = 0;
 
     /* Rotation */
     virtual void rotate(std::vector<double> dAngles) = 0;

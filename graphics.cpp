@@ -21,7 +21,7 @@ Scene scene;
 void init(){
     windowWidth = DEFAULT_WINDOW_WIDTH;
     windowHeight = DEFAULT_WINDOW_HEIGHT;
-    /** Create Axes */
+    /** Create Axes **/
     /// X Axis
     vector<point3d> xAxisPoints({
         point3d(0, 0, 0),
@@ -144,7 +144,6 @@ void init(){
 
     /// Create 3d Cube
     double CUBE_SIZE = 1;
-
     vector<point3d> cube3dPoints({
         point3d(1 * CUBE_SIZE, 1 * CUBE_SIZE, 1 * CUBE_SIZE),
         point3d(1 * CUBE_SIZE, 1 * CUBE_SIZE, -1 * CUBE_SIZE),
@@ -243,8 +242,7 @@ void display(){
     // system set to center, limited by screen/window size
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-//    glOrtho(-ORTHO_ZOOM/width/2, ORTHO_ZOOM/width/2, -ORTHO_ZOOM/height/2,
-//        ORTHO_ZOOM/height/2, 1.f, -1.f);
+
     glOrtho(-windowWidth/2.0, windowWidth/2.0,
         -windowHeight/2.0, windowHeight/2.0,
         1.f, -1.f);
@@ -260,121 +258,13 @@ void display(){
     glFlush();
 }
 
-
-//void kbd(unsigned char key, int x, int y){
-//    glutGetModifiers();
-//
-//    keyStates[key] = key;
-//
-//}
-
-// http://www.theasciicode.com.ar/ascii-control-characters/escape-ascii-code-27.html
 void kbd(unsigned char key, int x, int y){
-    // Get state of shift/ctrl/alt etc.
-//    int modifiers = glutGetModifiers();
-//    if (modifiers == GLUT_ACTIVE_SHIFT){
-//        std::cout << "Shift pressed!" << std::endl;
-//    }
-
+    // Handle all non-movement keys (rotation (for now), toggling camera, etc.)
     switch(tolower(key)){
         case 27:
-            // escape
+            // Escape
             glutDestroyWindow(window);
             exit(0);
-        case ROT_UP_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().rotateUp();
-            } else {
-                scene.getCamera4D().rotateUp();
-            }
-            break;
-        case ROT_DOWN_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().rotateDown();
-            } else {
-                scene.getCamera4D().rotateDown();
-            }
-            break;
-        case ROT_RIGHT_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().rotateRight();
-            } else {
-                scene.getCamera4D().rotateRight();
-            }
-            break;
-        case ROT_LEFT_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().rotateLeft();
-            } else {
-                scene.getCamera4D().rotateLeft();
-            }
-            break;
-        case ROT_OUT_KEY:
-            // Only can rotate out if 4d camera is selected
-            if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
-                scene.getCamera4D().rotateOut();
-            }
-            break;
-        case ROT_IN_KEY:
-            // Only can rotate in if 4d camera is selected
-            if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
-                scene.getCamera4D().rotateIn();
-            }
-            break;
-        case UP_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().moveU();
-            } else {
-                scene.getCamera4D().up();
-            }
-            break;
-        case DOWN_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().moveD();
-            } else {
-                scene.getCamera4D().down();
-            }
-            break;
-        case RIGHT_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().moveR();
-            } else {
-                scene.getCamera4D().right();
-            }
-            break;
-        case LEFT_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().moveL();
-            } else {
-                scene.getCamera4D().left();
-            }
-            break;
-        case FORWARD_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().moveF();
-            } else {
-                scene.getCamera4D().forward();
-            }
-            break;
-        case BACK_KEY:
-            if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-                scene.getCamera3D().moveB();
-            } else {
-                scene.getCamera4D().back();
-            }
-            break;
-        case OUT_KEY:
-            // Only can move outward if 4d camera is selected
-            if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
-                scene.getCamera4D().out();
-            }
-            break;
-        case IN_KEY:
-            // Only can move outward if 4d camera is selected
-            if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
-                scene.getCamera4D().in();
-            }
-            break;
         case TOGGLE_ACTIVE_CAMERA_KEY:
             scene.toggleActiveCamera();
             break;
@@ -384,49 +274,39 @@ void kbd(unsigned char key, int x, int y){
 }
 
 void kbdS(int key, int x, int y){
-    switch(key){
-        case 27:
-            // escape
-            glutDestroyWindow(window);
-            exit(0);
-    }
-
-    glutPostRedisplay();
+//    glutPostRedisplay();
 }
 
 void cursor(int x, int y){
-    glutPostRedisplay();
+//    glutPostRedisplay();
 }
 
 // button will be GLUT_LEFT_BUTTON or GLUT_RIGHT_BUTTON
 // state will be GLUT_UP or GLUT_DOWN
 void mouse(int button, int state, int x, int y){
-    glutPostRedisplay();
+//    glutPostRedisplay();
 }
 
 bool debug = false;
 void timer(int dummy){
     /// Get states of all keybinds
     int upPressed,
-                 downPressed,
-                 rightPressed,
-                 leftPressed,
-                 forwardPressed,
-                 backPressed,
-                 outPressed,
-                 inPressed,
-                 rotRightPressed,
-                 rotLeftPressed,
-                 rotUpPressed,
-                 rotDownPressed,
-                 rotOutPressed,
-                 rotInPressed,
-                 toggleActiveCameraPressed,
-                 toggleMovementModePressed;
-    // TODO Make variables store whether there was a change in keystate
-    // TODO Change variables to bools indicating whether SHORT return val has
-    //  most significant bit set - see:
-    //  https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getasynckeystate
+            downPressed,
+            rightPressed,
+            leftPressed,
+            forwardPressed,
+            backPressed,
+            outPressed,
+            inPressed,
+            rotRightPressed,
+            rotLeftPressed,
+            rotUpPressed,
+            rotDownPressed,
+            rotOutPressed,
+            rotInPressed,
+            toggleActiveCameraPressed,
+            toggleMovementModePressed;
+
     /* Movement */
     upPressed = GetAsyncKeyState(UP_KEY);
     downPressed = GetAsyncKeyState(DOWN_KEY);
@@ -449,11 +329,9 @@ void timer(int dummy){
     toggleActiveCameraPressed = GetAsyncKeyState(TOGGLE_ACTIVE_CAMERA_KEY);
     toggleMovementModePressed = GetAsyncKeyState(TOGGLE_MOVEMENT_MODE);
 
-    /** Handle key presses */
-
-    /// Movement
+    /** Movement & Rotation **/
     if (scene.getActiveCamera() == Camera::CameraType::Camera3D){
-        // Move scene.camera3d
+        /** Movement **/
         if (scene.getCamera3D().getMovementMode()
                 == Camera::MovementMode::Fixed){
             /// Move 3d in fixed mode
@@ -491,23 +369,10 @@ void timer(int dummy){
 
             // Forward/back
             if (forwardPressed and backPressed){
-                // Slow movement in f/b direction
-                if (debug)
-                    std::cout << "test: forwardPressed and backPressed"
-                            << std::endl;
-
                 scene.getCamera3D().applyBrakeFB();
             } else if (forwardPressed){
-                if (debug)
-                    std::cout << "test: forwardPressed" << std::endl;
-
-                if (scene.getCamera3D().getAcceleratingFB() == 0){
-                    scene.getCamera3D().setAccelerationDefaultF();
-                }
+                scene.getCamera3D().setAccelerationDefaultF();
             } else if (backPressed){
-                if (debug)
-                    std::cout << "test: backPressed" << std::endl;
-
                 scene.getCamera3D().setAccelerationDefaultB();
             } else {
                 scene.getCamera3D().setAccelerationFB(0);
@@ -515,20 +380,10 @@ void timer(int dummy){
 
             // Right/left
             if (rightPressed and leftPressed){
-                if (debug)
-                    std::cout << "test: rightPressed and leftPressed"
-                            << std::endl;
-
                 scene.getCamera3D().applyBrakeRL();
             } else if (rightPressed){
-                if (debug)
-                    std::cout << "test: rightPressed" << std::endl;
-
                 scene.getCamera3D().setAccelerationDefaultR();
             } else if (leftPressed){
-                if (debug)
-                    std::cout << "test: leftPressed" << std::endl;
-
                 scene.getCamera3D().setAccelerationDefaultL();
             } else {
                 scene.getCamera3D().setAccelerationRL(0);
@@ -536,19 +391,10 @@ void timer(int dummy){
 
             // Up/down
             if (upPressed and downPressed){
-                if (debug)
-                    std::cout << "test: upPressed and downPressed" << std::endl;
-
                 scene.getCamera3D().applyBrakeUD();
             } else if (upPressed){
-                if (debug)
-                    std::cout << "test: upPressed" << std::endl;
-
                 scene.getCamera3D().setAccelerationDefaultU();
             } else if (downPressed){
-                if (debug)
-                    std::cout << "test: downPressed" << std::endl;
-
                 scene.getCamera3D().setAccelerationDefaultD();
             } else {
                 scene.getCamera3D().setAccelerationUD(0);
@@ -557,13 +403,136 @@ void timer(int dummy){
             scene.getCamera3D().moveFly();
         }
 
-    } else if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
-        // Move scene.camera4d
-        std::cout << "TODO" << std::endl;
-    }
+        /** Rotation **/
+        // Right/left
+        if (rotRightPressed and rotLeftPressed){
+            ;
+        } else if (rotRightPressed){
+            scene.getCamera3D().rotateRight();
+        } else if (rotLeftPressed){
+            scene.getCamera3D().rotateLeft();
+        }
 
-    /// TODO Add rotation control here or in kbd()?
-    /// Rotation
+        // Up/down
+        if (rotUpPressed and rotDownPressed){
+            ;
+        } else if (rotUpPressed){
+            scene.getCamera3D().rotateUp();
+        } else if (rotDownPressed){
+            scene.getCamera3D().rotateDown();
+        }
+
+    } else if (scene.getActiveCamera() == Camera::CameraType::Camera4D){
+        /** Movement **/
+        // Move scene.camera4d
+        if (scene.getCamera4D().getMovementMode()
+                == Camera::MovementMode::Fixed){
+            /// Move 4d in fixed mode
+
+            // Forward/back
+            if (forwardPressed and backPressed){
+                ;
+            } else if (forwardPressed){
+                scene.getCamera4D().moveRelativeDefaultF();
+            } else if (backPressed){
+                scene.getCamera4D().moveRelativeDefaultB();
+            }
+
+            // Right/left
+            if (rightPressed and leftPressed){
+                ;
+            } else if (rightPressed){
+                scene.getCamera4D().moveRelativeDefaultR();
+            } else if (leftPressed){
+                scene.getCamera4D().moveRelativeDefaultL();
+            }
+
+            // Up/down
+            if (upPressed and downPressed){
+                ;
+            } else if (upPressed){
+                scene.getCamera4D().moveRelativeDefaultU();
+            } else if (downPressed){
+                scene.getCamera4D().moveRelativeDefaultD();
+            }
+
+            // Out/in
+            if (outPressed and inPressed){
+                ;
+            } else if (outPressed){
+                scene.getCamera4D().moveRelativeDefaultO();
+            } else if (inPressed){
+                scene.getCamera4D().moveRelativeDefaultI();
+            }
+
+        } else if (scene.getCamera4D().getMovementMode()
+                == Camera::MovementMode::Fly){
+            /// Move 4d in fly mode
+
+            // Forward/back
+            if (forwardPressed and backPressed){
+                scene.getCamera4D().applyBrakeFB();
+            } else if (forwardPressed){
+                scene.getCamera4D().setAccelerationDefaultF();
+            } else if (backPressed){
+                scene.getCamera4D().setAccelerationDefaultB();
+            } else {
+                scene.getCamera4D().setAccelerationFB(0);
+            }
+
+            // Right/left
+            if (rightPressed and leftPressed){
+                scene.getCamera4D().applyBrakeRL();
+            } else if (rightPressed){
+                scene.getCamera4D().setAccelerationDefaultR();
+            } else if (leftPressed){
+                scene.getCamera4D().setAccelerationDefaultL();
+            } else {
+                scene.getCamera3D().setAccelerationRL(0);
+            }
+
+            // Up/down
+            if (upPressed and downPressed){
+                scene.getCamera4D().applyBrakeUD();
+            } else if (upPressed){
+                scene.getCamera4D().setAccelerationDefaultU();
+            } else if (downPressed){
+                scene.getCamera4D().setAccelerationDefaultD();
+            } else {
+                scene.getCamera4D().setAccelerationUD(0);
+            }
+
+            scene.getCamera4D().moveFly();
+        }
+
+        /** Rotation **/
+        // Right/left
+        if (rotRightPressed and rotLeftPressed){
+            ;
+        } else if (rotRightPressed){
+            scene.getCamera4D().rotateRight();
+        } else if (rotLeftPressed){
+            scene.getCamera4D().rotateLeft();
+        }
+
+        // Up/down
+        if (rotUpPressed and rotDownPressed){
+            ;
+        } else if (rotUpPressed){
+            scene.getCamera4D().rotateUp();
+        } else if (rotDownPressed){
+            scene.getCamera4D().rotateDown();
+        }
+
+        // Out/in
+        if (rotOutPressed and rotInPressed){
+            ;
+        } else if (rotOutPressed){
+            scene.getCamera4D().rotateOut();
+        } else if (rotInPressed){
+            scene.getCamera4D().rotateIn();
+        }
+    }
 
     glutPostRedisplay();
     glutTimerFunc((int)(Scene::SECONDS_PER_TICK * 1000), timer, dummy);
@@ -610,7 +579,7 @@ int main(int argc, char** argv){
 //    scene.addObject(testCube);
 
 
-    /** GLUT Processes */
+    /** GLUT Processes **/
     init();
 
     // Initialize GLUT

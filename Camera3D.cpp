@@ -31,7 +31,7 @@ const double Camera3D::UD_MAX_SPEED = 1;
 /** ---------- Constructors ---------- **/
 Camera3D::Camera3D() : Camera3D(
         point3d(),
-        spatialVector(std::vector<double>({0, 1, 0})),
+        spatialVector({0, 1, 0}),
         sphericalAngle3d(0, 90),
         point3d(),
         Camera::getFocalDistanceFromFOV(Camera3D::DEFAULT_FOV_DEGREES,
@@ -324,6 +324,28 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
 
 /** ---------- Movement ---------- **/
 /** Main API Calls **/
+void Camera3D::moveF(){
+    if (movementMode == Camera::MovementMode::Fixed){
+        moveRelativeDefaultF();
+    } else if (movementMode == Camera::MovementMode::Fly){
+        setAccelerationDefaultF();
+    } else {
+        std::cout << "Warning: Invalid movementMode in:"
+                     "\n\tvoid Camera3D::moveF()"
+                     "\n\t(Camera3D.cpp)" << std::endl;
+    }
+}
+void Camera3D::moveB(){
+    if (movementMode == Camera::MovementMode::Fixed){
+        moveRelativeDefaultB();
+    } else if (movementMode == Camera::MovementMode::Fly){
+        setAccelerationDefaultB();
+    } else {
+        std::cout << "Warning: Invalid movementMode in:"
+                     "\n\tvoid Camera3D::moveB()"
+                     "\n\t(Camera3D.cpp)" << std::endl;
+    }
+}
 void Camera3D::moveR(){
     if (movementMode == Camera::MovementMode::Fixed){
         moveRelativeDefaultR();
@@ -365,28 +387,6 @@ void Camera3D::moveD(){
     } else {
         std::cout << "Warning: Invalid movementMode in:"
                      "\n\tvoid Camera3D::moveD()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
-    }
-}
-void Camera3D::moveF(){
-    if (movementMode == Camera::MovementMode::Fixed){
-        moveRelativeDefaultF();
-    } else if (movementMode == Camera::MovementMode::Fly){
-        setAccelerationDefaultF();
-    } else {
-        std::cout << "Warning: Invalid movementMode in:"
-                     "\n\tvoid Camera3D::moveF()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
-    }
-}
-void Camera3D::moveB(){
-    if (movementMode == Camera::MovementMode::Fixed){
-        moveRelativeDefaultB();
-    } else if (movementMode == Camera::MovementMode::Fly){
-        setAccelerationDefaultB();
-    } else {
-        std::cout << "Warning: Invalid movementMode in:"
-                     "\n\tvoid Camera3D::moveB()"
                      "\n\t(Camera3D.cpp)" << std::endl;
     }
 }
@@ -544,6 +544,12 @@ void Camera3D::setAccelerationUD(int acceleratingUD_){
                      "\n\t(Camera3D.cpp)" << std::endl;
     }
 }
+void Camera3D::setAccelerationDefaultF(){
+    setAccelerationFB(1);
+}
+void Camera3D::setAccelerationDefaultB(){
+    setAccelerationFB(-1);
+}
 void Camera3D::setAccelerationDefaultR(){
     setAccelerationRL(1);
 }
@@ -555,12 +561,6 @@ void Camera3D::setAccelerationDefaultU(){
 }
 void Camera3D::setAccelerationDefaultD(){
     setAccelerationUD(-1);
-}
-void Camera3D::setAccelerationDefaultF(){
-    setAccelerationFB(1);
-}
-void Camera3D::setAccelerationDefaultB(){
-    setAccelerationFB(-1);
 }
 
 void Camera3D::updateVelocities(){
