@@ -66,13 +66,25 @@ void Scene::addObject(const Object4D& obj){
 }
 
 void Scene::toggleActiveCamera(){
-    if (activeCamera == Camera::CameraType::Camera3D){
+    if (getActiveCamera() == Camera::CameraType::Camera3D){
         activeCamera = Camera::CameraType::Camera4D;
-    } else if (activeCamera == Camera::CameraType::Camera4D){
+    } else if (getActiveCamera() == Camera::CameraType::Camera4D){
         activeCamera = Camera::CameraType::Camera3D;
     } else {
         std::cout << "Warning: Invalid activeCamera in:"
                      "\n\tvoid Scene::toggleActiveCamera()"
+                     "\n\t(Scene.cpp)" << std::endl;
+    }
+}
+
+void Scene::toggleMovementMode() {
+    if (getActiveCamera() == Camera::CameraType::Camera3D){
+        camera3d.toggleMovementMode();
+    } else if (getActiveCamera() == Camera::CameraType::Camera4D){
+        camera4d.toggleMovementMode();
+    } else {
+        std::cout << "Warning: Invalid activeCamera in:"
+                     "\n\tvoid Scene::toggleMovementMode()"
                      "\n\t(Scene.cpp)" << std::endl;
     }
 }

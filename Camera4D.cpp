@@ -15,21 +15,21 @@ const double Camera4D::DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS = 10;
 // acceleration-in-minecraft-when-flying
 // and
 // https://github.com/ddevault/TrueCraft/wiki/Entity-Movement-And-Physics
-const double Camera4D::FB_ACCEL = 6;     // blocks/second^2
-const double Camera4D::RL_ACCEL = 6;
-const double Camera4D::UD_ACCEL = 6;
+const double Camera4D::FB_ACCEL = 8;     // blocks/second^2
+const double Camera4D::RL_ACCEL = 5;
+const double Camera4D::UD_ACCEL = 10;
 const double Camera4D::OI_ACCEL = 10;
-const double Camera4D::FB_DRAG = 3;      // blocks/second^2
-const double Camera4D::RL_DRAG = 3;
-const double Camera4D::UD_DRAG = 3;
+const double Camera4D::FB_DRAG = 5;      // blocks/second^2
+const double Camera4D::RL_DRAG = 5;
+const double Camera4D::UD_DRAG = 5;
 const double Camera4D::OI_DRAG = 5;
-const double Camera4D::FB_BRAKE = 5;     // blocks/second^2
-const double Camera4D::RL_BRAKE = 5;
-const double Camera4D::UD_BRAKE = 5;
-const double Camera4D::OI_BRAKE = 10;
+const double Camera4D::FB_BRAKE = 16;     // blocks/second^2
+const double Camera4D::RL_BRAKE = 10;
+const double Camera4D::UD_BRAKE = 20;
+const double Camera4D::OI_BRAKE = 20;
 const double Camera4D::FB_MAX_SPEED = 3; // blocks/second
-const double Camera4D::RL_MAX_SPEED = 3;
-const double Camera4D::UD_MAX_SPEED = 3;
+const double Camera4D::RL_MAX_SPEED = 2;
+const double Camera4D::UD_MAX_SPEED = 1;
 const double Camera4D::OI_MAX_SPEED = 1;
 
 /** ---------- Constructors ---------- */

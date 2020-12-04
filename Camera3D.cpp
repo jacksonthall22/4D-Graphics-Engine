@@ -16,14 +16,14 @@ const double Camera3D::DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS = 10;
 // and
 // https://github.com/ddevault/TrueCraft/wiki/Entity-Movement-And-Physics
 const double Camera3D::FB_ACCEL = 8;     // blocks/second^2
-const double Camera3D::RL_ACCEL = 3;
+const double Camera3D::RL_ACCEL = 5;
 const double Camera3D::UD_ACCEL = 10;
-const double Camera3D::FB_DRAG = 6;      // blocks/second^2
-const double Camera3D::RL_DRAG = 4;
-const double Camera3D::UD_DRAG = 6;
-const double Camera3D::FB_BRAKE = 8;     // blocks/second^2
-const double Camera3D::RL_BRAKE = 6;
-const double Camera3D::UD_BRAKE = 10;
+const double Camera3D::FB_DRAG = 5;      // blocks/second^2
+const double Camera3D::RL_DRAG = 5;
+const double Camera3D::UD_DRAG = 5;
+const double Camera3D::FB_BRAKE = 16;     // blocks/second^2
+const double Camera3D::RL_BRAKE = 10;
+const double Camera3D::UD_BRAKE = 20;
 const double Camera3D::FB_MAX_SPEED = 3; // blocks/second
 const double Camera3D::RL_MAX_SPEED = 2;
 const double Camera3D::UD_MAX_SPEED = 1;

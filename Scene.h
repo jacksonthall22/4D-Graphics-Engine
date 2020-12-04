@@ -43,6 +43,7 @@ public:
     void addObject(const Object3D& obj);
     void addObject(const Object4D& obj);
     void toggleActiveCamera();
+    void toggleMovementMode();
     void draw() const;
 
 protected:

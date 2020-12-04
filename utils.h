@@ -205,7 +205,7 @@ struct edge {
  */
 struct edge2d : edge {
     /** Fields */
-    std::unique_ptr<point2d> p1, p2;
+    std::shared_ptr<point2d> p1, p2;
 
     /** Constructors */
     edge2d();
@@ -229,7 +229,7 @@ struct edge2d : edge {
  */
 struct edge3d : edge {
     /** Fields */
-    std::unique_ptr<point3d> p1, p2;
+    std::shared_ptr<point3d> p1, p2;
 
     /** Constructors */
     edge3d();
@@ -248,7 +248,7 @@ struct edge3d : edge {
  */
 struct edge4d : edge {
     /** Fields */
-    std::unique_ptr<point4d> p1, p2;
+    std::shared_ptr<point4d> p1, p2;
 
     /** Constructors */
     edge4d();

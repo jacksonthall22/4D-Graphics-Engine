@@ -49,43 +49,48 @@ const std::vector<std::shared_ptr<edge4d>> &Object4D::getEdges() const {
 /** ========== Other Methods ========== */
 /**
  * Takes the current set of vertices and extrudes them into the given direction,
- * creating edges between the appropriate points.
+ * creating edges between the appropriate points. Given `direction` vector
+ * can be of size <= 4 with elements interpreted in XYZA order.
  */
-void Object4D::extrude(const spatialVector &direction){
-    if (direction.components.size() <= 4){
-        // Pad empty dimensions in given vector with 0s
-        std::vector<double> temp = direction.components;
-        while (temp.size() < 3){
-            temp.push_back(0.0);
-        }
-
-        // For every edge, extrude both points in the given direction
-        // and add 3 new edges to this object:
-        //      1. Between the 2 extruded points
-        //      2. Between the first point and the extruded first point
-        //      3. Between the second point and the extruded second point
-        for (auto & edge : edges){
-            point4d extrudedP1(*edge->p1);
-            extrudedP1.move(direction);
-            point4d extrudedP2(*edge->p2);
-            extrudedP2.move(direction);
-
-            // Add new points
-            vertices.push_back(std::make_unique<point4d>(extrudedP1));
-            vertices.push_back(std::make_unique<point4d>(extrudedP2));
-
-            // Add new edges
-            edges.push_back(std::make_unique<edge4d>(extrudedP1, extrudedP2));
-            edges.push_back(std::make_unique<edge4d>(*edge->p1, extrudedP1));
-            edges.push_back(std::make_unique<edge4d>(*edge->p2, extrudedP2));
-        }
-
-    } else {
-        std::cout << "Warning: Invalid input to:\n\tvoid extrude(const "
-                     "spatialVector& direction)\n\t(Object4D.cpp)"
-                     << std::endl;
-    }
-}
+/// TODO These methods segfault
+//void Object4D::extrude(const std::vector<double> &direction) {
+//    if (direction.size() <= 4){
+//        // Pad empty dimensions in given vector with 0s
+//        std::vector<double> temp = direction;
+//        while (temp.size() < 4){
+//            temp.push_back(0.0);
+//        }
+//
+//        // For every edge, extrude both points in the given direction
+//        // and add 3 new edges to this object:
+//        //      1. Between the 2 extruded points
+//        //      2. Between the first point and the extruded first point
+//        //      3. Between the second point and the extruded second point
+//        for (auto & edge : edges){
+//            point4d extrudedP1(*edge->p1);
+//            extrudedP1.move(direction);
+//            point4d extrudedP2(*edge->p2);
+//            extrudedP2.move(direction);
+//
+//            // Add new points
+//            vertices.push_back(std::make_shared<point4d>(extrudedP1));
+//            vertices.push_back(std::make_shared<point4d>(extrudedP2));
+//
+//            // Add new edges
+//            edges.push_back(std::make_shared<edge4d>(extrudedP1, extrudedP2));
+//            edges.push_back(std::make_shared<edge4d>(*edge->p1, extrudedP1));
+//            edges.push_back(std::make_shared<edge4d>(*edge->p2, extrudedP2));
+//        }
+//
+//    } else {
+//        std::cout << "Warning: Invalid input to:"
+//                     "\n\tvoid extrude(const std::vector<double>& direction)"
+//                     "\n\t(Object4D.cpp)" << std::endl;
+//    }
+//}
+//void Object4D::extrude(const spatialVector &direction){
+//    extrude(direction.components);
+//}
 
 /**
  * Draw this object on the screen by projecting them through the given

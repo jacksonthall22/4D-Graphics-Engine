@@ -337,7 +337,8 @@ void modEquals(double *a, double n){
     point4d::point4d(const point4d& other) : point4d(other.x, other.y, other.z, other.a){
     }
 
-    point4d::point4d(double x, double y, double z, double a) :
+    point4d::point4d(const double x, const double y, const double z,
+        const double a) :
             x(x), y(y), z(z), a(a){
     }
 
@@ -430,8 +431,8 @@ void modEquals(double *a, double n){
     }
 
     edge2d::edge2d(const point2d& p1, const point2d& p2){
-        this->p1 = std::make_unique<point2d>(p1);
-        this->p2 = std::make_unique<point2d>(p2);
+        this->p1 = std::make_shared<point2d>(p1);
+        this->p2 = std::make_shared<point2d>(p2);
     }
 
     double edge2d::length() const {
@@ -466,8 +467,8 @@ void modEquals(double *a, double n){
     }
 
     edge3d::edge3d(const point3d& p1, const point3d& p2){
-        this->p1 = std::make_unique<point3d>(p1);
-        this->p2 = std::make_unique<point3d>(p2);
+        this->p1 = std::make_shared<point3d>(p1);
+        this->p2 = std::make_shared<point3d>(p2);
     }
 
     double edge3d::length() const {
@@ -489,8 +490,8 @@ void modEquals(double *a, double n){
     }
 
     edge4d::edge4d(const point4d& p1, const point4d& p2){
-        this->p1 = std::make_unique<point4d>(p1);
-        this->p2 = std::make_unique<point4d>(p2);
+        this->p1 = std::make_shared<point4d>(p1);
+        this->p2 = std::make_shared<point4d>(p2);
     }
 
     double edge4d::length() const {
