@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(Part_2___Graphics_Alternate)
+project(4D_Rendering_Engine)
 
 if (WIN32)
     set(FREEGLUT_INCLUDE_DIRS "C:/Program\ Files/Common\ Files/freeglut/include")
@@ -28,7 +28,16 @@ file(GLOB SOURCE_FILES
         *.h
         )
 
-add_executable(graphics Scene Camera Camera3D Camera4D Object Object3D Object4D
+add_executable(
+        graphics
+        Scene
+        Camera
+        Camera3D
+        Camera4D
+        Object
+        Object3D
+        Object4D
+        utils
         ${SOURCE_FILES})
 
 if (WIN32)

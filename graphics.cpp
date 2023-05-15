@@ -2038,8 +2038,6 @@ void initScene(int preset){
  * Initialize OpenGL graphics.
  */
 void initGL(){
-    windowWidth = DEFAULT_WINDOW_WIDTH;
-    windowHeight = DEFAULT_WINDOW_HEIGHT;
 
     // Set "clearing" or background color 0, 113, 85, 1
     glClearColor(DEFAULT_BACKGROUND_COLOR_RGBA[0],
@@ -2097,8 +2095,60 @@ void kbdS(int key, int x, int y){
 //    glutPostRedisplay();
 }
 
+const double DEG_PER_CURSOR_PIXEL = 0.2;
+const bool USE_CURSOR_MOVING_AVERAGE = true;
+const unsigned int CURSOR_MOVING_AVERAGE_N = 10;
+int cursorIters = 0;
+int mostRecentDPixelsRight[CURSOR_MOVING_AVERAGE_N];
+int mostRecentDPixelsUp[CURSOR_MOVING_AVERAGE_N];
+double dPixelsRightAvg = 0.0;
+double dPixelsUpAvg = 0.0;
+void _updateCursorPixelsMovingAverage(
+        int (&a)[CURSOR_MOVING_AVERAGE_N],
+        const unsigned int idx,
+        const double valToPush,
+        double& currentAverage) {
+    currentAverage -= a[idx] * 1.0 / CURSOR_MOVING_AVERAGE_N;
+    a[idx] = valToPush;
+    currentAverage += a[idx] * 1.0 / CURSOR_MOVING_AVERAGE_N;
+}
 void cursor(int x, int y){
-//    glutPostRedisplay();
+    glutWarpPointer(windowWidth / 2, windowHeight / 2);
+
+    double dPixelsRight, dPixelsUp;
+    dPixelsRight = x - windowWidth / 2;
+    dPixelsUp = windowHeight / 2 - y;
+
+    double dDegRight, dDegUp;
+    if (USE_CURSOR_MOVING_AVERAGE) {
+        // Below we use a moving average of dPixels over the N most recent
+        // frames to prevent choppy camera motion (moving by fixed number of
+        // degrees.
+        const unsigned int currIdx = cursorIters % CURSOR_MOVING_AVERAGE_N;
+
+        // These update dPixelsRight/Up in place
+        _updateCursorPixelsMovingAverage(mostRecentDPixelsRight,
+                                         currIdx,
+                                         dPixelsRight,
+                                         dPixelsRightAvg);
+        _updateCursorPixelsMovingAverage(mostRecentDPixelsUp,
+                                         currIdx,
+                                         dPixelsUp,
+                                         dPixelsUpAvg);
+        dPixelsRight = dPixelsRightAvg;
+        dPixelsUp = dPixelsUpAvg;
+    }
+
+    dDegRight = dPixelsRight * DEG_PER_CURSOR_PIXEL;
+    dDegUp = dPixelsUp * DEG_PER_CURSOR_PIXEL;
+
+    if (scene.getActiveCamera() == Camera::CameraType::Camera3D) {
+        scene.getCamera3D().rotateRight(dDegRight);
+        scene.getCamera3D().rotateUp(dDegUp);
+    }
+
+    glutPostRedisplay();
+    cursorIters++;
 }
 
 // button will be GLUT_LEFT_BUTTON or GLUT_RIGHT_BUTTON
@@ -2153,27 +2203,27 @@ void timer(int dummy){
             if (rightPressed and leftPressed){
                 ;
             } else if (rightPressed){
-                scene.getCamera3D().moveRelativeDefaultR();
+                scene.getCamera3D().moveRelativeR();
             } else if (leftPressed){
-                scene.getCamera3D().moveRelativeDefaultL();
+                scene.getCamera3D().moveRelativeL();
             }
 
             // Up/down
             if (upPressed and downPressed){
                 ;
             } else if (upPressed){
-                scene.getCamera3D().moveRelativeDefaultU();
+                scene.getCamera3D().moveRelativeU();
             } else if (downPressed){
-                scene.getCamera3D().moveRelativeDefaultD();
+                scene.getCamera3D().moveRelativeD();
             }
 
             // Forward/back
             if (forwardPressed and backPressed){
                 ;
             } else if (forwardPressed){
-                scene.getCamera3D().moveRelativeDefaultF();
+                scene.getCamera3D().moveRelativeF();
             } else if (backPressed){
-                scene.getCamera3D().moveRelativeDefaultB();
+                scene.getCamera3D().moveRelativeB();
             }
 
         } else if (scene.getCamera3D().getMovementMode()
@@ -2184,33 +2234,33 @@ void timer(int dummy){
             if (forwardPressed and backPressed){
                 scene.getCamera3D().applyBrakeFB();
             } else if (forwardPressed){
-                scene.getCamera3D().setAccelerationDefaultF();
+                scene.getCamera3D().setAccelerationF();
             } else if (backPressed){
-                scene.getCamera3D().setAccelerationDefaultB();
+                scene.getCamera3D().setAccelerationB();
             } else {
-                scene.getCamera3D().setAccelerationFB(0);
+                scene.getCamera3D().setAccelerationF(0);
             }
 
             // Right/left
             if (rightPressed and leftPressed){
                 scene.getCamera3D().applyBrakeRL();
             } else if (rightPressed){
-                scene.getCamera3D().setAccelerationDefaultR();
+                scene.getCamera3D().setAccelerationR();
             } else if (leftPressed){
-                scene.getCamera3D().setAccelerationDefaultL();
+                scene.getCamera3D().setAccelerationL();
             } else {
-                scene.getCamera3D().setAccelerationRL(0);
+                scene.getCamera3D().setAccelerationR(0);
             }
 
             // Up/down
             if (upPressed and downPressed){
                 scene.getCamera3D().applyBrakeUD();
             } else if (upPressed){
-                scene.getCamera3D().setAccelerationDefaultU();
+                scene.getCamera3D().setAccelerationU();
             } else if (downPressed){
-                scene.getCamera3D().setAccelerationDefaultD();
+                scene.getCamera3D().setAccelerationD();
             } else {
-                scene.getCamera3D().setAccelerationUD(0);
+                scene.getCamera3D().setAccelerationU(0);
             }
 
             scene.getCamera3D().moveFly();
@@ -2373,10 +2423,13 @@ int main(int argc, char** argv){
 
     glutInitDisplayMode(GLUT_RGBA);
 
-    glutInitWindowSize((int)windowWidth, (int)windowHeight);
+    windowWidth = std::min(DEFAULT_WINDOW_WIDTH, glutGet(GLUT_SCREEN_WIDTH));
+    windowHeight = std::min(DEFAULT_WINDOW_HEIGHT, glutGet(GLUT_SCREEN_HEIGHT));
+    glutInitWindowSize(windowWidth, windowHeight);
 
     // Position the window's initial top-left corner
-    glutInitWindowPosition( 100, 100);
+    glutInitWindowPosition((glutGet(GLUT_SCREEN_WIDTH) - windowWidth) / 2.0,
+        (glutGet(GLUT_SCREEN_HEIGHT) - windowHeight) / 2.0);
 
     /* create the window and store the handle to it */
     window = glutCreateWindow(/* Fun with Drawing! */ "4D Graphics Engine");

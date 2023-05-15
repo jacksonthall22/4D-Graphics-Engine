@@ -8,6 +8,7 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #if __cplusplus < 201700
     #include <experimental/optional>
 #include <GL/gl.h>
@@ -35,9 +36,40 @@ double mod(const double a, const double n){
 void modEquals(double *a, const double n){
     *a = mod(*a, n);
 }
+double clamp(const double n, const double min, const double max) {
+    if (min > max) {
+        throw std::invalid_argument("Internal error: `min` should be <= `max`");
+    }
+    if (n < min)
+        return min;
+    if (n > max)
+        return max;
+    return n;
+}
+bool isBetween(const double n, const double min, const double max) {
+    if (min > max) {
+        throw std::invalid_argument("Internal error: `min` should be <= `max`");
+    }
+    return clamp(n, min, max) == n;
+}
+bool sameSign(const double n1, const double n2) {
+    return n1 * n2 >= 0.0;
+}
+double average(const std::vector<double>& arr) {
+    double sum = 0.0;
+    int count = 0;
 
+    for (auto e: arr) {
+   		count++;
+   		sum += e;
+    }
 
+    if (count == 0) {
+        throw std::invalid_argument("Internal error: `arr` had no elements");
+    }
 
+    return sum / count;
+}
 
 /* ========== Structs ========== */
 /* ===== Start spatialVector Struct ===== */
@@ -56,14 +88,11 @@ void modEquals(double *a, const double n){
     }
 
     void spatialVector::plus(const spatialVector& other){
-        if (other.components.size() <= components.size()){
-            for (int i = 0; i < other.components.size(); ++i){
-                components[i] += other.components[i];
-            }
-        } else {
-            std::cout << "Warning: Invalid input to:\n\tvoid "
-                         "spatialVector::plus(const spatialVector& other)\n\t"
-                         "(utils.cpp)" << std::endl;
+        if (other.components.size() != components.size()) {
+            std::cout << "Warning: Invalid input" << std::endl;
+        }
+        for (int i = 0; i < other.components.size(); ++i){
+            components[i] += other.components[i];
         }
     }
 
@@ -226,9 +255,7 @@ void modEquals(double *a, const double n){
 
 
 /* ===== Start point3d : point Struct ===== */
-    /**
-     * Represents a point in 3 dimensions.
-     */
+
     point3d::point3d() : point3d(0, 0, 0){
     }
 

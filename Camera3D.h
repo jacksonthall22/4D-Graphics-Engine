@@ -10,25 +10,28 @@
 
 class Camera3D : public Camera {
 public:
-    /** ---------- Static Const Vars ---------- **/
+    /* ---------- Static Const Vars ---------- */
+    ;
     static const double DEFAULT_FOV_DEGREES;
     static const double DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS;
 
     // Values used to maintain camera velocity
-    static const double FB_ACCEL;     // blocks/second^2
+    ;
+    static const double FB_ACCEL;
     static const double RL_ACCEL;
     static const double UD_ACCEL;
-    static const double FB_DRAG;      // blocks/second^2
+    static const double FB_DRAG;
     static const double RL_DRAG;
     static const double UD_DRAG;
-    static const double FB_BRAKE;     // blocks/second^2
+    static const double FB_BRAKE;
     static const double RL_BRAKE;
     static const double UD_BRAKE;
-    static const double FB_MAX_SPEED; // blocks/second
+    static const double FB_MAX_SPEED;
     static const double RL_MAX_SPEED;
     static const double UD_MAX_SPEED;
 
-    /** ---------- Constructors ---------- **/
+    /* ---------- Constructors ---------- */
+    ;
     Camera3D();
     Camera3D(const Camera3D& other);
     Camera3D(const point3d& location,
@@ -38,40 +41,39 @@ public:
             const double& focalDistance,
             const double& projectionPlaneWidthBlocks,
             Camera::MovementMode movementMode,
-            const int& acceleratingFB,
-            const int& acceleratingRL,
-            const int& acceleratingUD,
-            const spatialVector& velocityFRU);
+            const double& accelerationF,
+            const double& accelerationR,
+            const double& accelerationU,
+            const double& velocityF,
+            const double& velocityR,
+            const double& velocityU);
 
-    /** ---------- Getters ---------- **/
-    /** Const references **/
+    /* ---------- Getters ---------- */
+    /* Const references */
+    ;
     const point3d& getLocation() const;
     const spatialVector& getNormal() const;
     const sphericalAngle3d& getSphericalDirection() const;
     const point3d& getFocus() const;
+    const double& getVelocityF() const;
+    const double& getVelocityR() const;
+    const double& getVelocityU() const;
+    const double& getAccelerationF() const;
+    const double& getAccelerationR() const;
+    const double& getAccelerationU() const;
 
-    /** Non-const references **/
-    point3d& getLocation();
-    spatialVector& getNormal();
-    sphericalAngle3d& getSphericalDirection();
-    point3d& getFocus();
-    int& getAcceleratingFB();
-    int& getAcceleratingRL();
-    int& getAcceleratingUD();
-    double& getVelocityFB();
-    double& getVelocityRL();
-    double& getVelocityUD();
-
-    /** Values **/
-    int getAcceleratingFB() const;
-    int getAcceleratingRL() const;
-    int getAcceleratingUD() const;
-    double getVelocityFB() const;
-    double getVelocityRL() const;
-    double getVelocityUD() const;
-
-    /** Other **/
+    /* Other **/
+    /**
+     * Return the unit vector that points upward relative to the camera normal.
+     * In other words, return the vector that is a -90 deg azimuth rotation from
+     * the normal (even past zenith/nadir).
+     */
     spatialVector getUnitUpVector() const;
+    /**
+     * Return the unit vector that points rightward relative to the camera normal.
+     * In other words, return the vector that is a -90 deg polar rotation from
+     * the normal.
+     */
     spatialVector getUnitRightVector() const;
 
     /** ---------- Setters ---------- **/
@@ -86,11 +88,11 @@ public:
     void setAzimuth(double azimuthAngle);
     void setFocus() override;
 
-    /** ---------- Utility / Other ---------- **/
+    /* ---------- Utility / Other ---------- */
     optional<point2d> projectPoint(const point3d& p) const;
 
-    /** ---------- Movement ---------- **/
-    /** Main API Calls **/
+    /* ---------- Movement ---------- */
+    /* Main API Calls */
     // Use appropriate movement methods (moveFly or moveFixed) to move
     // `location`, depending on movementMode
     void moveF();
@@ -100,10 +102,9 @@ public:
     void moveU();
     void moveD();
 
-    /** Utility **/
     bool isMoving() const;
 
-    /** Absolute Movement **/
+    /* Absolute Movement **/
     // Move by given amounts along XYZ grid axes
     void moveAbsolute(std::vector<double> dPosition) override;
     void moveAbsolute(const spatialVector& dPosition) override;
@@ -112,50 +113,68 @@ public:
     void moveAbsoluteY(double dY);
     void moveAbsoluteZ(double dZ);
 
-    /** Relative Movement **/
-    // Move by amounts relative to orientation of camera
+    /* Relative Movement **/
+    // Move by amounts relative to orientation of camera (Camera
+    // .DEFAULT_MOVE_DISTANCE by default)
     void moveRelative(const std::vector<double>& dPosition) override;
     void moveRelative(const spatialVector& dPosition) override;
     void moveRelative(double dF, double dR, double dU);
     void moveRelativeFB(double dF); // dF > 0 = forward, dF < 0 = backward
     void moveRelativeRL(double dR); // etc.
     void moveRelativeUD(double dU);
-    void moveRelativeF(double dF);  // Move along polar angle (x/y plane only)
-    void moveRelativeB(double dB);  // Move opposite polar angel (x/y plane only)
-    void moveRelativeR(double dR);  // Move toward getUnitRightVector()
-    void moveRelativeL(double dL);  // Move opposite getUnitRightVector()
-    void moveRelativeU(double dU);  // Equivalent to moveAbsoluteY(dU)
-    void moveRelativeD(double dD);  // Equivalent to moveAbsoluteY(-dD)
+    /**
+     * Move along polar angle (x/y plane only)
+     */
+    void moveRelativeF(double dF = DEFAULT_MOVE_DISTANCE);
+    /**
+     * Move opposite polar angel (x/y plane only)
+     */
+    void moveRelativeB(double dB = DEFAULT_MOVE_DISTANCE);
+    /**
+     * Move toward `getUnitRightVector()`
+     */
+    void moveRelativeR(double dR = DEFAULT_MOVE_DISTANCE);
+    /**
+     * Move opposite `getUnitRightVector()`
+     */
+    void moveRelativeL(double dL = DEFAULT_MOVE_DISTANCE);
+    /**
+     * Equivalent to `moveAbsoluteY(dU)`
+     */
+    void moveRelativeU(double dU = DEFAULT_MOVE_DISTANCE);
+    /**
+     * Equivalent to `moveAbsoluteY(-dD)`
+     */
+    void moveRelativeD(double dD = DEFAULT_MOVE_DISTANCE);
 
-    // Move by Camera.DEFAULT_MOVE_DISTANCE relative to orientation of camera
-    void moveRelativeDefaultF(); // Same as moveRelativeF(DEFAULT_MOVE_DISTANCE)
-    void moveRelativeDefaultB(); // etc.
-    void moveRelativeDefaultR();
-    void moveRelativeDefaultL();
-    void moveRelativeDefaultU();
-    void moveRelativeDefaultD();
-
-    /** Acceleration & Velocity Movement **/
+    /* ---------- Acceleration & Velocity Movement ---------- */
     // Main API call to update camera location using velocity-based controls
+    ;
     void moveFly();
 
     // Set movingForward, movingRight, movingUp flags to given values, where
     // each must be -1, 0, or 1
-    void setAcceleration(int acceleratingFB_,
-                         int acceleratingRL_,
-                         int acceleratingUD_);
-    void setAccelerationFB(int acceleratingFB_);
-    void setAccelerationRL(int acceleratingRL_);
-    void setAccelerationUD(int acceleratingUD_);
-    void setAccelerationDefaultF(); // setAccelerationFB(1)
-    void setAccelerationDefaultB(); // setAccelerationFB(-1)
-    void setAccelerationDefaultR(); // setAccelerationRL(1)
-    void setAccelerationDefaultL(); // etc.
-    void setAccelerationDefaultU();
-    void setAccelerationDefaultD();
+    ;
+    void setAcceleration(double newAccelerationF,
+                         double newAccelerationR,
+                         double newAccelerationU);
+    void setAccelerationF(double newAccelerationF = 1);
+    void setAccelerationR(double newAccelerationR = 1);
+    void setAccelerationU(double newAccelerationU = 1);
+    void setAccelerationB(double newAccelerationB = 1);
+    void setAccelerationL(double newAccelerationL = 1);
+    void setAccelerationD(double newAccelerationD = 1);
+
+//    void setAccelerationF(int accelerationF);
+//    void setAccelerationB(int accelerationB);
+//    void setAccelerationR(int accelerationR);
+//    void setAccelerationL(int accelerationL);
+//    void setAccelerationU(int accelerationU);
+//    void setAccelerationD(int accelerationD);
 
     // Update velocity values in given direction(s) relative to orientation of
     // camera by applying drag + any current acceleration
+    ;
     void updateVelocities();
     void updateVelFB();
     void updateVelRL();
@@ -163,6 +182,7 @@ public:
 
     // Reduce velocity (make closer to 0) in forward/back, right/left, and
     // up/down direction using drag constants declared above
+    ;
     void applyDrag();
     void applyDragFB();
     void applyDragRL();
@@ -170,11 +190,13 @@ public:
 
     // Accelerate against current velocity until velocity = 0 using braking
     // constants declared above
+    ;
     void applyBrakeFB();
     void applyBrakeRL();
     void applyBrakeUD();
 
-    /** ---------- Rotation ---------- **/
+    /* ---------- Rotation ---------- */
+    ;
     void rotate(std::vector<double> dAngles) override;
     void rotate(const sphericalAngle3d& dAngles);
     void rotate(double dPolarAngle, double dAzimuthAngle);
@@ -182,10 +204,11 @@ public:
     void rotatePolar(double dPolarAngle, bool updateNormal);
     void rotateAzimuth(double dAzimuthAngle);
     void rotateAzimuth(double dAzimuthAngle, bool updateNormal);
-    void rotateRight();
-    void rotateLeft();
-    void rotateUp();
-    void rotateDown();
+
+    void rotateRight(double dDeg = DEFAULT_ROTATION_ANGLE);
+    void rotateLeft(double dDeg = DEFAULT_ROTATION_ANGLE);
+    void rotateUp(double dDeg = DEFAULT_ROTATION_ANGLE);
+    void rotateDown(double dDeg = DEFAULT_ROTATION_ANGLE);
 
 protected:
     /** ---------- Fields ---------- **/
@@ -197,18 +220,20 @@ protected:
     // always centered
     point3d location;
 
-    // Holds 1, -1, or 0 denoting positive, negative, or no movement
-    // (acceleration) along forward/backward, right/left, and up/down
-    // directions on the next game tick from orientation of the Camera (must
-    // then be translated to get absolute x/y/z movement velocities)
-    int acceleratingFB; // ex. 1 = towards direction of polarAngle
-    int acceleratingRL; // ex. 1 = towards Camera.getUnitRightVec()
-    int acceleratingUD; // ex. 1 = upwards
+    // Holds 1, -1, or 0 denoting positive, negative, or no acceleration
+    // along forward/backward, right/left, and up/down directions on the
+    // next game tick from orientation of the Camera (must then be
+    // translated to get absolute x/y/z movement velocities)
+    double accelerationF; // ex. 1 = towards direction of polarAngle
+    double accelerationR; // ex. 1 = towards Camera.getUnitRightVec()
+    double accelerationU; // ex. 1 = upwards
 
     // Store the <forward, right, up> velocities of the camera movement from
     // the orientation of the camera (not in absolute x/y/z directions). Ex.
     // a negative `right` value = moving left by that velocity.
-    spatialVector velocityFRU;
+    double velocityF;
+    double velocityR;
+    double velocityU;
 
     // Direction the camera is facing. Used to determine 2d plane of the
     // camera onto which 3d points get projected

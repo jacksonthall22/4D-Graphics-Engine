@@ -6,29 +6,27 @@
 #include "Scene.h"
 
 
-/** ---------- Static Const Vars ---------- **/
 const double Camera3D::DEFAULT_FOV_DEGREES = 160;
 const double Camera3D::DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS = 10;
 
-// (Some) credit to:
-// https://gaming.stackexchange.com/questions/327830/what-is-the-player-
-// acceleration-in-minecraft-when-flying
+// Based on constants found at:
+// https://gaming.stackexchange.com/questions/327830/what-is-the-player-acceleration-in-minecraft-when-flying
 // and
 // https://github.com/ddevault/TrueCraft/wiki/Entity-Movement-And-Physics
-const double Camera3D::FB_ACCEL = 8;     // blocks/second^2
-const double Camera3D::RL_ACCEL = 5;
-const double Camera3D::UD_ACCEL = 10;
-const double Camera3D::FB_DRAG = 5;      // blocks/second^2
-const double Camera3D::RL_DRAG = 5;
-const double Camera3D::UD_DRAG = 5;
-const double Camera3D::FB_BRAKE = 16;     // blocks/second^2
-const double Camera3D::RL_BRAKE = 10;
-const double Camera3D::UD_BRAKE = 20;
-const double Camera3D::FB_MAX_SPEED = 3; // blocks/second
-const double Camera3D::RL_MAX_SPEED = 2;
-const double Camera3D::UD_MAX_SPEED = 1;
+;
+const double Camera3D::FB_ACCEL = 8;        // blocks/second^2
+const double Camera3D::RL_ACCEL = 5;        // blocks/second^2
+const double Camera3D::UD_ACCEL = 10;       // blocks/second^2
+const double Camera3D::FB_DRAG = 5;         // blocks/second^2
+const double Camera3D::RL_DRAG = 5;         // blocks/second^2
+const double Camera3D::UD_DRAG = 5;         // blocks/second^2
+const double Camera3D::FB_BRAKE = 16;       // blocks/second^2
+const double Camera3D::RL_BRAKE = 10;       // blocks/second^2
+const double Camera3D::UD_BRAKE = 20;       // blocks/second^2
+const double Camera3D::FB_MAX_SPEED = 3;    // blocks/second
+const double Camera3D::RL_MAX_SPEED = 2;    // blocks/second
+const double Camera3D::UD_MAX_SPEED = 1;    // blocks/second
 
-/** ---------- Constructors ---------- **/
 Camera3D::Camera3D() : Camera3D(
         point3d(),
         spatialVector({0, 1, 0}),
@@ -38,8 +36,12 @@ Camera3D::Camera3D() : Camera3D(
             Camera3D::DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS),
         Camera3D::DEFAULT_PROJECTION_PLANE_WIDTH_BLOCKS,
         Camera::MovementMode::Fly,
-        0, 0, 0,
-        spatialVector(3)){
+        0,
+        0,
+        0,
+        0,
+        0,
+        0){
 }
 Camera3D::Camera3D(const Camera3D &other) : Camera3D(
         point3d(other.location),
@@ -49,10 +51,12 @@ Camera3D::Camera3D(const Camera3D &other) : Camera3D(
         other.focalDistance,
         other.projectionPlaneWidthBlocks,
         other.movementMode,
-        other.acceleratingFB,
-        other.acceleratingRL,
-        other.acceleratingUD,
-        other.velocityFRU){
+        other.accelerationF,
+        other.accelerationR,
+        other.accelerationU,
+        other.velocityF,
+        other.velocityR,
+        other.velocityU){
 }
 Camera3D::Camera3D(
         const point3d& location,
@@ -62,10 +66,12 @@ Camera3D::Camera3D(
         const double& focalDistance,
         const double& projectionPlaneWidthBlocks,
         Camera::MovementMode movementMode,
-        const int& acceleratingFB,
-        const int& acceleratingRL,
-        const int& acceleratingUD,
-        const spatialVector& velocityFRU)
+        const double& accelerationF,
+        const double& accelerationR,
+        const double& accelerationU,
+        const double& velocityF,
+        const double& velocityR,
+        const double& velocityU)
         : Camera(focalDistance, movementMode){ // NOLINT(performance-unnecessary-value-param)
     this->location = location;
     this->normal = normal;
@@ -73,16 +79,16 @@ Camera3D::Camera3D(
     this->focus = focus;
     this->movementMode = movementMode;
     this->projectionPlaneWidthBlocks = projectionPlaneWidthBlocks;
-    this->acceleratingFB = acceleratingFB;
-    this->acceleratingRL = acceleratingRL;
-    this->acceleratingUD = acceleratingUD;
-    this->velocityFRU = velocityFRU;
+    this->accelerationF = accelerationF;
+    this->accelerationR = accelerationR;
+    this->accelerationU = accelerationU;
+    this->velocityF = velocityF;
+    this->velocityR = velocityR;
+    this->velocityU = velocityU;
     this->normal = spatialVector();
     setNormal();
 }
 
-/** ---------- Getters ---------- **/
-/** Const references **/
 const point3d& Camera3D::getLocation() const {
     return location;
 }
@@ -96,74 +102,32 @@ const point3d& Camera3D::getFocus() const {
     return focus;
 }
 
-/** Non-const references **/
-point3d& Camera3D::getLocation() {
-    return location;
+const double& Camera3D::getAccelerationF() const {
+    return accelerationF;
 }
-spatialVector& Camera3D::getNormal() {
-    return normal;
+const double& Camera3D::getAccelerationR() const {
+    return accelerationR;
 }
-sphericalAngle3d& Camera3D::getSphericalDirection() {
-    return sphericalDirection;
+const double& Camera3D::getAccelerationU() const {
+    return accelerationU;
 }
-point3d& Camera3D::getFocus() {
-    return focus;
+const double& Camera3D::getVelocityF() const {
+    return velocityF;
 }
-int& Camera3D::getAcceleratingFB() {
-    return acceleratingFB;
+const double& Camera3D::getVelocityR() const {
+    return velocityR;
 }
-int& Camera3D::getAcceleratingRL() {
-    return acceleratingRL;
-}
-int& Camera3D::getAcceleratingUD() {
-    return acceleratingUD;
-}
-double& Camera3D::getVelocityFB() {
-    return this->velocityFRU.components[0];
-}
-double& Camera3D::getVelocityRL() {
-    return this->velocityFRU.components[1];
-}
-double& Camera3D::getVelocityUD() {
-    return this->velocityFRU.components[2];
+const double& Camera3D::getVelocityU() const {
+    return velocityU;
 }
 
-/** Values **/
-int Camera3D::getAcceleratingFB() const {
-    return acceleratingFB;
-}
-int Camera3D::getAcceleratingRL() const {
-    return acceleratingRL;
-}
-int Camera3D::getAcceleratingUD() const {
-    return acceleratingUD;
-}
-double Camera3D::getVelocityFB() const {
-    return this->velocityFRU.components[0];
-}
-double Camera3D::getVelocityRL() const {
-    return this->velocityFRU.components[1];
-}
-double Camera3D::getVelocityUD() const {
-    return this->velocityFRU.components[2];
-}
 
 /** Other **/
-/**
- * Return the unit vector that points upward relative to the camera normal.
- * In other words, return the vector that is a -90 deg azimuth rotation from
- * the normal (even past zenith/nadir).
- */
 spatialVector Camera3D::getUnitUpVector() const {
     return sphericalAngle3d(
             sphericalDirection.polarAngle,
             sphericalDirection.azimuthAngle - 90).getUnitVector();
 }
-/**
- * Return the unit vector that points rightward relative to the camera normal.
- * In other words, return the vector that is a -90 deg polar rotation from
- * the normal.
- */
 spatialVector Camera3D::getUnitRightVector() const {
     sphericalAngle3d temp(sphericalDirection.polarAngle, 90);
     temp.rotatePolar(-90);
@@ -324,89 +288,96 @@ optional<point2d> Camera3D::projectPoint(const point3d& p) const {
 
 /** ---------- Movement ---------- **/
 /** Main API Calls **/
+bool _validateMovementMode(Camera::MovementMode movementMode) {
+    if (movementMode != Camera::MovementMode::Fixed
+            && movementMode != Camera::MovementMode::Fly){
+        std::cout << "Warning: Movement mode not supported: " << movementMode
+        << std::endl;
+        return false;
+    }
+    return true;
+}
+
 void Camera3D::moveF(){
+    if (!_validateMovementMode(movementMode)) {
+        return;
+    }
+
     if (movementMode == Camera::MovementMode::Fixed){
-        moveRelativeDefaultF();
+        moveRelativeF();
     } else if (movementMode == Camera::MovementMode::Fly){
-        setAccelerationDefaultF();
-    } else {
-        std::cout << "Warning: Invalid movementMode in:"
-                     "\n\tvoid Camera3D::moveF()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        setAccelerationF();
     }
 }
 void Camera3D::moveB(){
+    if (!_validateMovementMode(movementMode)) {
+        return;
+    }
+
     if (movementMode == Camera::MovementMode::Fixed){
-        moveRelativeDefaultB();
+        moveRelativeB();
     } else if (movementMode == Camera::MovementMode::Fly){
-        setAccelerationDefaultB();
-    } else {
-        std::cout << "Warning: Invalid movementMode in:"
-                     "\n\tvoid Camera3D::moveB()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        setAccelerationB();
     }
 }
 void Camera3D::moveR(){
+    if (!_validateMovementMode(movementMode)) {
+        return;
+    }
+
     if (movementMode == Camera::MovementMode::Fixed){
-        moveRelativeDefaultR();
+        moveRelativeR();
     } else if (movementMode == Camera::MovementMode::Fly){
-        setAccelerationDefaultR();
-    } else {
-        std::cout << "Warning: Invalid movementMode in:"
-                     "\n\tvoid Camera3D::moveR()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        setAccelerationR();
     }
 }
 void Camera3D::moveL(){
+    if (!_validateMovementMode(movementMode)) {
+        return;
+    }
+
     if (movementMode == Camera::MovementMode::Fixed){
-        moveRelativeDefaultL();
+        moveRelativeL();
     } else if (movementMode == Camera::MovementMode::Fly){
-        setAccelerationDefaultL();
-    } else {
-        std::cout << "Warning: Invalid movementMode in:"
-                     "\n\tvoid Camera3D::moveL()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        setAccelerationL();
     }
 }
 void Camera3D::moveU(){
+    if (!_validateMovementMode(movementMode)) {
+        return;
+    }
+
     if (movementMode == Camera::MovementMode::Fixed){
-        moveRelativeDefaultU();
+        moveRelativeU();
     } else if (movementMode == Camera::MovementMode::Fly){
-        setAccelerationDefaultU();
-    } else {
-        std::cout << "Warning: Invalid movementMode in:"
-                     "\n\tvoid Camera3D::moveU()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        setAccelerationU();
     }
 }
 void Camera3D::moveD(){
+    if (!_validateMovementMode(movementMode)) {
+        return;
+    }
+
     if (movementMode == Camera::MovementMode::Fixed){
-        moveRelativeDefaultD();
+        moveRelativeD();
     } else if (movementMode == Camera::MovementMode::Fly){
-        setAccelerationDefaultD();
-    } else {
-        std::cout << "Warning: Invalid movementMode in:"
-                     "\n\tvoid Camera3D::moveD()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        setAccelerationD();
     }
 }
 
-/** Utility **/
 bool Camera3D::isMoving() const {
-    return getVelocityFB() != 0.0 or getVelocityRL() != 0.0 or getVelocityUD()
+    return getVelocityF() != 0.0 or getVelocityR() != 0.0 or getVelocityU()
     != 0;
 }
 
-/** Absolute Movement **/
 void Camera3D::moveAbsolute(const std::vector<double> dPosition){
-    if (dPosition.size() == 3){
-        location.move(dPosition);
-        setFocus();
-    } else {
-        std::cout << "Warning: Invalid input in:\n\tvoid Camera3D::moveAbsolute"
-                     "(std::vector<double> dPosition)\n\t(Camera3D.cpp)"
-                     << std::endl;
+    if (dPosition.size() != 3) {
+        std::cout << "Warning: Invalid `dPosition`" << std::endl;
+        return;
     }
+
+    location.move(dPosition);
+    setFocus();
 }
 void Camera3D::moveAbsolute(const spatialVector& dPosition){
     moveAbsolute(dPosition.components);
@@ -428,7 +399,6 @@ void Camera3D::moveAbsoluteZ(double dZ){
     setFocus();
 }
 
-/** Relative Movement **/
 void Camera3D::moveRelative(const std::vector<double>& dPosition){
     if (dPosition.size() == 3){
         moveRelative(dPosition[0], dPosition[1], dPosition[2]);
@@ -485,82 +455,55 @@ void Camera3D::moveRelativeD(double dD){
     moveRelativeU(-dD);
 }
 
-void Camera3D::moveRelativeDefaultF(){
-    moveRelativeF(DEFAULT_MOVE_DISTANCE);
-}
-void Camera3D::moveRelativeDefaultB(){
-    moveRelativeB(DEFAULT_MOVE_DISTANCE);
-}
-void Camera3D::moveRelativeDefaultR(){
-    moveRelativeR(DEFAULT_MOVE_DISTANCE);
-}
-void Camera3D::moveRelativeDefaultL(){
-    moveRelativeL(DEFAULT_MOVE_DISTANCE);
-}
-void Camera3D::moveRelativeDefaultU(){
-    moveRelativeU(DEFAULT_MOVE_DISTANCE);
-}
-void Camera3D::moveRelativeDefaultD(){
-    moveRelativeD(DEFAULT_MOVE_DISTANCE);
-}
-
-/** Acceleration & Velocity Movement **/
 void Camera3D::moveFly(){
     updateVelocities();
-    moveRelative(getVelocityFB(), getVelocityRL(), getVelocityUD());
+    moveRelative(getVelocityF(), getVelocityR(), getVelocityU());
 }
 
-void Camera3D::setAcceleration(const int acceleratingFB_,
-                               const int acceleratingRL_,
-                               const int acceleratingUD_){
-    setAccelerationFB(acceleratingFB_);
-    setAccelerationRL(acceleratingRL_);
-    setAccelerationUD(acceleratingUD_);
+void Camera3D::setAcceleration(const double newAccelerationF,
+                               const double newAccelerationR,
+                               const double newAccelerationU) {
+    setAccelerationF(newAccelerationF);
+    setAccelerationR(newAccelerationR);
+    setAccelerationU(newAccelerationU);
 }
-void Camera3D::setAccelerationFB(int acceleratingFB_){
-    if (-1 <= acceleratingFB_ and acceleratingFB_ <= 1){
-        acceleratingFB = acceleratingFB_;
-    } else {
-        std::cout << "Warning: Invalid input (movingForward_) in:"
-                     "\n\tvoid Camera3D::setAccelerationFB(int movingForward_)"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+
+bool _validateNewAcceleration(const double newAccel) {
+    if (!isBetween(newAccel, -1, 1)) {
+        std::cout
+        << "Warning: Invalid input, must be between -1 and 1 "
+           "(" << newAccel << ")" << std::endl;
+        return false;
     }
+    return true;
+
 }
-void Camera3D::setAccelerationRL(int acceleratingRL_){
-    if (-1 <= acceleratingRL_ and acceleratingRL_ <= 1){
-        acceleratingRL = acceleratingRL_;
-    } else {
-        std::cout << "Warning: Invalid input (movingStrafe_) in:"
-                     "\n\tvoid Camera3D::setAccelerationRL(int movingStrafe_)"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+void Camera3D::setAccelerationF(const double newAccelerationF) {
+    if (!_validateNewAcceleration(newAccelerationF)) {
+        return;
     }
+    accelerationF = newAccelerationF;
 }
-void Camera3D::setAccelerationUD(int acceleratingUD_){
-    if (-1 <= acceleratingUD_ and acceleratingUD_ <= 1){
-        acceleratingUD = acceleratingUD_;
-    } else {
-        std::cout << "Warning: Invalid input (movingUp_) in:"
-                     "\n\tvoid Camera3D::setAccelerationUD(int movingUp_)"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+void Camera3D::setAccelerationR(const double newAccelerationR) {
+    if (!_validateNewAcceleration(newAccelerationR)) {
+        return;
     }
+    accelerationR = newAccelerationR;
 }
-void Camera3D::setAccelerationDefaultF(){
-    setAccelerationFB(1);
+void Camera3D::setAccelerationU(const double newAccelerationU) {
+    if (!_validateNewAcceleration(newAccelerationU)) {
+        return;
+    }
+    accelerationU = newAccelerationU;
 }
-void Camera3D::setAccelerationDefaultB(){
-    setAccelerationFB(-1);
+void Camera3D::setAccelerationB(const double newAccelerationB) {
+    setAccelerationF(-newAccelerationB);
 }
-void Camera3D::setAccelerationDefaultR(){
-    setAccelerationRL(1);
+void Camera3D::setAccelerationL(const double newAccelerationL) {
+    setAccelerationR(-newAccelerationL);
 }
-void Camera3D::setAccelerationDefaultL(){
-    setAccelerationRL(-1);
-}
-void Camera3D::setAccelerationDefaultU(){
-    setAccelerationUD(1);
-}
-void Camera3D::setAccelerationDefaultD(){
-    setAccelerationUD(-1);
+void Camera3D::setAccelerationD(const double newAccelerationD) {
+    setAccelerationU(-newAccelerationD);
 }
 
 void Camera3D::updateVelocities(){
@@ -570,253 +513,151 @@ void Camera3D::updateVelocities(){
     updateVelUD();
 }
 void Camera3D::updateVelFB() {
-    if (acceleratingFB != 0){
-        if (getVelocityFB()/acceleratingFB >= 0){
-            // Current velocity is 0, or trying to accelerate in same
-            // direction as current velocity
-            if (acceleratingFB > 0){
-                // Positive acceleration until max speed is reached
-                getVelocityFB() = std::min(
-                        getVelocityFB() + FB_ACCEL
-                            * Scene::SECONDS_PER_TICK,
-                        FB_MAX_SPEED
-                );
-            } else {
-                // Negative acceleration until min speed is reached
-                getVelocityFB() = std::max(
-                        getVelocityFB() - FB_ACCEL
-                            * Scene::SECONDS_PER_TICK,
-                        -FB_MAX_SPEED
-                );
-            }
-        } else {
-            // Accelerating against current velocity - apply brake instead
-            applyBrakeFB();
-        }
-    } else {
-        // Apply drag only if camera is not accelerating
+    if (accelerationF == 0.0) {
         applyDragFB();
+        return;
     }
+
+    if (!sameSign(velocityF, accelerationF)) {
+        applyBrakeFB();
+        return;
+    }
+
+    velocityF += accelerationF * FB_ACCEL * Scene::SECONDS_PER_TICK;
+    velocityF = clamp(velocityF, -FB_MAX_SPEED, FB_MAX_SPEED);
 }
 void Camera3D::updateVelRL() {
-    if (acceleratingRL != 0){
-        if (getVelocityRL()/acceleratingRL >= 0){
-            // Current velocity is 0, or trying to accelerate in same
-            // direction as current velocity
-            if (acceleratingRL > 0){
-                // Positive acceleration until max speed is reached
-                getVelocityRL() = std::min(
-                        getVelocityRL() + RL_ACCEL
-                            * Scene::SECONDS_PER_TICK,
-                        RL_MAX_SPEED
-                );
-            } else {
-                // Negative acceleration until min speed is reached
-                getVelocityRL() = std::max(
-                        getVelocityRL() - RL_ACCEL
-                            * Scene::SECONDS_PER_TICK,
-                        -RL_MAX_SPEED
-                );
-            }
-        } else {
-            // Accelerating against current velocity - apply brake instead
-            applyBrakeRL();
-        }
-    } else {
-        // Apply drag only if camera is not accelerating
+    if (accelerationR == 0.0) {
         applyDragRL();
+        return;
     }
+
+    if (!sameSign(velocityR, accelerationR)) {
+        applyBrakeRL();
+        return;
+    }
+
+    velocityR += accelerationR * RL_ACCEL * Scene::SECONDS_PER_TICK;
+    velocityR = clamp(velocityR, -RL_MAX_SPEED, RL_MAX_SPEED);
 }
 void Camera3D::updateVelUD() {
-    if (acceleratingUD != 0){
-        if (getVelocityUD()/acceleratingUD >= 0){
-            // Current velocity is 0, or trying to accelerate in same
-            // direction as current velocity
-            if (acceleratingUD > 0){
-                // Positive acceleration until max speed is reached
-                getVelocityUD() = std::min(
-                        getVelocityUD() + UD_ACCEL
-                            * Scene::SECONDS_PER_TICK,
-                        UD_MAX_SPEED
-                );
-            } else {
-                // Negative acceleration until min speed is reached
-                getVelocityUD() = std::max(
-                        getVelocityUD() - UD_ACCEL
-                            * Scene::SECONDS_PER_TICK,
-                        -UD_MAX_SPEED
-                );
-            }
-        } else {
-            // Accelerating against current velocity - apply brake instead
-            applyBrakeUD();
-        }
-    } else {
-        // Apply drag only if camera is not accelerating
+    if (accelerationU == 0.0) {
         applyDragUD();
+        return;
     }
+
+    if (!sameSign(velocityU, accelerationU)) {
+        applyBrakeUD();
+        return;
+    }
+
+    velocityU += accelerationU * UD_ACCEL * Scene::SECONDS_PER_TICK;
+    velocityU = clamp(velocityU, -UD_MAX_SPEED, UD_MAX_SPEED);
 }
 
-void Camera3D::applyDrag(){
+void Camera3D::applyDrag() {
     applyDragFB();
     applyDragRL();
     applyDragUD();
 }
-void Camera3D::applyDragFB(){
-    if (getVelocityFB() != 0){
-        // No drag if current velocity already 0
-        if (getVelocityFB() > 0){
-            // Drag down to 0
-            getVelocityFB() = std::max(
-                getVelocityFB() - FB_DRAG
-                    * Scene::SECONDS_PER_TICK,
-                0.
-            );
-        } else {
-            // Drag up to 0
-            getVelocityFB() = std::min(
-                getVelocityFB() + FB_DRAG
-                    * Scene::SECONDS_PER_TICK,
-                0.
-            );
-        }
+void Camera3D::applyDragFB() {
+    if (velocityF == 0.0) {
+        return;
     }
-}
-void Camera3D::applyDragRL(){
-    if (getVelocityRL() != 0){
-        // No drag if current velocity already 0
-        if (getVelocityRL() > 0){
-            // Drag down to 0
-            getVelocityRL() = std::max(
-                getVelocityRL() - RL_DRAG
-                    * Scene::SECONDS_PER_TICK,
-                0.
-            );
-        } else {
-            // Drag up to 0
-            getVelocityRL() = std::min(
-                getVelocityRL() + RL_DRAG
-                    * Scene::SECONDS_PER_TICK,
-                0.
-            );
-        }
-    }
-}
-void Camera3D::applyDragUD(){
-    if (getVelocityUD() != 0){
-        // No drag if current velocity already 0
-        if (getVelocityUD() > 0){
-            // Drag down to 0
-            getVelocityUD() = std::max(
-                getVelocityUD() - UD_DRAG
-                    * Scene::SECONDS_PER_TICK,
-                0.
-            );
-        } else {
-            // Drag up to 0
-            getVelocityUD() = std::min(
-                getVelocityUD() + UD_DRAG
-                    * Scene::SECONDS_PER_TICK,
-                0.
-            );
-        }
-    }
-}
 
-void Camera3D::applyBrakeFB(){
-    if (getVelocityFB() > 0){
-        // Break down to 0
-        getVelocityFB() = std::max(
-            getVelocityFB() - FB_BRAKE
-                * Scene::SECONDS_PER_TICK,
-            0.
-        );
-
-        if (getVelocityFB() == 0){
-            // Reset acceleration when velocity gets to 0
-            setAccelerationFB(0);
-        }
-    } else if (getVelocityFB() < 0){
-        // Break up to 0
-        getVelocityFB() = std::min(
-            getVelocityFB() + FB_BRAKE
-                * Scene::SECONDS_PER_TICK,
-            0.
-        );
-
-        if (getVelocityFB() == 0){
-            // Reset acceleration when velocity gets to 0
-            setAccelerationFB(0);
-        }
+    const double dVel = FB_DRAG * Scene::SECONDS_PER_TICK;
+    if (velocityF > 0) {
+        // Drag down to 0
+        velocityF = std::max(velocityF - dVel, 0.0);
     } else {
-        std::cout << "Warning: Breaking called when velocityFB"
-                     " == 0 in:"
-                     "\n\tvoid Camera3D::applyBrakeFB()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        // Drag up to 0
+        velocityF = std::min(velocityF + dVel, 0.0);
     }
 }
-void Camera3D::applyBrakeRL(){
-    if (getVelocityRL() > 0){
-        // Break down to 0
-        getVelocityRL() = std::max(
-            getVelocityRL() - RL_BRAKE
-                * Scene::SECONDS_PER_TICK,
-            0.
-        );
+void Camera3D::applyDragRL() {
+    if (velocityR == 0.0) {
+        return;
+    }
 
-        if (getVelocityRL() == 0){
-            // Reset acceleration when velocity gets to 0
-            setAccelerationRL(0);
-        }
-    } else if (getVelocityRL() < 0){
-        // Break up to 0
-        getVelocityRL() = std::min(
-            getVelocityRL() + RL_BRAKE
-                * Scene::SECONDS_PER_TICK,
-            0.
-        );
-
-        if (getVelocityRL() == 0){
-            // Reset acceleration when velocity gets to 0
-            setAccelerationRL(0);
-        }
+    const double dVel = RL_DRAG * Scene::SECONDS_PER_TICK;
+    if (velocityR > 0) {
+        // Drag down to 0
+        velocityR = std::max(velocityR - dVel, 0.0);
     } else {
-        std::cout << "Warning: Breaking called when velocityRL"
-                     " == 0 in:"
-                     "\n\tvoid Camera3D::applyBrakeRL()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        // Drag up to 0
+        velocityR = std::min(velocityR + dVel, 0.0);
     }
 }
-void Camera3D::applyBrakeUD(){
-    if (getVelocityUD() > 0){
-        // Break down to 0
-        getVelocityUD() = std::max(
-            getVelocityUD() - UD_BRAKE
-                * Scene::SECONDS_PER_TICK,
-            0.
-        );
+void Camera3D::applyDragUD() {
+    if (velocityU == 0.0) {
+        return;
+    }
 
-        if (getVelocityUD() == 0){
-            // Reset acceleration when velocity gets to 0
-            setAccelerationUD(0);
-        }
-    } else if (getVelocityUD() < 0){
-        // Break up to 0
-        getVelocityUD() = std::min(
-            getVelocityUD() + UD_BRAKE
-                * Scene::SECONDS_PER_TICK,
-            0.
-        );
-
-        if (getVelocityUD() == 0){
-            // Reset acceleration when velocity gets to 0
-            setAccelerationUD(0);
-        }
+    const double dVel = UD_DRAG * Scene::SECONDS_PER_TICK;
+    if (velocityU > 0) {
+        // Drag down to 0
+        velocityU = std::max(velocityU - dVel, 0.0);
     } else {
-        std::cout << "Warning: Breaking called when velocityUD"
-                     " == 0 in:"
-                     "\n\tvoid Camera3D::applyBrakeUD()"
-                     "\n\t(Camera3D.cpp)" << std::endl;
+        // Drag up to 0
+        velocityU = std::min(velocityU + dVel, 0.0);
+    }
+}
+
+void Camera3D::applyBrakeFB() {
+    if (velocityF == 0.0) {
+        return;
+    }
+
+    const double dVel = FB_BRAKE * Scene::SECONDS_PER_TICK;
+    if (velocityF > 0) {
+        // Brake down to 0
+        velocityF = std::max(velocityF - dVel, 0.0);
+    } else {
+        // Brake up to 0
+        velocityF = std::min(velocityF + dVel, 0.0);
+    }
+
+    // When velocity gets to 0, stop moving
+    if (velocityF == 0.0) {
+        setAccelerationF(0);
+    }
+}
+void Camera3D::applyBrakeRL() {
+    if (velocityR == 0.0) {
+        return;
+    }
+
+    const double dVel = RL_BRAKE * Scene::SECONDS_PER_TICK;
+    if (velocityR > 0) {
+        // Brake down to 0
+        velocityR = std::max(velocityR - dVel, 0.0);
+    } else {
+        // Brake up to 0
+        velocityR = std::min(velocityR + dVel, 0.0);
+    }
+
+    // When velocity gets to 0, stop moving
+    if (velocityR == 0.0) {
+        setAccelerationR(0);
+    }
+}
+void Camera3D::applyBrakeUD() {
+    if (velocityU == 0.0) {
+        return;
+    }
+
+    const double dVel = UD_BRAKE * Scene::SECONDS_PER_TICK;
+    if (velocityU > 0) {
+        // Brake down to 0
+        velocityU = std::max(velocityU - dVel, 0.0);
+    } else {
+        // Brake up to 0
+        velocityU = std::min(velocityU + dVel, 0.0);
+    }
+
+    // When velocity gets to 0, stop moving
+    if (velocityU == 0.0) {
+        setAccelerationU(0);
     }
 }
 
@@ -856,15 +697,15 @@ void Camera3D::rotateAzimuth(const double dAzimuthAngle, bool updateNormal){
         setNormal();
     }
 }
-void Camera3D::rotateRight(){
-    rotatePolar(-DEFAULT_ROTATION_ANGLE);
+void Camera3D::rotateRight(const double dDeg){
+    rotatePolar(-dDeg);
 }
-void Camera3D::rotateLeft(){
-    rotatePolar(DEFAULT_ROTATION_ANGLE);
+void Camera3D::rotateLeft(const double dDeg){
+    rotatePolar(dDeg);
 }
-void Camera3D::rotateUp(){
-    rotateAzimuth(-DEFAULT_ROTATION_ANGLE);
+void Camera3D::rotateUp(const double dDeg){
+    rotateAzimuth(-dDeg);
 }
-void Camera3D::rotateDown(){
-    rotateAzimuth(DEFAULT_ROTATION_ANGLE);
+void Camera3D::rotateDown(const double dDeg){
+    rotateAzimuth(dDeg);
 }

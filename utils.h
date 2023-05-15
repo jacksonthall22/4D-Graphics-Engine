@@ -25,7 +25,7 @@ using std::experimental::optional;
 /* ========== Functions ========== */
 
 /**
- * Return the square of the given double value.
+ * Square a value.
  */
 double square(double n);
 /**
@@ -44,23 +44,38 @@ double mod(double a, double n);
  * Set `a` to `a % n` in-place.
  */
 void modEquals(double *a, double n);
+/**
+ * Clamp the first argument to the `min` or `max` if it's out of range.
+ * `min` must be less than `max`.
+ */
+double clamp(double n, double min, double max);
+/**
+ * Return true iff the first argument is between `min` and `max`.
+ */
+bool isBetween(double n, double min, double max);
+/**
+ * Return true iff the two arguments are both negative or both positive.
+ * If either argument is `0`, returns true. Does not support the `(0, inf)` case.
+ * https://stackoverflow.com/a/2922888/7304977
+ */
+bool sameSign(double n1, double n2);
+/**
+ * Return the average of the elements in the array.
+ */
+double average(std::vector<double>& arr);
 
 /* ========== Structs ========== */
 /**
  * Represents a vector with any number of dimensional components.
  */
 struct spatialVector {
-    /* Fields */
     std::vector<double> components;
 
-    /* Constructors */
     spatialVector();
     explicit spatialVector(int numDimensions);
     spatialVector(const spatialVector& other);
     explicit spatialVector(const std::vector<double>& components);
 
-    /* Other Methods */
-    /* Utility */
     /**
      * Add all of other's components to this's components.
      */
@@ -78,26 +93,25 @@ struct spatialVector {
      */
     double magnitude() const;
     /**
-     * Compute the dot product of this vector and another.
+     * Compute the dot product of `this` and `other`.
      */
     double dot(const spatialVector& other) const;
     /**
-     * Return the cosine of the angle between this vector and another in
-     * radians.
+     * Return the cosine of the angle between `this` and `other` in radians.
      */
     double cosOfAngleBetween(const spatialVector& other) const;
     /**
-     * Return the scalar projection of this vector onto another.
+     * Return the scalar projection of `this` onto `other`.
      */
     double scalarProjectOnto(const spatialVector& other) const;
     /**
-     * Return the magnitude of the vector rejection of this from other.
+     * Return the magnitude of the vector rejection of `this` from `other`.
      */
     double scalarRejectFrom(const spatialVector& other) const;
 };
 
 /**
- * Represents a point. Abstract, derived by point2d, point3d, and point4d.
+ * Represents a point. Abstract, derived by `point2d`, `point3d`, and `point4d`.
  */
 struct point {
     /* Other Methods */
