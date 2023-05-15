@@ -18,11 +18,13 @@
 
 
 /** Const Variables */
-const int DEFAULT_WINDOW_WIDTH = 1400;
+const int DEFAULT_WINDOW_WIDTH = 1920;
+const int DEFAULT_WINDOW_HEIGHT = 1080;
 
-const int DEFAULT_WINDOW_HEIGHT = 700;
-const double DEFAULT_RENDER_COLOR_RGB[3] = {0.0, 0.0, 0.0};
-const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {0.0, 0.0, 0.0};
+const double DEFAULT_LINE_COLOR_RGB[3] = {0.0, 0.0, 0.0};
+const double DEFAULT_BACKGROUND_COLOR_RGBA[4] = {0.9, 0.9, 0.86, 1.0};
+
+const double ORTHO_ZOOM = 700;
 
 /// Keybinds
 /* Movement */
@@ -36,12 +38,12 @@ const char OUT_KEY = 0x51;          // Q
 const char IN_KEY = 0x45;           // E
 
 /* Rotation */
-const char ROT_RIGHT_KEY = 0x4C;  // L
-const char ROT_LEFT_KEY = 0x4A;   // J
-const char ROT_UP_KEY = 0x49;     // I
-const char ROT_DOWN_KEY = 0x4B;   // K
-const char ROT_OUT_KEY = 0x4F;    // O
-const char ROT_IN_KEY = 0x55;     // U
+const char ROT_RIGHT_KEY = 0x4C;    // L
+const char ROT_LEFT_KEY = 0x4A;     // J
+const char ROT_UP_KEY = 0x49;       // I
+const char ROT_DOWN_KEY = 0x4B;     // K
+const char ROT_OUT_KEY = 0x4F;      // O
+const char ROT_IN_KEY = 0x55;       // U
 
 /* Other */
 //const char TOGGLE_ACTIVE_CAMERA_KEY = 0x54;     // T

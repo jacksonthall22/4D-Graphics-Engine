@@ -16,7 +16,7 @@ const int SCENE_PRESET = 0;
 
 
 /**
- * Create and initialize a Scene object.
+ * Create and initialize Scene objects.
  */
 void initScene(int preset){
     /** Create Axes **/
@@ -2042,7 +2042,11 @@ void initGL(){
     windowHeight = DEFAULT_WINDOW_HEIGHT;
 
     // Set "clearing" or background color 0, 113, 85, 1
-    glClearColor(0.9f, 0.9f, 0.86f, 1.0f); // Black and opaque
+    glClearColor(DEFAULT_BACKGROUND_COLOR_RGBA[0],
+        DEFAULT_BACKGROUND_COLOR_RGBA[1],
+        DEFAULT_BACKGROUND_COLOR_RGBA[2],
+        DEFAULT_BACKGROUND_COLOR_RGBA[3]); // Black
+    // and opaque
 }
 
 /* Handler for window-repaint event. Call back when the window first appears and
@@ -2375,7 +2379,7 @@ int main(int argc, char** argv){
     glutInitWindowPosition( 100, 100);
 
     /* create the window and store the handle to it */
-    window = glutCreateWindow(/* Fun with Drawing! */ "/* title */");
+    window = glutCreateWindow(/* Fun with Drawing! */ "4D Graphics Engine");
 
     // Register callback handler for window re-paint event
     glutDisplayFunc(display);

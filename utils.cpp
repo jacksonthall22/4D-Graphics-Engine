@@ -3,7 +3,7 @@
 //
 
 #include "utils.h"
-#include <utility>
+#include "graphics.h"
 #include <vector>
 #include <cmath>
 #include <iostream>
@@ -19,14 +19,6 @@ using std::experimental::optional;
     #include <optional>
 #endif
 
-
-
-/** ========== Constants ========== */
-const int DEFAULT_WINDOW_WIDTH = 960;
-const int DEFAULT_WINDOW_HEIGHT = 540;
-const double DEFAULT_RENDER_COLOR_RGB[3] = {0.0, 0.0, 0.0};
-const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {1.0, 1.0, 0.9};
-const double ORTHO_ZOOM = 700;
 
 /** ========== Functions ========== */
 /**
@@ -443,9 +435,9 @@ void modEquals(double *a, double n){
         glBegin(GL_LINES);
         glLineWidth(1);
         glColor3f(
-                DEFAULT_RENDER_COLOR_RGB[0],
-                DEFAULT_RENDER_COLOR_RGB[1],
-                DEFAULT_RENDER_COLOR_RGB[2]
+            DEFAULT_LINE_COLOR_RGB[0],
+            DEFAULT_LINE_COLOR_RGB[1],
+            DEFAULT_LINE_COLOR_RGB[2]
         );
         glVertex2i(ORTHO_ZOOM * this->p1->x, ORTHO_ZOOM * this->p1->y);
         glVertex2i(ORTHO_ZOOM * this->p2->x, ORTHO_ZOOM * this->p2->y);
