@@ -22,43 +22,44 @@ using std::experimental::optional;
 #endif
 
 
-/** ========== Functions ========== */
+/* ========== Functions ========== */
+
 /**
  * Return the square of the given double value.
  */
 double square(double n);
 /**
- * Return the given degrees value converted to radians.
+ * Convert a degree value to radians.
  */
 double rad(double deg);
 /**
- * Return the given radians value converted to degrees.
+ * Convert a radian value to degrees.
  */
 double deg(double rad);
 /**
- * Return a % n, which is not natively defined for doubles.
+ * Return `a % n`.
  */
 double mod(double a, double n);
 /**
- * Set a to a % n, which is not natively defined for doubles.
+ * Set `a` to `a % n` in-place.
  */
 void modEquals(double *a, double n);
 
-/** ========== Structs ========== */
+/* ========== Structs ========== */
 /**
  * Represents a vector with any number of dimensional components.
  */
 struct spatialVector {
-    /** Fields */
+    /* Fields */
     std::vector<double> components;
 
-    /** Constructors */
+    /* Constructors */
     spatialVector();
     explicit spatialVector(int numDimensions);
     spatialVector(const spatialVector& other);
     explicit spatialVector(const std::vector<double>& components);
 
-    /** Other Methods */
+    /* Other Methods */
     /* Utility */
     /**
      * Add all of other's components to this's components.
@@ -99,7 +100,7 @@ struct spatialVector {
  * Represents a point. Abstract, derived by point2d, point3d, and point4d.
  */
 struct point {
-    /** Other Methods */
+    /* Other Methods */
     /* Movement */
     virtual void move(const std::vector<double>& dPosition) = 0;
     virtual void move(const spatialVector& dPosition) = 0;
@@ -134,15 +135,15 @@ struct point2d : public point {
  * Represents a point in 3 dimensions.
  */
 struct point3d : public point {
-    /** Fields */
+    /* Fields */
     double x, y, z;
 
-    /** Constructors */
+    /* Constructors */
     point3d();
     point3d(const point3d& other);
     point3d(double x, double y, double z);
 
-    /** Other Methods */
+    /* Other Methods */
     /* Utility */
     /**
      * Return the Euclidean distance from this point to another.
@@ -161,15 +162,15 @@ struct point3d : public point {
  * Represents a point in 4 dimensions.
  */
 struct point4d : public point {
-    /** Fields */
+    /* Fields */
     double x, y, z, a;
 
-    /** Constructors */
+    /* Constructors */
     point4d();
     point4d(const point4d& other);
     point4d(double x, double y, double z, double a);
 
-    /** Other Methods */
+    /* Other Methods */
     /* Utility */
     /**
      * Return the Euclidean distance from this point to another.
@@ -190,10 +191,10 @@ struct point4d : public point {
  * Stores pairs of pointers to point objects.
  */
 struct edge {
-    /** Virtual Destructor */
+    /* Virtual Destructor */
     virtual ~edge() = 0;
 
-    /** Other Methods */
+    /* Other Methods */
     /**
      * Return the Euclidean distance between the endpoints of this edge.
      */
@@ -204,15 +205,15 @@ struct edge {
  * Stores a pair of pointers to point2d objects.
  */
 struct edge2d : edge {
-    /** Fields */
+    /* Fields */
     std::shared_ptr<point2d> p1, p2;
 
-    /** Constructors */
+    /* Constructors */
     edge2d();
     edge2d(const edge2d& other);
     edge2d(const point2d& p1, const point2d& p2);
 
-    /** Other Methods */
+    /* Other Methods */
     /**
      * Return the Euclidean distance between the endpoints of this edge.
      */
@@ -228,15 +229,15 @@ struct edge2d : edge {
  * Stores a pair of pointers to point2d objects.
  */
 struct edge3d : edge {
-    /** Fields */
+    /* Fields */
     std::shared_ptr<point3d> p1, p2;
 
-    /** Constructors */
+    /* Constructors */
     edge3d();
     edge3d(const edge3d& other);
     edge3d(const point3d& p1, const point3d& p2);
 
-    /** Other Methods */
+    /* Other Methods */
     /**
      * Return the Euclidean distance between the endpoints of this edge.
      */
@@ -247,15 +248,15 @@ struct edge3d : edge {
  * Stores a pair of pointers to point2d objects.
  */
 struct edge4d : edge {
-    /** Fields */
+    /* Fields */
     std::shared_ptr<point4d> p1, p2;
 
-    /** Constructors */
+    /* Constructors */
     edge4d();
     edge4d(const edge4d& other);
     edge4d(const point4d& p1, const point4d& p2);
 
-    /** Other Methods */
+    /* Other Methods */
     /**
      * Return the Euclidean distance between the endpoints of this edge.
      */
@@ -272,7 +273,7 @@ struct sphericalAngle {
     /// Note: All calculations done in degrees
     /// Note: Left-handed coordinate system
 
-    /** Getters */
+    /* Getters */
     /**
      * Return the unit vector in the direction defined by this object.
      */
@@ -287,7 +288,7 @@ struct sphericalAngle3d : public sphericalAngle {
     /// Note: All calculations done in degrees
     /// Note: Left-handed coordinate system
 
-    /** Fields */
+    /* Fields */
     // polarAngle rotates around the (vertical) z-axis, ranges from [0, 360)
     //      degrees and where 0 is towards the positive y-axis, and increasing
     //      rotates east (CCW rotation from top-down)
@@ -295,12 +296,12 @@ struct sphericalAngle3d : public sphericalAngle {
     //      180 is straight down (90 is forward)
     double polarAngle, azimuthAngle;
 
-    /** Constructors */
+    /* Constructors */
     sphericalAngle3d();
     sphericalAngle3d(sphericalAngle3d const &other);
     sphericalAngle3d(double polarAngle, double azimuthAngle);
 
-    /** Setters */
+    /* Setters */
     /**
      * Set polar angle to given value, capping between [0, 360)
      */
@@ -310,7 +311,7 @@ struct sphericalAngle3d : public sphericalAngle {
      */
     void setAzimuth(double newAzimuthAngle);
 
-    /** Other Methods */
+    /* Other Methods */
     /* Utility */
     /**
      * Return the unit vector pointing in the direction defined by this object.
@@ -355,12 +356,12 @@ struct sphericalAngle4d : public sphericalAngle {
     //      names to 4d directions)
     double polarAngle, azimuthAngle, phiAngle;
 
-    /** Constructors */
+    /* Constructors */
     sphericalAngle4d();
     sphericalAngle4d(const sphericalAngle4d& other);
     sphericalAngle4d(double polarAngle, double azimuthAngle, double phiAngle);
 
-    /** Setters */
+    /* Setters */
     /**
      * Set polar angle to given value, capping between [0, 180]
      */
@@ -374,7 +375,7 @@ struct sphericalAngle4d : public sphericalAngle {
      */
     void setPhi(double newPhiAngle);
 
-    /** Other Methods */
+    /* Other Methods */
     /* Utility */
     /**
      * Return the vector pointing in the direction defined by this object.

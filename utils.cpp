@@ -20,47 +20,27 @@ using std::experimental::optional;
 #endif
 
 
-/** ========== Functions ========== */
-/**
- * Return the square of the given double value.
- */
-double square(double n){
+double square(const double n){
     return pow(n, 2);
 }
-
-/**
- * Return the given degrees value converted to radians.
- */
-double rad(double deg){
+double rad(const double deg){
     return deg * M_PI / 180;
 }
-
-double deg(double rad){
+double deg(const double rad){
     return rad * 180 / M_PI;
 }
-
-/**
- * Return a % n, which is not natively defined for doubles.
- */
-double mod(double a, double n){
+double mod(const double a, const double n){
     return a - floor(a / n) * n;
 }
-
-/**
- * Set a to a % n, which is not natively defined for doubles.
- */
-void modEquals(double *a, double n){
+void modEquals(double *a, const double n){
     *a = mod(*a, n);
 }
 
 
 
 
-/** ========== Structs ========== */
-/** ===== Start spatialVector Struct ===== */
-    /**
-     * Represents a vector with any number of dimensional components.
-     */
+/* ========== Structs ========== */
+/* ===== Start spatialVector Struct ===== */
     spatialVector::spatialVector() : spatialVector(0){
     }
 
@@ -175,12 +155,12 @@ void modEquals(double *a, double n){
             return -1;
         }
     }
-/** ===== End spatialVector Struct ===== */
+/* ===== End spatialVector Struct ===== */
 
 
 
 
-/** ===== Start point2d : point Struct ===== */
+/* ===== Start point2d : point Struct ===== */
     /**
      * Represents a point in 2 dimensions.
      */
@@ -240,12 +220,12 @@ void modEquals(double *a, double n){
                     << std::endl;
         }
     }
-/** ===== End point2d : point Struct ===== */
+/* ===== End point2d : point Struct ===== */
 
 
 
 
-/** ===== Start point3d : point Struct ===== */
+/* ===== Start point3d : point Struct ===== */
     /**
      * Represents a point in 3 dimensions.
      */
@@ -314,12 +294,12 @@ void modEquals(double *a, double n){
                     << std::endl;
         }
     }
-/** ===== End point3d : point Struct ===== */
+/* ===== End point3d : point Struct ===== */
 
 
 
 
-/** ===== Start point4d : point Struct ===== */
+/* ===== Start point4d : point Struct ===== */
     /**
      * Represents a point in 4 dimensions.
      */
@@ -397,22 +377,22 @@ void modEquals(double *a, double n){
                     << std::endl;
         }
     }
-/** ===== End point4d : point Struct ===== */
+/* ===== End point4d : point Struct ===== */
 
 
 
 
-/** ===== Start edge Struct ===== */
+/* ===== Start edge Struct ===== */
     /**
      * Stores pairs of pointers to point objects.
      */
     edge::~edge() = default;
-/** ===== End edge Struct ===== */
+/* ===== End edge Struct ===== */
 
 
 
 
-/** ===== Start edge2d : edge Struct ===== */
+/* ===== Start edge2d : edge Struct ===== */
     /**
      * Stores a pair of pointers to point2d objects.
      */
@@ -443,12 +423,12 @@ void modEquals(double *a, double n){
         glVertex2i(ORTHO_ZOOM * this->p2->x, ORTHO_ZOOM * this->p2->y);
         glEnd();
     }
-/** ===== End edge2d : edge Struct ===== */
+/* ===== End edge2d : edge Struct ===== */
 
 
 
 
-/** ===== Start edge3d : edge Struct ===== */
+/* ===== Start edge3d : edge Struct ===== */
     /**
      * Stores a pair of pointers to point2d objects.
      */
@@ -466,12 +446,12 @@ void modEquals(double *a, double n){
     double edge3d::length() const {
         return p1->distanceTo(*p2);
     }
-/** ===== End edge3d : edge Struct ===== */
+/* ===== End edge3d : edge Struct ===== */
 
 
 
 
-/** ===== Start edge4d : edge Struct ===== */
+/* ===== Start edge4d : edge Struct ===== */
     /**
      * Stores a pair of pointers to point2d objects.
      */
@@ -489,23 +469,23 @@ void modEquals(double *a, double n){
     double edge4d::length() const {
         return p1->distanceTo(*p2);
     }
-/** ===== End edge4d : edge Struct ===== */
+/* ===== End edge4d : edge Struct ===== */
 
 
 
 
-/** ===== Start sphericalAngle Struct ===== */
+/* ===== Start sphericalAngle Struct ===== */
     /**
      * Stores n-1 angles that can be used to define any direction in
      * n-dimensional space. Abstract, derived by sphericalAngle3d and
      * sphericalAngle4d.
      */
-/** ===== End sphericalAngle Struct ===== */
+/* ===== End sphericalAngle Struct ===== */
 
 
 
 
-/** ===== Start sphericalAngle3d : sphericalAngle Struct ===== */
+/* ===== Start sphericalAngle3d : sphericalAngle Struct ===== */
     /**
      * Stores 2 angles that can be used to define any direction in 3d space.
      */
@@ -574,12 +554,12 @@ void modEquals(double *a, double n){
         }
     }
 
-/** ===== End sphericalAngle3d : sphericalAngle Struct ===== */
+/* ===== End sphericalAngle3d : sphericalAngle Struct ===== */
 
 
 
 
-/** ===== Start sphericalAngle4d : sphericalAngle Struct ===== */
+/* ===== Start sphericalAngle4d : sphericalAngle Struct ===== */
 /**
  * Stores 3 angles that can be used to define any direction in 4d space.
  */
@@ -659,4 +639,4 @@ void modEquals(double *a, double n){
                          << std::endl;
         }
     }
-/** ===== End sphericalAngle4d : sphericalAngle Struct ===== */
+/* ===== End sphericalAngle4d : sphericalAngle Struct ===== */
