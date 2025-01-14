@@ -23,7 +23,9 @@ public:
     const std::vector<std::shared_ptr<edge3d>>& getEdges() const;
 
     /** Other Methods */
-    void extrude(const spatialVector& direction) override;
+    /// TODO These methods segfault
+//    void extrude(const std::vector<double>& direction) override;
+//    void extrude(const spatialVector& direction) override;
     void draw(const Camera3D& camera3d, const Camera4D& camera4d) const
     override;
 

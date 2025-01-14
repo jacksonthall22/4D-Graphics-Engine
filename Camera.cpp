@@ -6,34 +6,53 @@
 #include <cmath>
 
 
-/** Static Fields */
+/** ---------- Static Const Vars ---------- */
 const double Camera::DEFAULT_MOVE_DISTANCE = 0.25;
+const double Camera::DEFAULT_ROTATION_ANGLE = 2.5;
 
-const double Camera::DEFAULT_ROTATION_ANGLE = 2;
-
-const double Camera::DEFAULT_FOV = 160;
-
-/** Constructors */
-Camera::Camera(double focalDistance) : focalDistance(focalDistance) {
+/** ---------- Constructors ---------- */
+Camera::Camera(double focalDistance, MovementMode movementMode) :
+        focalDistance(focalDistance), movementMode(movementMode){
 }
 
-/** Static Methods */
+/** ---------- Static Methods ---------- */
 /**
- * Return the distance of the focus from a Camera's plane/hyperplane to
- * render with a field of view of the given degree angle.
+ * Return the orthogonal distance behind the Camera's viewing hyperplane to
+ * place the focus such that the Camera renders with a field of view of the
+ * given degree angle. If fovDegrees is >= 180, print a warning and return 1.
  */
-double Camera::getFocalDistanceFromFOV(const double fovDegrees) {
+double Camera::getFocalDistanceFromFOV(const double fovDegrees,
+        const double screenWidthBlocks){
     // Focal distance is the cosine of half the field of view
-    return cos(rad(fovDegrees / 2.0 * M_PI / 180));
+    if (fovDegrees >= 180){
+        std::cout << "Warning: Invalid input (fovDegrees) in:"
+                     "\n\tdouble Camera::getFocalDistanceFromFOV(const double "
+                     "fovDegrees, const double screenWidth)"
+                     "\n\t(Camera.cpp)" << std::endl;
+        return 1;
+    }
+
+    // focal distance is to screen width / 2 as cos(fov/2) is to sin(fov/2)
+    return screenWidthBlocks / 2
+            * cos(rad(fovDegrees/2)) / sin(rad(fovDegrees/2));
 }
 
-/** Getters */
+/** ---------- Getters ---------- */
 double Camera::getFocalDistance() const {
     return focalDistance;
 }
-
-/** Setters */
-void Camera::setFocalDistance(const double newFocalDistance) {
-    focalDistance = newFocalDistance;
+Camera::MovementMode Camera::getMovementMode(){
+    return movementMode;
 }
 
+/** ---------- Setters ---------- */
+void Camera::setFocalDistance(const double newFocalDistance){
+    focalDistance = newFocalDistance;
+}
+void Camera::toggleMovementMode(){
+    if (movementMode == Camera::MovementMode::Fixed){
+        movementMode = Camera::MovementMode::Fly;
+    } else {
+        movementMode = Camera::MovementMode::Fixed;
+    }
+}

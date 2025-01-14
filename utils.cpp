@@ -3,11 +3,12 @@
 //
 
 #include "utils.h"
-#include <utility>
+#include "graphics.h"
 #include <vector>
 #include <cmath>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #if __cplusplus < 201700
     #include <experimental/optional>
 #include <GL/gl.h>
@@ -20,56 +21,63 @@ using std::experimental::optional;
 #endif
 
 
-
-/** ========== Constants ========== */
-const int DEFAULT_WINDOW_WIDTH = 960;
-const int DEFAULT_WINDOW_HEIGHT = 540;
-const double DEFAULT_RENDER_COLOR_RGB[3] = {0.0, 0.0, 0.0};
-const double DEFAULT_BACKGROUND_COLOR_RGB[3] = {1.0, 1.0, 0.9};
-const double ORTHO_ZOOM = 700;
-
-/** ========== Functions ========== */
-/**
- * Return the square of the given double value.
- */
-double square(double n){
+double square(const double n){
     return pow(n, 2);
 }
-
-/**
- * Return the given degrees value converted to radians.
- */
-double rad(double deg){
+double rad(const double deg){
     return deg * M_PI / 180;
 }
-
-double deg(double rad){
+double deg(const double rad){
     return rad * 180 / M_PI;
 }
-
-/**
- * Return a % n, which is not natively defined for doubles.
- */
-double mod(double a, double n){
+double mod(const double a, const double n){
     return a - floor(a / n) * n;
 }
-
-/**
- * Set a to a % n, which is not natively defined for doubles.
- */
-void modEquals(double *a, double n){
+void modEquals(double *a, const double n){
     *a = mod(*a, n);
 }
+double clamp(const double n, const double min, const double max) {
+    if (min > max) {
+        throw std::invalid_argument("Internal error: `min` should be <= `max`");
+    }
+    if (n < min)
+        return min;
+    if (n > max)
+        return max;
+    return n;
+}
+bool isBetween(const double n, const double min, const double max) {
+    if (min > max) {
+        throw std::invalid_argument("Internal error: `min` should be <= `max`");
+    }
+    return clamp(n, min, max) == n;
+}
+bool sameSign(const double n1, const double n2) {
+    return n1 * n2 >= 0.0;
+}
+double average(const std::vector<double>& arr) {
+    double sum = 0.0;
+    int count = 0;
 
+    for (auto e: arr) {
+   		count++;
+   		sum += e;
+    }
 
+    if (count == 0) {
+        throw std::invalid_argument("Internal error: `arr` had no elements");
+    }
 
+    return sum / count;
+}
 
-/** ========== Structs ========== */
-/** ===== Start spatialVector Struct ===== */
-    /**
-     * Represents a vector with any number of dimensional components.
-     */
-    spatialVector::spatialVector() : spatialVector(std::vector<double>()){
+/* ========== Structs ========== */
+/* ===== Start spatialVector Struct ===== */
+    spatialVector::spatialVector() : spatialVector(0){
+    }
+
+    spatialVector::spatialVector(const int numDimensions) :
+            spatialVector(std::vector<double>(numDimensions, 0.0)){
     }
 
     spatialVector::spatialVector(const spatialVector& other) : spatialVector(other.components){
@@ -79,19 +87,16 @@ void modEquals(double *a, double n){
         this->components = components;
     }
 
-    void spatialVector::plus(const spatialVector& other) {
-        if (other.components.size() <= components.size()){
-            for (int i = 0; i < other.components.size(); ++i){
-                components[i] += other.components[i];
-            }
-        } else {
-            std::cout << "Warning: Invalid input to:\n\tvoid "
-                         "spatialVector::plus(const spatialVector& other)\n\t"
-                         "(utils.cpp)" << std::endl;
+    void spatialVector::plus(const spatialVector& other){
+        if (other.components.size() != components.size()) {
+            std::cout << "Warning: Invalid input" << std::endl;
+        }
+        for (int i = 0; i < other.components.size(); ++i){
+            components[i] += other.components[i];
         }
     }
 
-    void spatialVector::minus(const spatialVector& other) {
+    void spatialVector::minus(const spatialVector& other){
         if (other.components.size() <= components.size()){
             for (int i = 0; i < other.components.size(); ++i){
                 components[i] -= other.components[i];
@@ -142,16 +147,14 @@ void modEquals(double *a, double n){
 
     double spatialVector::scalarProjectOnto(const spatialVector& other) const{
         if (components.size() == other.components.size()){
-            /// TODO Delete test var, using with debugger
-            double test = this->dot(other) / other.magnitude();
-            return test;
+            return this->dot(other) / other.magnitude();
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tdouble vectorProjection"
                          "(spatialVector v1, spatialVector v2)\n\t(utils.cpp)"
                          << std::endl;
             std::cout << "other.components: ";
-            for (auto & e : other.components) {
+            for (auto& e : other.components){
                 std::cout << e << " | ";
             }
             std::cout << std::endl;
@@ -181,12 +184,12 @@ void modEquals(double *a, double n){
             return -1;
         }
     }
-/** ===== End spatialVector Struct ===== */
+/* ===== End spatialVector Struct ===== */
 
 
 
 
-/** ===== Start point2d : point Struct ===== */
+/* ===== Start point2d : point Struct ===== */
     /**
      * Represents a point in 2 dimensions.
      */
@@ -196,7 +199,7 @@ void modEquals(double *a, double n){
     point2d::point2d(const point2d& other) : point2d(other.x, other.y){
     }
 
-    point2d::point2d(double x, double y) : x(x), y(y) {
+    point2d::point2d(double x, double y) : x(x), y(y){
     }
 
     double point2d::distanceTo(const point2d& other) const {
@@ -216,7 +219,7 @@ void modEquals(double *a, double n){
         moveY(dY);
     }
 
-    void point2d::move(const std::vector<double>& dPosition) {
+    void point2d::move(const std::vector<double>& dPosition){
         if (dPosition.size() <= 2){
             // Can move in at most 2 directions
             // Create a new vector of length 2 (fill remaining
@@ -230,38 +233,36 @@ void modEquals(double *a, double n){
 
             move(dPositionVec[0], dPositionVec[1]);
         } else {
-            std::cout << "Warning: Invalid input in:\n\tvoid move"
+            std::cout << "Warning: Invalid input in:\n\tvoid moveAbsolute"
                     "(std::vector<double>& dPosition)\n\t(point2d, utils.cpp)"
                     << std::endl;
         }
     }
 
-    void point2d::move(const spatialVector& dPosition) {
+    void point2d::move(const spatialVector& dPosition){
         if (dPosition.components.size() <= 2){
             move(dPosition.components);
         } else {
             // Bad input
-            std::cout << "Warning: Invalid input in:\n\tvoid move(const "
+            std::cout << "Warning: Invalid input in:\n\tvoid moveAbsolute(const "
                     "spatialVector& dPosition) override\n\t(point2d, utils.cpp)"
                     << std::endl;
         }
     }
-/** ===== End point2d : point Struct ===== */
+/* ===== End point2d : point Struct ===== */
 
 
 
 
-/** ===== Start point3d : point Struct ===== */
-    /**
-     * Represents a point in 3 dimensions.
-     */
+/* ===== Start point3d : point Struct ===== */
+
     point3d::point3d() : point3d(0, 0, 0){
     }
 
     point3d::point3d(const point3d& other) : point3d(other.x, other.y, other.z){
     }
 
-    point3d::point3d(double x, double y, double z) : x(x), y(y), z(z) {
+    point3d::point3d(double x, double y, double z) : x(x), y(y), z(z){
     }
 
     double point3d::distanceTo(const point3d& other) const {
@@ -290,7 +291,7 @@ void modEquals(double *a, double n){
         moveZ(dZ);
     }
 
-    void point3d::move(const std::vector<double>& dPosition) {
+    void point3d::move(const std::vector<double>& dPosition){
         if (dPosition.size() <= 3){
             // Can move in at most 3 directions
             // Create a new vector of length 3 (fill remaining
@@ -304,28 +305,28 @@ void modEquals(double *a, double n){
 
             move(dPositionVec[0], dPositionVec[1], dPositionVec[2]);
         } else {
-            std::cout << "Warning: Invalid input in:\n\tvoid move"
+            std::cout << "Warning: Invalid input in:\n\tvoid moveAbsolute"
                     "(std::vector<double>& dPosition)\n\t(point3d, utils.cpp)"
                     << std::endl;
         }
     }
 
-    void point3d::move(const spatialVector& dPosition) {
+    void point3d::move(const spatialVector& dPosition){
         if (dPosition.components.size() <= 3){
             move(dPosition.components);
         } else {
             // Bad input
-            std::cout << "Warning: Invalid input in:\n\tvoid move(const "
+            std::cout << "Warning: Invalid input in:\n\tvoid moveAbsolute(const "
                     "spatialVector& dPosition) override\n\t(point3d, utils.cpp)"
                     << std::endl;
         }
     }
-/** ===== End point3d : point Struct ===== */
+/* ===== End point3d : point Struct ===== */
 
 
 
 
-/** ===== Start point4d : point Struct ===== */
+/* ===== Start point4d : point Struct ===== */
     /**
      * Represents a point in 4 dimensions.
      */
@@ -335,8 +336,9 @@ void modEquals(double *a, double n){
     point4d::point4d(const point4d& other) : point4d(other.x, other.y, other.z, other.a){
     }
 
-    point4d::point4d(double x, double y, double z, double a) :
-            x(x), y(y), z(z), a(a) {
+    point4d::point4d(const double x, const double y, const double z,
+        const double a) :
+            x(x), y(y), z(z), a(a){
     }
 
     double point4d::distanceTo(const point4d& other) const {
@@ -371,7 +373,7 @@ void modEquals(double *a, double n){
         moveA(dA);
     }
 
-    void point4d::move(const std::vector<double>& dPosition) {
+    void point4d::move(const std::vector<double>& dPosition){
         if (dPosition.size() <= 4){
             // Can move in at most 4 directions
             // Create a new vector of length 4 (fill remaining
@@ -386,38 +388,38 @@ void modEquals(double *a, double n){
             move(dPositionVec[0], dPositionVec[1], dPositionVec[2],
                 dPositionVec[3]);
         } else {
-            std::cout << "Warning: Invalid input in:\n\tvoid move"
+            std::cout << "Warning: Invalid input in:\n\tvoid moveAbsolute"
                     "(std::vector<double>& dPosition)\n\t(point4d, utils.cpp)"
                     << std::endl;
         }
     }
 
-    void point4d::move(const spatialVector& dPosition) {
+    void point4d::move(const spatialVector& dPosition){
         if (dPosition.components.size() <= 4){
             move(dPosition.components);
         } else {
             // Bad input
-            std::cout << "Warning: Invalid input in:\n\tvoid move(const "
+            std::cout << "Warning: Invalid input in:\n\tvoid moveAbsolute(const "
                     "spatialVector& dPosition) override\n\t(point4d, utils.cpp)"
                     << std::endl;
         }
     }
-/** ===== End point4d : point Struct ===== */
+/* ===== End point4d : point Struct ===== */
 
 
 
 
-/** ===== Start edge Struct ===== */
+/* ===== Start edge Struct ===== */
     /**
      * Stores pairs of pointers to point objects.
      */
     edge::~edge() = default;
-/** ===== End edge Struct ===== */
+/* ===== End edge Struct ===== */
 
 
 
 
-/** ===== Start edge2d : edge Struct ===== */
+/* ===== Start edge2d : edge Struct ===== */
     /**
      * Stores a pair of pointers to point2d objects.
      */
@@ -428,8 +430,8 @@ void modEquals(double *a, double n){
     }
 
     edge2d::edge2d(const point2d& p1, const point2d& p2){
-        this->p1 = std::make_unique<point2d>(p1);
-        this->p2 = std::make_unique<point2d>(p2);
+        this->p1 = std::make_shared<point2d>(p1);
+        this->p2 = std::make_shared<point2d>(p2);
     }
 
     double edge2d::length() const {
@@ -440,43 +442,43 @@ void modEquals(double *a, double n){
         glBegin(GL_LINES);
         glLineWidth(1);
         glColor3f(
-                DEFAULT_RENDER_COLOR_RGB[0],
-                DEFAULT_RENDER_COLOR_RGB[1],
-                DEFAULT_RENDER_COLOR_RGB[2]
+            DEFAULT_LINE_COLOR_RGB[0],
+            DEFAULT_LINE_COLOR_RGB[1],
+            DEFAULT_LINE_COLOR_RGB[2]
         );
         glVertex2i(ORTHO_ZOOM * this->p1->x, ORTHO_ZOOM * this->p1->y);
         glVertex2i(ORTHO_ZOOM * this->p2->x, ORTHO_ZOOM * this->p2->y);
         glEnd();
     }
-/** ===== End edge2d : edge Struct ===== */
+/* ===== End edge2d : edge Struct ===== */
 
 
 
 
-/** ===== Start edge3d : edge Struct ===== */
+/* ===== Start edge3d : edge Struct ===== */
     /**
      * Stores a pair of pointers to point2d objects.
      */
     edge3d::edge3d() : p1(nullptr), p2(nullptr){
     }
 
-    edge3d::edge3d(const edge3d& other) : edge3d(*other.p1, *other.p2) {
+    edge3d::edge3d(const edge3d& other) : edge3d(*other.p1, *other.p2){
     }
 
     edge3d::edge3d(const point3d& p1, const point3d& p2){
-        this->p1 = std::make_unique<point3d>(p1);
-        this->p2 = std::make_unique<point3d>(p2);
+        this->p1 = std::make_shared<point3d>(p1);
+        this->p2 = std::make_shared<point3d>(p2);
     }
 
     double edge3d::length() const {
         return p1->distanceTo(*p2);
     }
-/** ===== End edge3d : edge Struct ===== */
+/* ===== End edge3d : edge Struct ===== */
 
 
 
 
-/** ===== Start edge4d : edge Struct ===== */
+/* ===== Start edge4d : edge Struct ===== */
     /**
      * Stores a pair of pointers to point2d objects.
      */
@@ -487,49 +489,45 @@ void modEquals(double *a, double n){
     }
 
     edge4d::edge4d(const point4d& p1, const point4d& p2){
-        this->p1 = std::make_unique<point4d>(p1);
-        this->p2 = std::make_unique<point4d>(p2);
+        this->p1 = std::make_shared<point4d>(p1);
+        this->p2 = std::make_shared<point4d>(p2);
     }
 
     double edge4d::length() const {
         return p1->distanceTo(*p2);
     }
-/** ===== End edge4d : edge Struct ===== */
+/* ===== End edge4d : edge Struct ===== */
 
 
 
 
-/** ===== Start sphericalAngle Struct ===== */
+/* ===== Start sphericalAngle Struct ===== */
     /**
      * Stores n-1 angles that can be used to define any direction in
      * n-dimensional space. Abstract, derived by sphericalAngle3d and
      * sphericalAngle4d.
      */
-/** ===== End sphericalAngle Struct ===== */
+/* ===== End sphericalAngle Struct ===== */
 
 
 
 
-/** ===== Start sphericalAngle3d : sphericalAngle Struct ===== */
+/* ===== Start sphericalAngle3d : sphericalAngle Struct ===== */
     /**
      * Stores 2 angles that can be used to define any direction in 3d space.
      */
     sphericalAngle3d::sphericalAngle3d() : sphericalAngle3d(0, 90){
     }
-
     sphericalAngle3d::sphericalAngle3d(sphericalAngle3d const &other) :
             sphericalAngle3d(other.polarAngle, other.azimuthAngle){
     }
-
     sphericalAngle3d::sphericalAngle3d(double polarAngle, double azimuthAngle) :
             polarAngle(polarAngle), azimuthAngle(azimuthAngle){
     }
-
-    void sphericalAngle3d::setPolar(double newPolarAngle) {
+    void sphericalAngle3d::setPolar(double newPolarAngle){
         this->polarAngle = mod(newPolarAngle, 360);
     }
-
-    void sphericalAngle3d::setAzimuth(double newAzimuthAngle) {
+    void sphericalAngle3d::setAzimuth(double newAzimuthAngle){
         if (newAzimuthAngle < 0){
             this->azimuthAngle = 0;
         } else if (newAzimuthAngle > 180){
@@ -538,13 +536,16 @@ void modEquals(double *a, double n){
             this->azimuthAngle = newAzimuthAngle;
         }
     }
-
-    spatialVector sphericalAngle3d::getUnitVector() {
+    /**
+     * Return a spatialVector of length 1 facing in the direction of this
+     * spherical angle.
+     */
+    spatialVector sphericalAngle3d::getUnitVector(){
         // By definition, when an angle a is plotted on the unit circle, the
         // point where the angle's ray intersects the circle is
         // (cos(a), sin(a)). This method takes those coordinates and scales
         // them down towards the circle's center by the sin of the azimuth
-        // (up/down)  angle to emulate the same point rotating up/down along
+        // (up/down) angle to emulate the same point rotating up/down along
         // the unit sphere. Because the azimuthAngle is measured from the
         // z-axis to the point, the sin of the angle represents the non-vertical
         // component of that angle, which is parallel to the xy plane. If you
@@ -561,51 +562,46 @@ void modEquals(double *a, double n){
             cos(rad(azimuthAngle))
         }));
     }
-
     void sphericalAngle3d::rotatePolar(double dPolarAngle){
         setPolar(polarAngle + dPolarAngle);
     }
-
     void sphericalAngle3d::rotateAzimuth(double dAzimuthAngle){
         setAzimuth(azimuthAngle + dAzimuthAngle);
     }
-
-    void sphericalAngle3d::rotate(std::vector<double> dAngles) {
+    void sphericalAngle3d::rotate(const std::vector<double>& dAngles){
         if (dAngles.size() == 2){
             rotatePolar(dAngles[0]);
             rotateAzimuth(dAngles[1]);
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tvoid "
-                         "rotate(std::vector<double> angles) override\n\t"
-                         "(sphericalAngle3d, utils.cpp)" << std::endl;
+                         "rotate(const std::vector<double>& angles) "
+                         "override\n\t(sphericalAngle3d, utils.cpp)"
+                         << std::endl;
         }
     }
 
-/** ===== End sphericalAngle3d : sphericalAngle Struct ===== */
+/* ===== End sphericalAngle3d : sphericalAngle Struct ===== */
 
 
 
 
-/** ===== Start sphericalAngle4d : sphericalAngle Struct ===== */
+/* ===== Start sphericalAngle4d : sphericalAngle Struct ===== */
 /**
  * Stores 3 angles that can be used to define any direction in 4d space.
  */
     sphericalAngle4d::sphericalAngle4d() : sphericalAngle4d(0, 90, 90){
     }
-
-    sphericalAngle4d::sphericalAngle4d(const sphericalAngle4d& other) : sphericalAngle4d(
-            other.polarAngle, other.azimuthAngle, other.phiAngle) {
+    sphericalAngle4d::sphericalAngle4d(const sphericalAngle4d& other) :
+        sphericalAngle4d(other.polarAngle, other.azimuthAngle, other.phiAngle){
     }
-
     sphericalAngle4d::sphericalAngle4d(
             double polarAngle, double azimuthAngle, double phiAngle) :
             polarAngle(polarAngle),
             azimuthAngle(azimuthAngle),
             phiAngle(phiAngle){
     }
-
-    void sphericalAngle4d::setPolar(const double newPolarAngle) {
+    void sphericalAngle4d::setPolar(const double newPolarAngle){
         if (newPolarAngle < 0){
             this->polarAngle = 0;
         } else if (newPolarAngle > 180){
@@ -614,8 +610,7 @@ void modEquals(double *a, double n){
             this->polarAngle = newPolarAngle;
         }
     }
-
-    void sphericalAngle4d::setAzimuth(const double newAzimuthAngle) {
+    void sphericalAngle4d::setAzimuth(const double newAzimuthAngle){
         if (newAzimuthAngle < 0){
             this->azimuthAngle = 0;
         } else if (newAzimuthAngle > 180){
@@ -624,12 +619,10 @@ void modEquals(double *a, double n){
             this->azimuthAngle = newAzimuthAngle;
         }
     }
-
-    void sphericalAngle4d::setPhi(const double newPhiAngle) {
+    void sphericalAngle4d::setPhi(const double newPhiAngle){
         this->phiAngle = mod(newPhiAngle, 360);
     }
-
-    spatialVector sphericalAngle4d::getUnitVector() {
+    spatialVector sphericalAngle4d::getUnitVector(){
         // It would seem at first that only the +x hemisphere of the unit
         // 3-sphere can be reached with polarAngle and azimuthAngle both only
         // ranging from [0-180], but every point on this hemisphere can be
@@ -637,13 +630,13 @@ void modEquals(double *a, double n){
         // the 4th dimension by 180 degrees. For example, to reach (-1, 0, 0,
         // 0), these values work with the math that has been implemented below:
         //      polarAngle = 90 deg = pi/2 rad
-        //      azimuthAngle = 90 deg
+        //      azimuthAngle = 90 deg = pi/2 rad
         //      phiAngle = 270 deg = 3pi/2 rad
         // because
-        //      x = sin(phiAngle)sin(azimuthAngle)sin(polarAngle) = -1
-        //      y = sin(phiAngle)sin(azimuthAngle)cos(polarAngle) = 0
-        //      z = sin(phiAngle)cos(azimuthAngle) = 0
-        //      a = cos(phiAngle) = 0
+        //      x = sin(3pi/2)sin(pi/2)sin(pi/2) = -1
+        //      y = sin(3pi/2)sin(pi/2)cos(pi/2) = 0
+        //      z = sin(3pi/2)cos(pi/2) = 0
+        //      a = cos(3pi/2) = 0
         return spatialVector(std::vector<double>({
             sin(rad(phiAngle)) * sin(rad(azimuthAngle)) * sin(rad(polarAngle)),
             sin(rad(phiAngle)) * sin(rad(azimuthAngle)) * cos(rad(polarAngle)),
@@ -651,20 +644,16 @@ void modEquals(double *a, double n){
             cos(rad(phiAngle))
         }));
     }
-
     void sphericalAngle4d::rotatePolar(double dPolarAngle){
         setPolar(polarAngle + dPolarAngle);
     }
-
     void sphericalAngle4d::rotateAzimuth(double dAzimuthAngle){
         setAzimuth(azimuthAngle + dAzimuthAngle);
     }
-
     void sphericalAngle4d::rotatePhi(double dPhiAngle){
         setPhi(phiAngle + dPhiAngle);
     }
-
-    void sphericalAngle4d::rotate(std::vector<double> dAngles) {
+    void sphericalAngle4d::rotate(const std::vector<double>& dAngles){
         if (dAngles.size() == 3){
             rotatePolar(dAngles[0]);
             rotateAzimuth(dAngles[1]);
@@ -672,8 +661,9 @@ void modEquals(double *a, double n){
         } else {
             // Bad input
             std::cout << "Warning: Invalid input in:\n\tvoid "
-                         "rotate(std::vector<double> angles) override\n\t"
-                         "(sphericalAngle4d, utils.cpp)" << std::endl;
+                         "rotate(const std::vector<double>& angles) "
+                         "override\n\t(sphericalAngle4d, utils.cpp)"
+                         << std::endl;
         }
     }
-/** ===== End sphericalAngle4d : sphericalAngle Struct ===== */
+/* ===== End sphericalAngle4d : sphericalAngle Struct ===== */

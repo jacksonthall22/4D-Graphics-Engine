@@ -13,7 +13,9 @@
 class Object {
 public:
     /** Other Methods */
-    virtual void extrude(const spatialVector& direction) = 0;
+    /// TODO These methods segfault
+//    virtual void extrude(const std::vector<double>& direction) = 0;
+//    virtual void extrude(const spatialVector& direction) = 0;
     virtual void draw(const Camera3D& camera3d, const Camera4D& camera4d)
             const = 0;
 
